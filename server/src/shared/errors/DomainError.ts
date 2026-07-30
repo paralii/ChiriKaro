@@ -1,0 +1,38 @@
+export class DomainError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+
+export class InvalidRoleAssignmentError extends DomainError {}
+
+export class InvitationExpiredError extends DomainError {
+  constructor(invitationId: string) {
+    super(`Invitation ${invitationId} has expired`);
+  }
+}
+
+export class InvitationAlreadyUsedError extends DomainError {
+  constructor(invitationId: string) {
+    super(`Invitation ${invitationId} has already been used`);
+  }
+}
+
+export class InvitationRevokedError extends DomainError {
+  constructor(invitationId: string) {
+    super(`Invitation ${invitationId} has been revoked`);
+  }
+}
+
+export class UserAlreadyExistsError extends DomainError {
+  constructor(email: string) {
+    super(`A user with email ${email} already exists`);
+  }
+}
+
+export class UnauthorizedInviterError extends DomainError {
+  constructor(inviterRole: string, targetRole: string) {
+    super(`${inviterRole} is not permitted to invite ${targetRole}`);
+  }
+}

@@ -1,0 +1,6 @@
+export const OTP_CONSTANTS = {
+  MAX_ATTEMPTS: 5,
+  RESEND_COOLDOWN_SECONDS: 60,
+  OTP_LENGTH: 6,
+  OTP_TTL_MINUTES: 10,
+} as const;

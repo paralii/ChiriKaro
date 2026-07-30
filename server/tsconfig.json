@@ -1,44 +1,67 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    "ignoreDeprecations": "6.0",
+    /* Language */
+    "target": "ES2022",
+    "lib": ["ES2022"],
 
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
+    /* Module */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
 
-    // Other Outputs
+    /* Project */
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* Path Aliases */
+    "baseUrl": "./src",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@constants/*": ["constants/*"],
+      "@controllers/*": ["controllers/*"],
+      "@dto/*": ["dto/*"],
+      "@entities/*": ["entities/*"],
+      "@enums/*": ["enums/*"],
+      "@errors/*": ["errors/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@middleware/*": ["middleware/*"],
+      "@repositories/*": ["repositories/*"],
+      "@routes/*": ["routes/*"],
+      "@services/*": ["services/*"],
+      "@shared/*": ["shared/*"],
+      "@use-cases/*": ["use-cases/*"],
+      "@utils/*": ["utils/*"],
+      "@validations/*": ["validations/*"]
+    },
+
+    /* Node */
+    "types": ["node"],
+    "resolveJsonModule": true,
+
+    /* Type Checking */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    /* Interop */
+    "esModuleInterop": true,
+
+    /* Output */
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
+    /* Performance */
     "skipLibCheck": true,
-  }
+
+    /* Consistency */
+    "forceConsistentCasingInFileNames": true,
+
+    /* Modern TS */
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -14,25 +14,14 @@
     "outDir": "./dist",
 
     /* Path Aliases */
-    "baseUrl": "./src",
     "paths": {
-      "@config/*": ["config/*"],
-      "@constants/*": ["constants/*"],
-      "@controllers/*": ["controllers/*"],
-      "@dto/*": ["dto/*"],
-      "@entities/*": ["entities/*"],
-      "@enums/*": ["enums/*"],
-      "@errors/*": ["errors/*"],
-      "@infrastructure/*": ["infrastructure/*"],
-      "@interfaces/*": ["interfaces/*"],
-      "@middleware/*": ["middleware/*"],
-      "@repositories/*": ["repositories/*"],
-      "@routes/*": ["routes/*"],
-      "@services/*": ["services/*"],
-      "@shared/*": ["shared/*"],
-      "@use-cases/*": ["use-cases/*"],
-      "@utils/*": ["utils/*"],
-      "@validations/*": ["validations/*"]
+      "@application/*": ["./src/application/*"],
+      "@container/*": ["./src/container/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@presentation/*": ["./src/presentation/*"],
+      "@shared/*": ["./src/shared/*"],
+
     },
 
     /* Node */

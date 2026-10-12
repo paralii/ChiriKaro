@@ -1,16 +1,17 @@
 export enum Role {
   SUPER_ADMIN = "SUPER_ADMIN",
   CLINIC_ADMIN = "CLINIC_ADMIN",
-  DENTIST = "DENTIST",
-  RECEPTIONIST = "RECEPTIONIST",
+  DOCTOR = "DOCTOR",
+  STAFF = "STAFF",
   PATIENT = "PATIENT",
+  DENTIST = "DOCTOR",
+  RECEPTIONIST = "STAFF",
 }
 
 export const CLINIC_SCOPED_ROLES: Role[] = [
   Role.CLINIC_ADMIN,
-  Role.DENTIST,
-  Role.RECEPTIONIST,
-  Role.PATIENT,
+  Role.DOCTOR,
+  Role.STAFF,
 ];
 
 export function requiresClinic(role: Role): boolean {
@@ -19,8 +20,8 @@ export function requiresClinic(role: Role): boolean {
 
 export const INVITE_PERMISSIONS: Record<Role, Role[]> = {
   [Role.SUPER_ADMIN]: [Role.CLINIC_ADMIN],
-  [Role.CLINIC_ADMIN]: [Role.DENTIST, Role.RECEPTIONIST],
-  [Role.DENTIST]: [],
-  [Role.RECEPTIONIST]: [],
+  [Role.CLINIC_ADMIN]: [Role.DOCTOR, Role.STAFF],
+  [Role.DOCTOR]: [],
+  [Role.STAFF]: [],
   [Role.PATIENT]: [],
 };

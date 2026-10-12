@@ -42,11 +42,16 @@ const resolveErrorDetails = (
   errors?: Record<string, string[]>;
 } => {
   if (err instanceof AppError) {
-    return {
+    const result: { statusCode: number; message: string; errors?: Record<string, string[]> } = {
       statusCode: err.statusCode,
       message: err.message,
-      errors: err.errors,
     };
+
+    if (err.errors) {
+      result.errors = err.errors;
+    }
+
+    return result;
   }
 
   if (isMongoServerError(err)) {

@@ -1,6 +1,6 @@
 import { Server } from "http";
 import { app } from "./app.js";
-// import { routes } from "./presentation/routes";
+import { routes } from "./presentation/routes/index.js";
 import { appConfig } from "./infrastructure/config/index.js";
 import { logger } from "./infrastructure/logger/logger.js";
 import { mongoDatabase } from "./infrastructure/database/mongodb/index.js";
@@ -13,7 +13,10 @@ const bootstrap = async (): Promise<void> => {
     await mongoDatabase.connect();
     await redisClient.connect();
 
-    // app.registerRoutes(routes);
+    app.registerRoutes(routes.auth);
+    app.registerRoutes(routes.clinic);
+    // app.registerRoutes(routes.invitation);
+    app.registerRoutes(routes.doctor);
     app.registerErrorHandlers();
 
     server = app.instance.listen(appConfig.port, () => {

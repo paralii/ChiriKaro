@@ -1,122 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import type { RootState, AppDispatch } from './store/store';
+import { setAuthSession, setUser } from './store/slices/authSlice';
+import AuthPage from './pages/auth/LoginPage';
+import LoginPage from './pages/auth/login/LoginPage';
+import RegistrationPage from './pages/auth/registration/RegistrationPage';
+import ForgotPasswordPage from './pages/auth/forgot-password/ForgotPasswordPage';
+import HomePage from './pages/HomePage';
+import PortalPage from './pages/PortalPage';
+import { apiRequest } from './lib/api';
 
-function App() {
-  const [count, setCount] = useState(0)
+function AppRoutes() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, accessToken, refreshToken } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      window.localStorage.setItem('chirikaro-auth', JSON.stringify({ user, accessToken, refreshToken }));
+    } else {
+      window.localStorage.removeItem('chirikaro-auth');
+    }
+  }, [user, accessToken, refreshToken]);
+
+  const defaultPortal = user ? '/app/dashboard' : '/login/patient';
+
+  const handleLogout = async () => {
+    if (accessToken) {
+      try {
+        await apiRequest('/auth/logout', {
+          method: 'POST',
+          body: JSON.stringify({ refreshToken }),
+        }, accessToken);
+      } catch {
+        // Ignore backend logout failures and still clear the local session.
+      }
+    }
+
+    dispatch(setUser(null));
+    dispatch(setAuthSession(null));
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<Navigate to="/login/patient" replace />} />
+      <Route path="/superadmin" element={<AuthPage />} />
+      <Route path="/login/super-admin" element={<Navigate to="/superadmin" replace />} />
+      <Route path="/register/doctor" element={<Navigate to="/login/doctor" replace />} />
+      <Route path="/register/staff" element={<Navigate to="/login/staff" replace />} />
+      <Route path="/register/super-admin" element={<Navigate to="/superadmin" replace />} />
+      <Route path="/login/:role" element={<LoginPage />} />
+      <Route path="/register/:role" element={<RegistrationPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ForgotPasswordPage />} />
+      <Route path="/accept-invitation" element={<AuthPage />} />
+      <Route path="/app" element={<Navigate to={defaultPortal} replace />} />
+      <Route path="/app/:section" element={user ? <PortalPage onLogout={handleLogout} /> : <Navigate to="/login/patient" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
-export default App
+export default function App() {
+  return <BrowserRouter><AppRoutes /></BrowserRouter>;
+}

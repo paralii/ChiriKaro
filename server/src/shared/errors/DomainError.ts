@@ -19,11 +19,13 @@ export class InvitationAlreadyUsedError extends DomainError {
   }
 }
 
-export class InvitationRevokedError extends DomainError {
+export class InvitationCancelledError extends DomainError {
   constructor(invitationId: string) {
-    super(`Invitation ${invitationId} has been revoked`);
+    super(`Invitation ${invitationId} has been cancelled`);
   }
 }
+
+export class InvitationRevokedError extends InvitationCancelledError {}
 
 export class UserAlreadyExistsError extends DomainError {
   constructor(email: string) {

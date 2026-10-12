@@ -1,5 +1,6 @@
 import type {
   IEmailService,
+  OtpEmailPurpose,
   SendEmailOptions,
 } from "../../application/interfaces/IEmailService.js";
 import { mailTransport } from "./mail.transport.js";
@@ -72,11 +73,12 @@ export class EmailService implements IEmailService {
     to: string,
     name: string,
     code: string,
+    purpose: OtpEmailPurpose,
   ): Promise<void> {
     await this.sendMail({
       to,
-      subject: "Your verification code",
-      html: renderOtpTemplate(name, code),
+      subject: renderOtpSubject(purpose),
+      html: renderOtpTemplate(name, code, purpose),
     });
   }
 
@@ -84,11 +86,18 @@ export class EmailService implements IEmailService {
     to: string,
     name: string,
     acceptLink: string,
+    role: string,
   ): Promise<void> {
     await this.sendMail({
       to,
-      subject: "You've been invited to Chirikaro",
-      html: renderAdminInviteTemplate(name, acceptLink),
+      subject: "You've been invited to ChiriKaro",
+      html: renderAdminInviteTemplate(name, acceptLink, role),
     });
   }
+}
+
+function renderOtpSubject(purpose: OtpEmailPurpose): string {
+  if (purpose === "registration") return "Verify your ChiriKaro account";
+  if (purpose === "password-reset") return "Your ChiriKaro password reset code";
+  return "Confirm your ChiriKaro password change";
 }

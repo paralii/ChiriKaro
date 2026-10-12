@@ -1,6 +1,7 @@
 import { MongoUserRepository } from "../infrastructure/repositories/user.repository.js";
 import { PasswordService } from "../infrastructure/services/bcrypt.password.service.js";
 import { Role } from "../domain/value-objects/Role.js";
+import { UserStatus } from "../shared/enums/user-statues.enum.js";
 import { mongoDatabase } from "../infrastructure/database/mongodb/index.js";
 import { logger } from "../infrastructure/logger/logger.js";
 
@@ -40,8 +41,15 @@ const run = async (): Promise<void> => {
     const existing = await userRepository.findByEmail(email);
 
     if (existing) {
+      if (existing.role !== Role.SUPER_ADMIN) {
+        throw new Error(`The configured admin email is already used by a ${existing.role} account`);
+      }
+      if (existing.status !== UserStatus.ACTIVE) {
+        existing.activate();
+        await userRepository.save(existing);
+      }
       logger.warn(
-        `Seed skipped: a user with email "${email}" already exists (role: ${existing.role})`,
+        `Seed skipped: a super admin with email "${email}" already exists`,
       );
       return;
     }
@@ -53,6 +61,8 @@ const run = async (): Promise<void> => {
       email: email.toLowerCase(),
       password: hashedPassword,
       role: Role.SUPER_ADMIN,
+      status: UserStatus.ACTIVE,
+      clinicId: null,
       isEmailVerified: true,
     });
 

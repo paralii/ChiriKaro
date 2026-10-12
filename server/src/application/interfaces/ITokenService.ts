@@ -4,6 +4,7 @@ export interface TokenPayload {
   sub: string;
   email: string;
   role: Role;
+  clinicId?: string | null;
 }
 
 export interface RefreshTokenPayload extends TokenPayload {

@@ -8,6 +8,7 @@
     /* Module */
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions" :true,
 
     /* Project */
     "rootDir": "./src",

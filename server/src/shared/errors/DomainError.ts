@@ -7,6 +7,14 @@ export class DomainError extends Error {
 
 export class InvalidRoleAssignmentError extends DomainError {}
 
+export class MissingCredentialsError extends DomainError {
+  constructor() {
+    super("User must have either a password or an OAuth id");
+  }
+}
+
+export class InvalidUserDataError extends DomainError {}
+
 export class InvitationExpiredError extends DomainError {
   constructor(invitationId: string) {
     super(`Invitation ${invitationId} has expired`);

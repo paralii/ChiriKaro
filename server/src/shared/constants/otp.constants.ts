@@ -3,4 +3,4 @@ export const OTP_CONSTANTS = {
   RESEND_COOLDOWN_SECONDS: 30,
   OTP_LENGTH: 6,
   OTP_TTL_MINUTES: 10,
-} as const;
+};

@@ -15,6 +15,8 @@ export class MissingCredentialsError extends DomainError {
 
 export class InvalidUserDataError extends DomainError {}
 
+export class InvalidClinicDataError extends DomainError {}
+
 export class InvitationExpiredError extends DomainError {
   constructor(invitationId: string) {
     super(`Invitation ${invitationId} has expired`);

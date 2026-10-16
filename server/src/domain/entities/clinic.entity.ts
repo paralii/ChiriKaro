@@ -1,5 +1,5 @@
-import { ClinicStatus } from "../../shared/enums/clinic-status.enum.ts";
-import { InvalidClinicDataError } from "../../shared/errors/DomainError.ts";
+import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
+import { InvalidClinicDataError } from "@domain/error/DomainError.ts";
 
 export interface ClinicProps {
   id: string;

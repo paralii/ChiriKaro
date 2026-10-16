@@ -1,10 +1,10 @@
-import { Role, isClinicScopedRole } from "../value-objects/Role.js";
-import { UserStatus } from "../../shared/enums/user-statues.enum.js";
+import { Role, isClinicScopedRole } from "@domain/value-objects/Role.js";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 import {
   InvalidRoleAssignmentError,
   InvalidUserDataError,
   MissingCredentialsError,
-} from "../../shared/errors/DomainError.js";
+} from "@domain/error/DomainError.ts";
 
 export interface UserProps {
   id: string;

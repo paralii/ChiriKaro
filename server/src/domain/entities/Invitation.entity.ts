@@ -1,26 +1,19 @@
-import { Role } from "../value-objects/Role.js";
+import { isClinicScopedRole, Role } from "@domain/value-objects/Role.js";
+import { InvitationStatus } from "@domain/enum/invitation-status.enum.ts";
 import {
+  InvalidInvitationDataError,
+  InvalidRoleAssignmentError,
   InvitationExpiredError,
   InvitationAlreadyUsedError,
   InvitationCancelledError,
-  InvitationRevokedError,
-} from "../../shared/errors/DomainError.js";
-
-export enum InvitationStatus {
-  PENDING = "PENDING",
-  ACCEPTED = "ACCEPTED",
-  EXPIRED = "EXPIRED",
-  CANCELLED = "CANCELLED",
-  REVOKED = "CANCELLED",
-}
+} from "@domain/error/DomainError.ts";
 
 export interface InvitationProps {
   id: string;
   email: string;
   role: Role;
-  clinicId: string | null;
+  clinicId: string;
   invitedBy: string;
-  token: string;
   status: InvitationStatus;
   expiresAt: Date;
   createdAt: Date;
@@ -28,6 +21,15 @@ export interface InvitationProps {
 }
 
 const DEFAULT_TTL_HOURS = 72;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
+
+function requireNonBlank(value: string, field: string): string {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    throw new InvalidInvitationDataError(`Invitation ${field} must not be blank`);
+  }
+  return trimmed;
+}
 
 export class Invitation {
   private constructor(private props: InvitationProps) {}
@@ -36,49 +38,64 @@ export class Invitation {
     id: string;
     email: string;
     role: Role;
-    clinicId: string | null;
+    clinicId: string;
     invitedBy: string;
-    token: string;
-    ttlHours?: number;
+    ttl?: number;
   }): Invitation {
-    const now = new Date();
-    const expiresAt = new Date(
-      now.getTime() + (props.ttlHours ?? DEFAULT_TTL_HOURS) * 60 * 60 * 1000
-    );
+    const id = requireNonBlank(props.id, "id");
+    const email = requireNonBlank(props.email, "email");
+    if (!EMAIL_PATTERN.test(email)) {
+      throw new InvalidInvitationDataError("Invitation email is not a valid email address");
+    }
+    const invitedBy = requireNonBlank(props.invitedBy, "invitedBy");
 
+    const needsClinicId = isClinicScopedRole(props.role);  
+    const clinicId = props.clinicId?.trim() ?? "";
+
+    if (needsClinicId && !clinicId) {
+      throw new InvalidRoleAssignmentError(
+        `Role ${props.role} requires a clinicId`
+      );
+    }
+
+    const ttl = props.ttl ?? DEFAULT_TTL_HOURS;
+    if (!Number.isFinite(ttl) || ttl <= 0) {
+      throw new InvalidInvitationDataError("Invitation ttl must be a finite number greater than 0");
+    }
+
+    const now = new Date();
     return new Invitation({
-      id: props.id,
-      email: props.email,
+      id,
+      email,
       role: props.role,
-      clinicId: props.clinicId,
-      invitedBy: props.invitedBy,
-      token: props.token,
+      clinicId,
+      invitedBy,
       status: InvitationStatus.PENDING,
-      expiresAt,
+      expiresAt: new Date(now.getTime() + ttl * 60 * 60 * 1000),
       createdAt: now,
-      updatedAt: now,
+      updatedAt: new Date(now),
     });
   }
 
   static fromPersistence(props: InvitationProps): Invitation {
-    return new Invitation(props);
+    return new Invitation({
+      ...props,
+      expiresAt: new Date(props.expiresAt),
+      createdAt: new Date(props.createdAt),
+      updatedAt: new Date(props.updatedAt),
+    });
   }
 
-  /**
-   * Called by ValidateInvitationTokenUseCase (before showing the registration
-   * form) and again by RegisterViaInvitationUseCase (before creating the User).
-   * Centralizing this rule here is exactly why Invitation is an entity and
-   * not logic duplicated inside two separate use-cases.
-   */
   assertUsable(): void {
-    if (this.props.status === InvitationStatus.ACCEPTED) {
-      throw new InvitationAlreadyUsedError(this.props.id);
+    switch (this.props.status) {
+      case InvitationStatus.ACCEPTED:
+        throw new InvitationAlreadyUsedError(this.props.id);
+      case InvitationStatus.CANCELLED:
+        throw new InvitationCancelledError(this.props.id);
+      case InvitationStatus.EXPIRED:
+        throw new InvitationExpiredError(this.props.id);
     }
-    if (this.props.status === InvitationStatus.CANCELLED) {
-      throw new InvitationCancelledError(this.props.id);
-    }
-    if (new Date() > this.props.expiresAt) {
-      this.props.status = InvitationStatus.EXPIRED;
+    if (this.isPastExpiry()) {
       throw new InvitationExpiredError(this.props.id);
     }
   }
@@ -90,12 +107,36 @@ export class Invitation {
   }
 
   revoke(): void {
+    switch (this.props.status) {
+      case InvitationStatus.ACCEPTED:
+        throw new InvitationAlreadyUsedError(this.props.id);
+      case InvitationStatus.CANCELLED:
+        throw new InvitationCancelledError(this.props.id);
+      case InvitationStatus.EXPIRED:
+        throw new InvitationExpiredError(this.props.id);
+    }
+    if (this.isPastExpiry()) {
+      throw new InvitationExpiredError(this.props.id);
+    }
     this.props.status = InvitationStatus.CANCELLED;
     this.touch();
   }
 
   cancel(): void {
     this.revoke();
+  }
+
+  expireIfDue(): boolean {
+    if (this.props.status === InvitationStatus.PENDING && this.isPastExpiry()) {
+      this.props.status = InvitationStatus.EXPIRED;
+      this.touch();
+      return true;
+    }
+    return false;
+  }
+ 
+  private isPastExpiry(): boolean {
+    return new Date() > this.props.expiresAt;
   }
 
   private touch(): void {
@@ -107,7 +148,6 @@ export class Invitation {
   get role() { return this.props.role; }
   get clinicId() { return this.props.clinicId; }
   get invitedBy() { return this.props.invitedBy; }
-  get token() { return this.props.token; }
   get status() { return this.props.status; }
   get expiresAt() { return this.props.expiresAt; }
   get createdAt() { return this.props.createdAt; }

@@ -1,62 +1,45 @@
-import { IUserRepository } from "../../../domain/repositories/IUserRepository";
-import { ITokenService } from "../../../domain/services/ITokenService";
-import { ICacheService } from "../../../domain/services/ICacheService";
-import { UnauthorizedError } from "../../../shared/errors";
-import { buildRefreshTokenKey } from "../../../shared/constants/redis-keys.constant";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
+import { UnauthorizedError } from "@shared/errors/index.ts";
+
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+
+import type { ITokenService } from "@application/interfaces/services/ITokenService.ts";
 
 export interface RefreshTokenResult {
   accessToken: string;
   refreshToken: string;
-  refreshTokenTtlSeconds: number;
+  expiresIn: number;
 }
 
 export class RefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: ITokenService,
-    private readonly cacheService: ICacheService,
   ) {}
 
-  public async execute(
-    incomingRefreshToken: string,
-  ): Promise<RefreshTokenResult> {
-    const payload = this.tokenService.verifyRefreshToken(incomingRefreshToken);
-
-    const storedKey = buildRefreshTokenKey(payload.sub, payload.jti);
-    const isValid = await this.cacheService.exists(storedKey);
-    if (!isValid) {
-      throw new UnauthorizedError("Refresh token has been revoked");
-    }
+  public async execute(refreshToken: string): Promise<RefreshTokenResult> {
+    const payload = this.tokenService.verifyRefreshToken(refreshToken);
 
     const user = await this.userRepository.findById(payload.sub);
-    if (!user) {
-      throw new UnauthorizedError("User no longer exists");
+
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedError("Invalid refresh token");
     }
 
-    await this.cacheService.del(storedKey);
-
     const tokenPayload = {
-      sub: user._id.toString(),
+      sub: user.id,
       email: user.email,
       role: user.role,
+      clinicId: user.clinicId,
     };
     const accessToken = this.tokenService.generateAccessToken(tokenPayload);
-    const {
-      token: refreshToken,
-      jti,
-      expiresInSeconds,
-    } = this.tokenService.generateRefreshToken(tokenPayload);
-
-    await this.cacheService.set(
-      buildRefreshTokenKey(user._id.toString(), jti),
-      "1",
-      expiresInSeconds,
-    );
+    const { refreshToken: newRefreshToken, expiresIn } =
+      this.tokenService.generateRefreshToken(tokenPayload);
 
     return {
       accessToken,
-      refreshToken,
-      refreshTokenTtlSeconds: expiresInSeconds,
+      refreshToken: newRefreshToken,
+      expiresIn,
     };
   }
 }

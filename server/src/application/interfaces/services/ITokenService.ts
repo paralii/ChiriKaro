@@ -1,4 +1,4 @@
-import { Role } from "@domain/value-objects/Role.ts";
+import type { Role } from "@domain/value-objects/Role.ts";
 
 export interface TokenPayload {
   sub: string;
@@ -17,4 +17,6 @@ export interface ITokenService {
   generateRefreshToken(payload: TokenPayload): GeneratedRefreshToken;
   verifyAccessToken(token: string): TokenPayload;
   verifyRefreshToken(token: string): TokenPayload;
+  revokeRefreshToken(refreshToken: string): Promise<void>;
 }
+

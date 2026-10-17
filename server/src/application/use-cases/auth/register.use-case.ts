@@ -5,8 +5,8 @@ import { ConflictError, ValidationError } from "@shared/errors/index.ts";
 import type { RegisterDTO } from "@application/dto/auth/register.dto.ts";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
-import type { ICacheService } from "@application/interfaces/services/ICacheService.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
 import type { IIdGenerator } from "@application/interfaces/services/IIdGenerator.ts";
@@ -15,8 +15,8 @@ export class RegisterUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordService: IPasswordService,
-    private readonly cacheService: ICacheService,
     private readonly otpService: IOtpService,
+    private readonly otpRepository: IOtpRepository,
     private readonly emailService: IEmailService,
     private readonly idGenerator: IIdGenerator,
   ) {}
@@ -39,7 +39,7 @@ export class RegisterUseCase {
     const passwordHash = dto.password
       ? await this.passwordService.hash(dto.password)
       : undefined;
-        const userId = this.idGenerator.generate();
+    const userId = this.idGenerator.generate();
 
     const user = User.create({
       id: userId,
@@ -55,13 +55,24 @@ export class RegisterUseCase {
 
     const { code, codeHash, expiresAt } = this.otpService.generate();
 
-    await this.cacheService.set(
-      `registration-otp:${user.id}`,
-      JSON.stringify({ codeHash, expiresAt, attempts: 0 }),
-      Math.max(1, Math.floor((expiresAt.getTime() - Date.now()) / 1000)),
+    const otpKey = `registration-otp:${user.id}`;
+
+    const ttlSeconds = Math.max(
+      1,
+      Math.floor((expiresAt.getTime() - Date.now()) / 1000),
     );
 
     await this.userRepository.save(user);
+
+    await this.otpRepository.save(
+      otpKey,
+      {
+        codeHash,
+        expiresAt,
+        attempts: 0,
+      },
+      ttlSeconds,
+    );
 
     try {
       await this.emailService.sendOtpEmail(
@@ -71,12 +82,12 @@ export class RegisterUseCase {
         "registration",
       );
     } catch {
-      await this.cacheService.del(`registration-otp:${user.id}`);
+      await this.otpRepository.delete(otpKey);
+
       throw new Error(
         "Registration could not be completed because the verification email failed. Please try again.",
       );
     }
-
     return {
       user: user.toSafeObject(),
       message: "Registration successful, Please verify your email",

@@ -1,17 +1,19 @@
-import { IUserRepository } from "../../../domain/repositories/IUserRepository";
-import { IOtpService } from "../../../domain/services/IOtpService";
-import { BadRequestError, NotFoundError } from "../../../shared/errors";
-import { VerifyOtpDto } from "../../dto/auth/OtpDto";
-import { OTP_CONSTANTS } from "../../../shared/constants/otp.constants";
+import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
+
+import type{ VerifyOtpDto } from "@application/dto/auth/verify-otp.dto.ts";
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
+import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 
 export class VerifyOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly otpRepository: IOtpRepository,
     private readonly otpService: IOtpService,
   ) {}
 
   public async execute(dto: VerifyOtpDto): Promise<void> {
-    const user = await this.userRepository.findByEmailWithOtp(dto.email);
+    const user = await this.userRepository.findByEmail(dto.email);
 
     if (!user) {
       throw new NotFoundError("User");
@@ -21,36 +23,33 @@ export class VerifyOtpUseCase {
       throw new BadRequestError("Email is already verified");
     }
 
-    if (!user.otp) {
-      throw new BadRequestError(
-        "No verification code was requested. Please request a new one.",
-      );
+    const otpKey = `registration-otp:${user.id}`;
+
+    const challenge = await this.otpRepository.findByKey(otpKey);
+
+    if (!challenge) {
+      throw new BadRequestError("Invalid or expired verification code");
     }
 
-    if (user.otp.expiresAt.getTime() < Date.now()) {
-      throw new BadRequestError(
-        "Verification code has expired. Please request a new one.",
-      );
+    if (challenge.expiresAt.getTime() <= Date.now()) {
+      await this.otpRepository.delete(otpKey);
+
+      throw new BadRequestError("Invalid or expired verification code");
     }
 
-    if (user.otp.attempts >= OTP_CONSTANTS.MAX_ATTEMPTS) {
-      throw new BadRequestError(
-        "Too many incorrect attempts. Please request a new code.",
-      );
-    }
-
-    const isValid = this.otpService.verify(dto.code, user.otp.codeHash);
+    const isValid = this.otpService.verify(
+      dto.code,
+      challenge.codeHash,
+    );
 
     if (!isValid) {
-      await this.userRepository.updateById(user._id.toString(), {
-        $inc: { "otp.attempts": 1 },
-      });
       throw new BadRequestError("Invalid verification code");
     }
 
-    await this.userRepository.updateById(user._id.toString(), {
-      isEmailVerified: true,
-      $unset: { otp: 1 },
-    });
+    user.verifyEmail();
+
+    await this.userRepository.update(user);
+
+    await this.otpRepository.delete(otpKey);
   }
 }

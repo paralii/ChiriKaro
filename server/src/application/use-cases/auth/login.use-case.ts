@@ -1,73 +1,64 @@
-import { IUserRepository } from "../../../domain/repositories/IUserRepository";
-import { IPasswordService } from "../../../domain/services/IPasswordService";
-import { ITokenService } from "../../../domain/services/ITokenService";
-import { ICacheService } from "../../../domain/services/ICacheService";
-import { LoginDto } from "../../dto/auth/LoginDto";
-import { AuthResponseDto } from "../../dto/auth/AuthResponseDto";
-import { UnauthorizedError } from "../../../shared/errors";
-import { buildRefreshTokenKey } from "../../../shared/constants/redis-keys.constant";
+import { UnauthorizedError } from "@shared/errors/index.ts";
 
-export interface LoginResult {
-  authResponse: AuthResponseDto;
-  refreshToken: string;
-  refreshTokenTtlSeconds: number;
-}
+import type { LoginDto, LoginResult } from "@application/dto/auth/login.dto.ts";
+
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
+import type { ITokenService, TokenPayload } from "@application/interfaces/services/ITokenService.ts";
 
 export class LoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordService: IPasswordService,
     private readonly tokenService: ITokenService,
-    private readonly cacheService: ICacheService,
   ) {}
 
-  public async execute(dto: LoginDto): Promise<LoginResult> {
-    const user = await this.userRepository.findByEmail(dto.email, true);
-
-    if (!user || !user.password) {
-      throw new UnauthorizedError("Invalid email or password");
+  public async execute(dto: LoginDto): Promise<LoginResult>{
+    const user = await this.userRepository.findByEmail(dto.email);
+    if (!user) {
+      throw new UnauthorizedError("Invalid email");
+    }
+    if(!user.isEmailVerified) {
+      throw new UnauthorizedError("Email not verified");
+    }
+    if (!user.passwordHash) {
+      throw new UnauthorizedError("Invalid credentials");
     }
 
     const isPasswordValid = await this.passwordService.compare(
       dto.password,
-      user.password,
+      user.passwordHash
     );
+
     if (!isPasswordValid) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new UnauthorizedError("Invalid credentials");
     }
 
-    const tokenPayload = {
-      sub: user._id.toString(),
+    const tokenPayload: TokenPayload ={
+      sub: user.id.toString(),
       email: user.email,
       role: user.role,
+      clinicId: user.clinicId
     };
+
     const accessToken = this.tokenService.generateAccessToken(tokenPayload);
+    
     const {
-      token: refreshToken,
-      jti,
-      expiresInSeconds,
+      refreshToken,
+      expiresIn,
     } = this.tokenService.generateRefreshToken(tokenPayload);
 
-    await this.cacheService.set(
-      buildRefreshTokenKey(user._id.toString(), jti),
-      "1",
-      expiresInSeconds,
-    );
-
     return {
-      authResponse: {
-        user: {
-          id: user._id.toString(),
+      user: {
+          id: user.id.toString(),
           name: user.name,
           email: user.email,
           role: user.role,
-          isEmailVerified: user.isEmailVerified,
-          createdAt: user.createdAt,
+          clinicId: user.clinicId,
         },
         accessToken,
-      },
-      refreshToken,
-      refreshTokenTtlSeconds: expiresInSeconds,
+        refreshToken,
+        expiresIn,
     };
   }
 }

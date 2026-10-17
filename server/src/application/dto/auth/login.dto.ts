@@ -1,15 +1,19 @@
+import type { Role } from "@domain/value-objects/Role.ts";
+
 export interface LoginDto {
   email: string;
   password: string;
 }
 
 export interface LoginResult {
-  accessToken: string;
   user: {
     id: string;
     name: string;
     email: string;
-    role: string;
+    role: Role;
     clinicId: string | null;
   };
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }

@@ -1,15 +1,9 @@
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 import { UnauthorizedError } from "@shared/errors/index.ts";
 
+import type { RefreshTokenResult } from "@application/dto/auth/refresh-token.dto.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
-
 import type { ITokenService } from "@application/interfaces/services/ITokenService.ts";
-
-export interface RefreshTokenResult {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
 
 export class RefreshTokenUseCase {
   constructor(

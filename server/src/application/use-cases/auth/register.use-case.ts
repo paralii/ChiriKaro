@@ -1,12 +1,11 @@
 import { User } from "@domain/entities/user.entity.ts";
 import { Role } from "@domain/value-objects/Role.ts";
-import { ConflictError } from "@shared/errors/index.ts";
+import { ConflictError, ValidationError } from "@shared/errors/index.ts";
 
 import type { RegisterDTO } from "@application/dto/auth/register.dto.ts";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
-import type { ITokenService } from "@application/interfaces/services/ITokenService.ts";
 import type { ICacheService } from "@application/interfaces/services/ICacheService.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
@@ -16,7 +15,6 @@ export class RegisterUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordService: IPasswordService,
-    private readonly tokenService: ITokenService,
     private readonly cacheService: ICacheService,
     private readonly otpService: IOtpService,
     private readonly emailService: IEmailService,
@@ -29,17 +27,22 @@ export class RegisterUseCase {
       throw new ConflictError("Email is already registered");
     }
 
-    if (!dto.password && !dto.googleId) {
-      throw new Error(
-        "A password or Google authentication credential is required",
+    const hasPassword = Boolean(dto.password?.trim());
+    const hasGoogleId = Boolean(dto.googleId?.trim());
+
+    if (hasPassword === hasGoogleId) {
+      throw new ValidationError(
+        "Provide either a password or Google authentication, not both",
       );
     }
 
     const passwordHash = dto.password
       ? await this.passwordService.hash(dto.password)
       : undefined;
+        const userId = this.idGenerator.generate();
+
     const user = User.create({
-      id: this.idGenerator.generate(),
+      id: userId,
       name: dto.name,
       email: dto.email,
       role: dto.role ?? Role.PATIENT,
@@ -73,7 +76,6 @@ export class RegisterUseCase {
         "Registration could not be completed because the verification email failed. Please try again.",
       );
     }
-
 
     return {
       user: user.toSafeObject(),

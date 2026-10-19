@@ -7,5 +7,6 @@ export interface OAuthProfile {
 }
 
 export interface IOAuthService {
-  verifyGoogleCredential(credential: string): Promise<OAuthProfile>;
+  getAuthUrl(state: string): string;
+  getProfileFromCode(code: string): Promise<OAuthProfile>;
 }

@@ -5,7 +5,6 @@ import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 import {
   ConflictError,
   UnauthorizedError,
-  ValidationError,
 } from "@shared/errors/index.js";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
@@ -15,32 +14,22 @@ import type {
   TokenPayload,
 } from "@application/interfaces/services/ITokenService.ts";
 import type { IIdGenerator } from "@application/interfaces/services/IIdGenerator.ts";
-import type { IOAuthService } from "@application/interfaces/services/IOAuthService.ts";
+import type { OAuthProfile } from "@application/interfaces/services/IOAuthService.ts";
 
 import type {
-  GoogleAuthRequestDTO,
   GoogleAuthResponseDTO,
 } from "@application/dto/auth/oauth.dto.ts";
 
 export class GoogleAuthUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly oauthService: IOAuthService,
     private readonly tokenService: ITokenService,
     private readonly idGenerator: IIdGenerator,
   ) {}
 
   public async execute(
-    dto: GoogleAuthRequestDTO,
+    profile: OAuthProfile,
   ): Promise<GoogleAuthResponseDTO> {
-    const credential = dto.credential?.trim();
-
-    if (!credential) {
-      throw new ValidationError("Google credential is required");
-    }
-
-    const profile = await this.oauthService.verifyGoogleCredential(credential);
-
     if (!profile.googleId || !profile.email) {
       throw new UnauthorizedError("Invalid Google account");
     }

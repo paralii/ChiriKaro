@@ -1,18 +1,20 @@
-import { IUserRepository } from "../../../domain/repositories/IUserRepository";
-import { IOtpService } from "../../../domain/services/IOtpService";
-import { IEmailService } from "../../../domain/services/IEmailService";
-import { ICacheService } from "../../../domain/services/ICacheService";
-import { BadRequestError, NotFoundError } from "../../../shared/errors";
-import { ResendOtpDto } from "../../dto/auth/OtpDto";
-import { OTP_CONSTANTS } from "../../../shared/constants/otp.constants";
-import { buildOtpResendCooldownKey } from "../../../shared/constants/redis-keys.constant";
+import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
+
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
+
+import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
+import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
+
+import type { ResendOtpDto } from "@application/dto/auth/resend-otp.dto.ts";
 
 export class ResendOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly otpRepository: IOtpRepository,
+
     private readonly otpService: IOtpService,
     private readonly emailService: IEmailService,
-    private readonly cacheService: ICacheService,
   ) {}
 
   public async execute(dto: ResendOtpDto): Promise<void> {
@@ -26,24 +28,38 @@ export class ResendOtpUseCase {
       throw new BadRequestError("Email is already verified");
     }
 
-    const cooldownKey = buildOtpResendCooldownKey(user._id.toString());
-    const isCoolingDown = await this.cacheService.exists(cooldownKey);
-
-    if (isCoolingDown) {
-      throw new BadRequestError("Please wait before requesting another code");
-    }
+    const otpKey = `registration-otp:${user.id}`;
 
     const { code, codeHash, expiresAt } = this.otpService.generate();
 
-    await this.userRepository.updateById(user._id.toString(), {
-      otp: { codeHash, expiresAt, attempts: 0 },
-    });
-
-    await this.cacheService.set(
-      cooldownKey,
-      "1",
-      OTP_CONSTANTS.RESEND_COOLDOWN_SECONDS,
+    const ttlSeconds = Math.max(
+      1,
+      Math.floor((expiresAt.getTime() - Date.now()) / 1000),
     );
-    await this.emailService.sendOtpEmail(user.email, user.name, code, "registration");
+
+    await this.otpRepository.save(
+      otpKey,
+      {
+        codeHash,
+        expiresAt,
+        attempts: 0,
+      },
+      ttlSeconds,
+    );
+
+    try {
+      await this.emailService.sendOtpEmail(
+        user.email,
+        user.name,
+        code,
+        "registration",
+      );
+    } catch {
+      await this.otpRepository.delete(otpKey);
+
+      throw new Error(
+        "Unable to resend the verification email. Please try again.",
+      );
+    }
   }
 }

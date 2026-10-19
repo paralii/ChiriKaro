@@ -1,91 +1,107 @@
-import { IUserRepository } from "../../../domain/repositories/IUserRepository";
-import { ITokenService } from "../../../domain/services/ITokenService";
-import { ICacheService } from "../../../domain/services/ICacheService";
-import { GoogleProfile } from "../../../domain/services/IOAuthService";
-import { AuthResponseDto } from "../../dto/auth/AuthResponseDto";
-import { Role } from "../../../shared/enums/Role.enum";
-import { buildRefreshTokenKey } from "../../../shared/constants/redis-keys.constant";
-import { IUser } from "../../../domain/entities/User.entity";
+import { User } from "@domain/entities/user.entity.ts";
+import { Role } from "@domain/value-objects/Role.ts";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 
-export interface GoogleAuthResult {
-  authResponse: AuthResponseDto;
-  refreshToken: string;
-  refreshTokenTtlSeconds: number;
-}
+import {
+  ConflictError,
+  UnauthorizedError,
+  ValidationError,
+} from "@shared/errors/index.js";
+
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+
+import type {
+  ITokenService,
+  TokenPayload,
+} from "@application/interfaces/services/ITokenService.ts";
+import type { IIdGenerator } from "@application/interfaces/services/IIdGenerator.ts";
+import type { IOAuthService } from "@application/interfaces/services/IOAuthService.ts";
+
+import type {
+  GoogleAuthRequestDTO,
+  GoogleAuthResponseDTO,
+} from "@application/dto/auth/oauth.dto.ts";
 
 export class GoogleAuthUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly oauthService: IOAuthService,
     private readonly tokenService: ITokenService,
-    private readonly cacheService: ICacheService,
+    private readonly idGenerator: IIdGenerator,
   ) {}
 
-  public async execute(profile: GoogleProfile): Promise<GoogleAuthResult> {
-    const user = await this.resolveUser(profile);
+  public async execute(
+    dto: GoogleAuthRequestDTO,
+  ): Promise<GoogleAuthResponseDTO> {
+    const credential = dto.credential?.trim();
 
-    const tokenPayload = {
-      sub: user._id.toString(),
+    if (!credential) {
+      throw new ValidationError("Google credential is required");
+    }
+
+    const profile = await this.oauthService.verifyGoogleCredential(credential);
+
+    if (!profile.googleId || !profile.email) {
+      throw new UnauthorizedError("Invalid Google account");
+    }
+    if (!profile.emailVerified) {
+      throw new UnauthorizedError("Google email must be verified");
+    }
+
+    let user = await this.userRepository.findByGoogleId(profile.googleId);
+
+    if (!user) {
+      const existingUser = await this.userRepository.findByEmail(profile.email);
+      if (existingUser) {
+        throw new ConflictError(
+          "An account with this email already exists. " +
+            "Sign in using the existing account and link Google securely.",
+        );
+      }
+
+      user = User.create({
+        id: this.idGenerator.generate(),
+        name: profile.name,
+        email: profile.email,
+        role: Role.PATIENT,
+        googleId: profile.googleId,
+        avatar: profile.avatar ?? null,
+        clinicId: null,
+        isEmailVerified: true,
+        status: UserStatus.ACTIVE,
+      });
+
+      user = await this.userRepository.save(user);
+    }
+
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedError("Your account is not active");
+    }
+
+    const tokenPayload: TokenPayload = {
+      sub: user.id.toString(),
       email: user.email,
       role: user.role,
+      clinicId: user.clinicId,
     };
-    const accessToken = this.tokenService.generateAccessToken(tokenPayload);
-    const {
-      token: refreshToken,
-      jti,
-      expiresInSeconds,
-    } = this.tokenService.generateRefreshToken(tokenPayload);
 
-    await this.cacheService.set(
-      buildRefreshTokenKey(user._id.toString(), jti),
-      "1",
-      expiresInSeconds,
-    );
+    const accessToken = this.tokenService.generateAccessToken(tokenPayload);
+    const { refreshToken, expiresIn } =
+      this.tokenService.generateRefreshToken(tokenPayload);
 
     return {
-      authResponse: {
-        user: {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          isEmailVerified: user.isEmailVerified,
-          createdAt: user.createdAt,
-        },
-        accessToken,
+      user: {
+        id: user.id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        clinicId: user.clinicId,
+        avatar: user.avatar ?? null,
+        isEmailVerified: user.isEmailVerified,
       },
+      accessToken,
       refreshToken,
-      refreshTokenTtlSeconds: expiresInSeconds,
+      expiresIn,
     };
-  }
-
-  private async resolveUser(profile: GoogleProfile): Promise<IUser> {
-    const byGoogleId = await this.userRepository.findByGoogleId(
-      profile.googleId,
-    );
-    if (byGoogleId) {
-      return byGoogleId;
-    }
-
-    const byEmail = await this.userRepository.findByEmail(profile.email);
-    if (byEmail) {
-      const linked = await this.userRepository.updateById(
-        byEmail._id.toString(),
-        {
-          googleId: profile.googleId,
-          isEmailVerified: true,
-          avatar: byEmail.avatar ?? profile.avatar,
-        },
-      );
-      return linked ?? byEmail;
-    }
-
-    return this.userRepository.create({
-      name: profile.name,
-      email: profile.email.toLowerCase(),
-      googleId: profile.googleId,
-      avatar: profile.avatar,
-      role: Role.PATIENT,
-      isEmailVerified: true,
-    });
   }
 }

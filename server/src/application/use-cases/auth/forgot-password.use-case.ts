@@ -4,7 +4,7 @@ import type { IPasswordResetTokenRepository } from "@application/interfaces/repo
 import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
 import type { IPasswordResetTokenService } from "@application/interfaces/services/IPasswordResetTokenService.js";
 
-import type { ForgotPasswordDto } from "@application/dto/auth/reset.password.dto.ts";
+import type { ForgotPasswordDto } from "@application/dto/auth/reset-password.dto.ts";
 
 import type { IPasswordResetLinkGenerator } from "@application/interfaces/services/ILinkGenerator.ts";
 

@@ -6,7 +6,7 @@ import type { IPasswordResetTokenRepository } from "@application/interfaces/repo
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
 import type { IPasswordResetTokenService } from "@application/interfaces/services/IPasswordResetTokenService.js";
 
-import type { ResetPasswordDto } from "@application/dto/auth/reset.password.dto.ts";
+import type { ResetPasswordDto } from "@application/dto/auth/reset-password.dto.ts";
 
 export class ResetPasswordUseCase {
   constructor(

@@ -1,21 +1,21 @@
 import { Document, model, Schema, Types } from "mongoose";
-import { Role } from "../../../../domain/value-objects/Role.js";
-import { InvitationStatus } from "../../../../domain/entities/Invitation.entity.js";
+import { Role } from "@domain/value-objects/Role.ts";
+import { InvitationStatus } from "@domain/enum/invitation-status.enum.ts";
 
-export interface IInvitation extends Document {
+export interface IInvitationDocument extends Document {
   _id: Types.ObjectId;
   email: string;
   role: Role;
   clinicId: Types.ObjectId;
   invitedBy: Types.ObjectId;
-  token: string;
+  tokenHash: string;
   status: InvitationStatus;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const invitationSchema = new Schema<IInvitation>(
+const invitationSchema = new Schema<IInvitationDocument>(
   {
     email: {
       type: String,
@@ -38,7 +38,7 @@ const invitationSchema = new Schema<IInvitation>(
       ref: "User",
       required: true,
     },
-    token: {
+    tokenHash: {
       type: String,
       required: true,
       unique: true,
@@ -61,7 +61,7 @@ const invitationSchema = new Schema<IInvitation>(
 
 invitationSchema.index({ email: 1, status: 1 });
 
-export const InvitationModel = model<IInvitation>(
-  "Invitation",
+export const InvitationModel = model<IInvitationDocument>(
+  "Invitations",
   invitationSchema
 );

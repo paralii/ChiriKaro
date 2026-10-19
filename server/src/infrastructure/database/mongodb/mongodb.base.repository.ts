@@ -1,7 +1,6 @@
-import type { Model, QueryFilter , UpdateQuery, Document } from "mongoose";
+import type { Model, QueryFilter, UpdateQuery, Document } from "mongoose";
 
-export abstract class BaseRepository<
-  T extends Document,> {
+export abstract class BaseRepository<T extends Document> {
   protected constructor(protected readonly model: Model<T>) {}
 
   public async create(data: Partial<T>): Promise<T> {
@@ -9,9 +8,9 @@ export abstract class BaseRepository<
     return doc.save();
   }
 
-  // public async findById(id: string): Promise<T | null> {
-  //   return this.model.findById(id).exec();
-  // }
+  public async findById(id: string): Promise<T | null> {
+    return this.model.findById(id).exec();
+  }
 
   public async findOne(filter: QueryFilter<T>): Promise<T | null> {
     return this.model.findOne(filter).exec();

@@ -1,5 +1,5 @@
 import { Document, model, Schema, Types } from "mongoose";
-import { ClinicStatus } from "../../../../domain/entities/clinic.entity.js";
+import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 
 export interface IClinicWorkingHour {
   day: string;
@@ -8,32 +8,27 @@ export interface IClinicWorkingHour {
   endTime: string;
 }
 
-export interface IClinicDocument {
+export interface IClinicDocumentData {
   documentType: string;
   documentKey: string;
   uploadedAt: Date;
 }
 
-export interface IClinic extends Document {
+export interface IClinicDocument extends Document {
   _id: Types.ObjectId;
   name: string;
-  description?: string | null;
   address?: string | null;
   city?: string | null;
   state?: string | null;
   pincode?: string | null;
   phone?: string | null;
-  ownerName?: string | null;
   contactEmail?: string | null;
   registrationNumber?: string | null;
-  clinicType?: string | null;
-  logoUrl?: string | null;
   ownerAdminId?: Types.ObjectId | null;
-  specializations: string[];
+  services: string[];
   workingHours: IClinicWorkingHour[];
   documents: IClinicDocument[];
   status: ClinicStatus;
-  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,13 +37,13 @@ const clinicWorkingHourSchema = new Schema<IClinicWorkingHour>(
   {
     day: { type: String, required: true, trim: true },
     isOpen: { type: Boolean, default: false },
-    startTime: { type: String, default: "09:00" },
+    startTime: { type: String, default: "10:00" },
     endTime: { type: String, default: "17:00" },
   },
   { _id: false },
 );
 
-const clinicDocumentSchema = new Schema<IClinicDocument>(
+const clinicDocumentSchema = new Schema<IClinicDocumentData>(
   {
     documentType: { type: String, required: true, trim: true },
     documentKey: { type: String, required: true, trim: true },
@@ -57,7 +52,7 @@ const clinicDocumentSchema = new Schema<IClinicDocument>(
   { _id: false },
 );
 
-const clinicSchema = new Schema<IClinic>(
+const clinicSchema = new Schema<IClinicDocument>(
   {
     name: {
       type: String,
@@ -65,11 +60,6 @@ const clinicSchema = new Schema<IClinic>(
       trim: true,
       minlength: 2,
       maxlength: 150,
-    },
-    description: {
-      type: String,
-      trim: true,
-      default: null,
     },
     address: {
       type: String,
@@ -96,11 +86,6 @@ const clinicSchema = new Schema<IClinic>(
       trim: true,
       default: null,
     },
-    ownerName: {
-      type: String,
-      trim: true,
-      default: null,
-    },
     contactEmail: {
       type: String,
       lowercase: true,
@@ -112,22 +97,12 @@ const clinicSchema = new Schema<IClinic>(
       trim: true,
       default: null,
     },
-    clinicType: {
-      type: String,
-      trim: true,
-      default: null,
-    },
-    logoUrl: {
-      type: String,
-      trim: true,
-      default: null,
-    },
     ownerAdminId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
-    specializations: { type: [String], default: [] },
+    services: { type: [String], default: [] },
     workingHours: { type: [clinicWorkingHourSchema], default: [] },
     documents: { type: [clinicDocumentSchema], default: [] },
     status: {
@@ -135,14 +110,10 @@ const clinicSchema = new Schema<IClinic>(
       enum: Object.values(ClinicStatus),
       default: ClinicStatus.PENDING,
     },
-    isActive: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
   }
 );
 
-export const ClinicModel = model<IClinic>("Clinic", clinicSchema);
+export const ClinicModel = model<IClinicDocument>("Clinic", clinicSchema);

@@ -1,4 +1,4 @@
-import { renderBaseTemplate } from "./base.template.js";
+import { renderBaseTemplate } from "@infrastructure/email/templates/index.ts";
 
 const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, (character) => ({
   "&": "&amp;",
@@ -8,7 +8,7 @@ const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, (charact
   "'": "&#39;",
 })[character] ?? character);
 
-export const renderAdminInviteTemplate = (
+export const renderInviteTemplate = (
   name: string,
   acceptLink: string,
   role: string,

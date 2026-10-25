@@ -28,7 +28,7 @@ export interface IEmailService {
     resetLink: string,
   ): Promise<void>;
   sendOtpEmail(to: string, name: string, code: string, purpose: OtpEmailPurpose): Promise<void>;
-  sendAdminInviteEmail(
+  sendInviteEmail(
     to: string,
     name: string,
     acceptLink: string,

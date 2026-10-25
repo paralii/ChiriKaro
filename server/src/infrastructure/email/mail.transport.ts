@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
-import { emailTransportConfig } from "./email.config.js";
-import { logger } from "../logger/logger.js";
+import { emailTransportConfig } from "@infrastructure/email/email.config.ts";
+import { logger } from "@infrastructure/logger/logger.js";
 
 class MailTransport {
   private transporter: Transporter | null = null;
@@ -29,6 +29,7 @@ class MailTransport {
       logger.error(
         `SMTP connection verification failed: ${(error as Error).message}`,
       );
+      throw error;
     }
   }
 }

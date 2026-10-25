@@ -1,5 +1,5 @@
-import { renderBaseTemplate } from "./base.template.js";
-import type { OtpEmailPurpose } from "../../../application/interfaces/IEmailService.js";
+import { renderBaseTemplate } from "@infrastructure/email/templates/index.ts";
+import type { OtpEmailPurpose } from "@application/interfaces/services/IEmailService.ts";
 
 const otpCopy: Record<OtpEmailPurpose, { title: string; instruction: string }> = {
   registration: {

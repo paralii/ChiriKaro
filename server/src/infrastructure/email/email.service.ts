@@ -2,17 +2,17 @@ import type {
   IEmailService,
   OtpEmailPurpose,
   SendEmailOptions,
-} from "../../application/interfaces/IEmailService.js";
-import { mailTransport } from "./mail.transport.js";
-import { emailTransportConfig } from "./email.config.js";
-import { logger } from "../logger/logger.js";
+} from "@application/interfaces/services/IEmailService.ts";
+import { mailTransport } from "@infrastructure/email/mail.transport.ts";
+import { emailTransportConfig } from "@infrastructure/email/email.config.ts";
+import { logger } from "@infrastructure/logger/logger.ts";
 import {
   renderWelcomeTemplate,
   renderVerificationTemplate,
   renderPasswordResetTemplate,
   renderOtpTemplate,
-  renderAdminInviteTemplate,
-} from "./templates/index.js";
+  renderInviteTemplate,
+} from "@infrastructure/email/templates/index.ts";
 
 export class EmailService implements IEmailService {
   public async sendMail(options: SendEmailOptions): Promise<void> {
@@ -82,7 +82,7 @@ export class EmailService implements IEmailService {
     });
   }
 
-  public async sendAdminInviteEmail(
+  public async sendInviteEmail(
     to: string,
     name: string,
     acceptLink: string,
@@ -91,7 +91,7 @@ export class EmailService implements IEmailService {
     await this.sendMail({
       to,
       subject: "You've been invited to ChiriKaro",
-      html: renderAdminInviteTemplate(name, acceptLink, role),
+      html: renderInviteTemplate(name, acceptLink, role),
     });
   }
 }

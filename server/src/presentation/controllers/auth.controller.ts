@@ -1,33 +1,18 @@
-import type { CookieOptions, Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 
-import { RegisterUseCase } from "../../application/use-cases/auth/register.use-case.js";
-import { LoginUseCase } from "../../application/use-cases/auth/login.use-case.js";
-import { LogoutUseCase } from "../../application/use-cases/auth/logout.use-case.js";
-import { GetProfileUseCase } from "../../application/use-cases/auth/get-profile.use-case.js";
-import { RefreshTokenUseCase } from "../../application/use-cases/auth/refresh-token.use-case.js";
-import { ForgotPasswordUseCase } from "../../application/use-cases/auth/forgot-password.use-case.js";
-import { ResetPasswordUseCase } from "../../application/use-cases/auth/reset-password.use-case.js";
-import { VerifyOtpUseCase } from "../../application/use-cases/auth/verify-otp.use-case.js";
-import { ResendOtpUseCase } from "../../application/use-cases/auth/resend-otp.use-case.js";
-import { GoogleAuthUseCase } from "../../application/use-cases/auth/google-auth.use-case.js";
+import { RegisterUseCase } from "@application/use-cases/auth/register.use-case.ts";
+import { LoginUseCase } from "@application/use-cases/auth/login.use-case.ts";
+import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
+import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
+import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
+import { ForgotPasswordUseCase } from "@application/use-cases/auth/forgot-password.use-case.ts";
+import { ResetPasswordUseCase } from "@application/use-cases/auth/reset-password.use-case.ts";
+import { VerifyOtpUseCase } from "@application/use-cases/auth/verify-otp.use-case.ts";
+import { ResendOtpUseCase } from "@application/use-cases/auth/resend-otp.use-case.ts";
+import { GoogleAuthUseCase } from "@application/use-cases/auth/google-auth.use-case.ts";
+import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
-import type { RegisterDto } from "../../application/dto/auth/register.dto.js";
-import type { LoginDto } from "../../application/dto/auth/login.dto.js";
-import type {
-  ForgotPasswordDto,
-  ResetPasswordDto,
-} from "../../application/dto/auth/PasswordResetDto.js";
-import type {
-  VerifyOtpDto,
-  ResendOtpDto,
-} from "../../application/dto/auth/OtpDto.js";
-
-import type { GoogleProfile } from "../../application/interfaces/IOAuthService.js";
-import { UnauthorizedError } from "../../shared/errors/index.js";
-
-const REFRESH_COOKIE_NAME = "refreshToken";
-
-type GoogleAuthenticatedRequest = Request & { googleProfile?: GoogleProfile };
+import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
 
 export class AuthController {
   constructor(
@@ -41,29 +26,8 @@ export class AuthController {
     private readonly verifyOtpUseCase: VerifyOtpUseCase,
     private readonly resendOtpUseCase: ResendOtpUseCase,
     private readonly googleAuthUseCase: GoogleAuthUseCase,
+    private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
-
-  private readonly cookieOptions: CookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-  };
-
-  private setRefreshCookie(
-    res: Response,
-    refreshToken: string,
-    ttlSeconds: number,
-  ): void {
-    res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
-      ...this.cookieOptions,
-      maxAge: ttlSeconds * 1000,
-    });
-  }
-
-  private clearRefreshCookie(res: Response): void {
-    res.clearCookie(REFRESH_COOKIE_NAME, this.cookieOptions);
-  }
 
   public register = async (
     req: Request,
@@ -71,20 +35,11 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const dto = req.body as RegisterDto;
+      const result = await this.registerUseCase.execute(req.body);
 
-      const result = await this.registerUseCase.execute(dto);
-
-      this.setRefreshCookie(
-        res,
-        result.refreshToken,
-        result.refreshTokenTtlSeconds,
-      );
-
-      res.status(201).json({
+      res.status(200).json({
         success: true,
-        message: "Registration successful. Please verify your email.",
-        data: result.authResponse,
+        data: result.user,
       });
     } catch (error) {
       next(error);
@@ -97,20 +52,17 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const dto = req.body as LoginDto;
+      const result = await this.loginUseCase.execute(req.body);
 
-      const result = await this.loginUseCase.execute(dto);
-
-      this.setRefreshCookie(
+      AuthCookieHelper.setAuthCookies(
         res,
+        result.accessToken,
         result.refreshToken,
-        result.refreshTokenTtlSeconds,
       );
 
       res.status(200).json({
         success: true,
-        message: "Login successful",
-        data: result.authResponse,
+        data: result.user,
       });
     } catch (error) {
       next(error);
@@ -123,27 +75,15 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const userId = req.user?.sub;
+      await this.logoutUseCase.execute({
+        refreshToken: req.cookies?.refreshToken,
+      });
 
-      if (!userId) {
-        res.status(401).json({
-          success: false,
-          message: "Authentication required",
-        });
-        return;
-      }
-
-      const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME] as
-        | string
-        | undefined;
-
-      await this.logoutUseCase.execute(userId, refreshToken);
-
-      this.clearRefreshCookie(res);
+      AuthCookieHelper.clearAuthCookies(res);
 
       res.status(200).json({
         success: true,
-        message: "Logout successful",
+        message: "Logged out successfully",
       });
     } catch (error) {
       next(error);
@@ -156,22 +96,13 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const userId = req.user?.sub;
-
-      if (!userId) {
-        res.status(401).json({
-          success: false,
-          message: "Authentication required",
-        });
-        return;
-      }
-
-      const profile = await this.getProfileUseCase.execute(userId);
+      const result = await this.getProfileUseCase.execute(
+        res.locals.auth.userId,
+      );
 
       res.status(200).json({
         success: true,
-        message: "Profile retrieved successfully",
-        data: profile,
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -184,65 +115,19 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const incomingToken = req.cookies?.[REFRESH_COOKIE_NAME] as
-        | string
-        | undefined;
+      const result = await this.refreshTokenUseCase.execute(
+        req.cookies?.refreshToken,
+      );
 
-      if (!incomingToken) {
-        throw new UnauthorizedError("Refresh token is missing");
-      }
-
-      const result = await this.refreshTokenUseCase.execute(incomingToken);
-
-      this.setRefreshCookie(
+      AuthCookieHelper.setAuthCookies(
         res,
+        result.accessToken,
         result.refreshToken,
-        result.refreshTokenTtlSeconds,
       );
 
       res.status(200).json({
         success: true,
         message: "Token refreshed successfully",
-        data: { accessToken: result.accessToken },
-      });
-    } catch (error) {
-      this.clearRefreshCookie(res);
-      next(error);
-    }
-  };
-
-  public verifyOtp = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const dto = req.body as VerifyOtpDto;
-
-      await this.verifyOtpUseCase.execute(dto);
-
-      res.status(200).json({
-        success: true,
-        message: "Email verified successfully",
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public resendOtp = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const dto = req.body as ResendOtpDto;
-
-      await this.resendOtpUseCase.execute(dto);
-
-      res.status(200).json({
-        success: true,
-        message: "A new verification code has been sent to your email",
       });
     } catch (error) {
       next(error);
@@ -255,14 +140,12 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const dto = req.body as ForgotPasswordDto;
-
-      await this.forgotPasswordUseCase.execute(dto);
+      await this.forgotPasswordUseCase.execute(req.body);
 
       res.status(200).json({
         success: true,
         message:
-          "If an account with that email exists, a password reset link has been sent.",
+          "If the account exists, password reset instructions will be sent.",
       });
     } catch (error) {
       next(error);
@@ -275,45 +158,88 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const dto = req.body as ResetPasswordDto;
-
-      await this.resetPasswordUseCase.execute(dto);
-
-      this.clearRefreshCookie(res);
+      await this.resetPasswordUseCase.execute(req.body);
 
       res.status(200).json({
         success: true,
-        message: "Password reset successful. Please log in with your new password.",
+        message: "Password reset successfully",
       });
     } catch (error) {
       next(error);
     }
   };
 
-  public googleCallback = async (
+  public verifyOtp = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const profile = (req as GoogleAuthenticatedRequest).googleProfile;
+      const result = await this.verifyOtpUseCase.execute(req.body);
 
-      if (!profile) {
-        throw new UnauthorizedError("Google authentication failed");
-      }
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
-      const result = await this.googleAuthUseCase.execute(profile);
+  public resendOtp = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      await this.resendOtpUseCase.execute(req.body);
 
-      this.setRefreshCookie(
+      res.status(200).json({
+        success: true,
+        message: "If applicable, a verification code will be sent.",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public googleAuth = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const result = await this.googleAuthUseCase.execute(req.body);
+
+      AuthCookieHelper.setAuthCookies(
         res,
+        result.accessToken,
         result.refreshToken,
-        result.refreshTokenTtlSeconds,
       );
 
       res.status(200).json({
         success: true,
-        message: "Google login successful",
-        data: result.authResponse,
+        data: result.user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public changePassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      await this.changePasswordUseCase.execute({
+        ...req.body,
+        userId: res.locals.auth.userId,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Password changed successfully",
       });
     } catch (error) {
       next(error);

@@ -1,14 +1,12 @@
 import { Document, model, Schema, Types } from "mongoose";
-import { Role } from "../../../../domain/value-objects/Role.js";
-import { UserStatus } from "../../../../shared/enums/user-statues.enum.js";
 
 export interface IUserDocument extends Document {
   _id: Types.ObjectId;
   name: string;
   email: string;
   password?: string;
-  role: Role;
-  status: UserStatus;
+  role: string;
+  status: string;
   clinicId?: Types.ObjectId | null;
   googleId?: string;
   avatar?: string | null;
@@ -39,13 +37,11 @@ const userSchema = new Schema<IUserDocument>(
     },
     role: {
       type: String,
-      enum: Object.values(Role),
       required: true,
     },
     status: {
       type: String,
-      enum: Object.values(UserStatus),
-      default: UserStatus.INVITED,
+      required: true
     },
     clinicId: {
       type: Schema.Types.ObjectId,

@@ -1,17 +1,18 @@
 import type {
   IEmailService,
+  OtpEmailPurpose,
   SendEmailOptions,
-} from "../../application/interfaces/IEmailService.js";
-import { mailTransport } from "./mail.transport.js";
-import { emailTransportConfig } from "./email.config.js";
-import { logger } from "../logger/logger.js";
+} from "@application/interfaces/services/IEmailService.ts";
+import { mailTransport } from "@infrastructure/email/mail.transport.ts";
+import { emailTransportConfig } from "@infrastructure/email/email.config.ts";
+import { logger } from "@infrastructure/logger/logger.ts";
 import {
   renderWelcomeTemplate,
   renderVerificationTemplate,
   renderPasswordResetTemplate,
   renderOtpTemplate,
-  renderAdminInviteTemplate,
-} from "./templates/index.js";
+  renderInviteTemplate,
+} from "@infrastructure/email/templates/index.ts";
 
 export class EmailService implements IEmailService {
   public async sendMail(options: SendEmailOptions): Promise<void> {
@@ -72,23 +73,31 @@ export class EmailService implements IEmailService {
     to: string,
     name: string,
     code: string,
+    purpose: OtpEmailPurpose,
   ): Promise<void> {
     await this.sendMail({
       to,
-      subject: "Your verification code",
-      html: renderOtpTemplate(name, code),
+      subject: renderOtpSubject(purpose),
+      html: renderOtpTemplate(name, code, purpose),
     });
   }
 
-  public async sendAdminInviteEmail(
+  public async sendInviteEmail(
     to: string,
     name: string,
     acceptLink: string,
+    role: string,
   ): Promise<void> {
     await this.sendMail({
       to,
-      subject: "You've been invited to Chirikaro",
-      html: renderAdminInviteTemplate(name, acceptLink),
+      subject: "You've been invited to ChiriKaro",
+      html: renderInviteTemplate(name, acceptLink, role),
     });
   }
+}
+
+function renderOtpSubject(purpose: OtpEmailPurpose): string {
+  if (purpose === "registration") return "Verify your ChiriKaro account";
+  if (purpose === "password-reset") return "Your ChiriKaro password reset code";
+  return "Confirm your ChiriKaro password change";
 }

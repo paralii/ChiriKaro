@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import winston from "winston";
-import { loggerConfig } from "./logger.config.js";
+import { loggerConfig } from "@infrastructure/logger/logger.config.ts";
 
 const LOG_DIR = path.join(process.cwd(), "logs");
 
@@ -20,6 +20,7 @@ const developmentFormat = combine(
       Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : "";
     return `[${ts}] ${level}: ${stack ?? message}${metaString}`;
   }),
+  colorize({ all: true }),
 );
 
 const productionFormat = combine(timestamp(), errors({ stack: true }), json());

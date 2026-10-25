@@ -1,45 +1,105 @@
 import type { Request, Response, NextFunction } from "express";
-import { TokenService } from "../../infrastructure/services/jwt.token.service.js";
-import { UnauthorizedError, ForbiddenError } from "../../shared/errors/index.js";
-import { Role } from "../../domain/value-objects/Role.js";
 
-const tokenService = new TokenService();
+import { Role } from "@domain/value-objects/Role.ts";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
+import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 
-export const authenticate = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  const authHeader = req.headers.authorization;
+import type {
+  ITokenService,
+  TokenPayload,
+} from "@application/interfaces/services/ITokenService.ts";
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    next(new UnauthorizedError("Access token is missing"));
-    return;
-  }
+import { UnauthorizedError, ForbiddenError } from "@shared/errors/index.ts";
 
-  const token = authHeader.split(" ")[1];
+export interface AuthMiddlewareDependencies {
+  tokenService: ITokenService;
+  userRepository: IUserRepository;
+  clinicRepository: IClinicRepository;
+}
 
-  try {
-    const payload = tokenService.verifyAccessToken(token);
-    req.user = payload;
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
+export class AuthMiddleware {
+  constructor(private readonly dependencies: AuthMiddlewareDependencies) {}
 
-export const authorize = (...roles: Role[]) => {
-  return (req: Request, _res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      next(new UnauthorizedError("Not authenticated"));
+  public authenticate = async (
+    req: Request,
+    _res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      next(new UnauthorizedError("Access token is missing"));
       return;
     }
 
-    if (!roles.includes(req.user.role)) {
-      next(new ForbiddenError("Insufficient permissions"));
+    const token = authHeader.slice(7).trim();
+
+    if (!token) {
+      next(new UnauthorizedError("Access token is missing"));
       return;
     }
 
-    next();
+    let payload: TokenPayload;
+
+    try {
+      payload = this.dependencies.tokenService.verifyAccessToken(token);
+    } catch {
+      next(new UnauthorizedError("Invalid or expired access token"));
+      return;
+    }
+
+    try {
+      const user = await this.dependencies.userRepository.findById(payload.sub);
+
+      if (!user || user.status !== UserStatus.ACTIVE) {
+        next(new ForbiddenError("This account is not active"));
+        return;
+      }
+
+      if (user.role !== Role.PATIENT && user.role !== Role.SUPER_ADMIN) {
+        if (!user.clinicId) {
+          next(new ForbiddenError("This account is not linked to a clinic"));
+          return;
+        }
+
+        const clinic = await this.dependencies.clinicRepository.findById(
+          user.clinicId,
+        );
+
+        if (!clinic || clinic.status !== ClinicStatus.APPROVED) {
+          next(new ForbiddenError("This clinic is not active"));
+          return;
+        }
+      }
+
+      req.user = {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        clinicId: user.clinicId,
+      };
+
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
-};
+
+  public authorize = (...roles: Role[]) => {
+    return (req: Request, _res: Response, next: NextFunction): void => {
+      if (!req.user) {
+        next(new UnauthorizedError("Not authenticated"));
+        return;
+      }
+
+      if (!roles.includes(req.user.role)) {
+        next(new ForbiddenError("Insufficient permissions"));
+        return;
+      }
+
+      next();
+    };
+  };
+}

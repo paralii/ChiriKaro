@@ -1,30 +1,26 @@
 import { Server } from "http";
 import { app } from "./app.js";
-// import { routes } from "./presentation/routes";
-import { appConfig } from "./infrastructure/config/index.js";
-import { logger } from "./infrastructure/logger/logger.js";
-import { mongoDatabase } from "./infrastructure/database/mongodb/index.js";
-import { redisClient } from "./infrastructure/redis/redis.client.js";
+import { logger } from "@infrastructure/logger/logger.ts";
+import { MongoDatabase } from "@infrastructure/database/mongodb/mongodb.ts";
+import { redisClient } from "@infrastructure/redis/redis.client.ts";
 
 let server: Server;
+const mongoDatabase = new MongoDatabase();
 
 const bootstrap = async (): Promise<void> => {
   try {
     await mongoDatabase.connect();
     await redisClient.connect();
 
-    // app.registerRoutes(routes);
-    app.registerErrorHandlers();
-
-    server = app.instance.listen(appConfig.port, () => {
+    server = app.instance.listen(process.env.PORT, () => {
       logger.info(
-        `Server running in ${appConfig.nodeEnv} mode on port ${appConfig.port}`,
+        `Server running in ${process.env.NODE_ENV} mode on PORT ${process.env.PORT}`,
       );
     });
   } catch (error) {
-    logger.error(
-      `Failed to bootstrap application: ${(error as Error).message}`,
-    );
+    const message = error instanceof Error ? error.message : String(error);
+
+    logger.error(`Failed to bootstrap application: ${message}`);
     process.exit(1);
   }
 };

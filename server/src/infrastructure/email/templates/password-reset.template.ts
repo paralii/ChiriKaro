@@ -1,4 +1,4 @@
-import { renderBaseTemplate } from "./base.template.js";
+import { renderBaseTemplate } from "@infrastructure/email/templates/index.ts";
 
 export const renderPasswordResetTemplate = (
   name: string,

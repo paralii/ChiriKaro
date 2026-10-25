@@ -1,11 +1,10 @@
 import { OAuth2Client } from "google-auth-library";
-import type { TokenPayload } from "google-auth-library";
-import { googleOAuthConfig } from "./google-oauth.config.js";
-import type {
-  IOAuthService,
-  GoogleProfile,
-} from "../../application/interfaces/IOAuthService.js";
-import { UnauthorizedError } from "../../shared/errors/index.js";
+
+import { UnauthorizedError } from "@shared/errors/index.js";
+
+import { googleOAuthConfig } from "@infrastructure/oauth/google-oauth.config.ts";
+
+import type {IOAuthService, OAuthProfile } from "@application/interfaces/services/IOAuthService.ts";
 
 const GOOGLE_SCOPES = ["openid", "email", "profile"];
 
@@ -20,16 +19,20 @@ export class GoogleOAuthService implements IOAuthService {
     );
   }
 
-  public getAuthUrl(): string {
+  public getAuthUrl(state: string): string {
     return this.client.generateAuthUrl({
-      access_type: "offline",
       scope: GOOGLE_SCOPES,
-      prompt: "consent",
+      state,
+      response_type: "code",
     });
   }
 
-  public async getProfileFromCode(code: string): Promise<GoogleProfile> {
-    const { tokens } = await this.client.getToken(code);
+  public async getProfileFromCode(code: string): Promise<OAuthProfile> {
+    try {
+      const { tokens } = await this.client.getToken({
+        code,
+        redirect_uri: googleOAuthConfig.callbackUrl
+      });
 
     if (!tokens.id_token) {
       throw new UnauthorizedError(
@@ -42,19 +45,27 @@ export class GoogleOAuthService implements IOAuthService {
       audience: googleOAuthConfig.clientId,
     });
 
-    const payload: TokenPayload | undefined = ticket.getPayload();
+    const payload = ticket.getPayload();
 
-    if (!payload || !payload.sub || !payload.email) {
+    if (!payload || !payload.sub || !payload.email || payload.email_verified !== true) {
       throw new UnauthorizedError(
         "Google authentication failed: invalid profile payload",
       );
     }
 
     return {
-      googleId: payload.sub,
-      email: payload.email,
-      name: payload.name ?? payload.email.split("@")[0] ?? "",
-      avatar: payload.picture ?? 'image',
-    };
+        googleId: payload.sub,
+        email: payload.email,
+        emailVerified: payload.email_verified,
+        name: payload.name?.trim() || payload.email.split("@")[0]!,
+        avatar: payload.picture ?? null,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        throw error;
+      }
+
+      throw new UnauthorizedError("Google authentication failed");
+    }
   }
 }

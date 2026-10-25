@@ -1,107 +1,129 @@
 import { Redis } from "ioredis";
 import type { Redis as RedisInstance } from "ioredis";
 
-import { redisConfig } from "./redis.config.js";
-import { logger } from "../logger/logger.js";
+import { redisConfig } from "@infrastructure/redis/redis.config.js";
+import { logger } from "@infrastructure/logger/logger.js";
 
 class RedisClient {
-  private client: RedisInstance | null = null;
+private client: RedisInstance | null = null;
+private connectionPromise: Promise<RedisInstance> | null = null;
 
-  public async connect(): Promise<RedisInstance> {
-    if (this.client && this.client.status === "ready") {
-      return this.client;
-    }
+public async connect(): Promise<RedisInstance> {
+if (this.client?.status === "ready") {
+return this.client;
+}
 
-    if (this.client) {
-      try {
-        await this.client.quit();
-      } catch {
-        this.client.disconnect();
-      }
+if (this.connectionPromise) {
+  return this.connectionPromise;
+}
 
-      this.client = null;
-    }
+const client = new Redis(redisConfig.url, {
+  lazyConnect: true,
+  maxRetriesPerRequest: 3,
+  enableReadyCheck: true,
 
-    const client = new Redis(redisConfig.url, {
-      lazyConnect: true,
+  retryStrategy(times: number): number {
+    return Math.min(times * 200, 3000);
+  },
+});
 
-      maxRetriesPerRequest: 3,
+this.registerListeners(client);
 
-      enableReadyCheck: true,
+this.connectionPromise = this.initialize(client);
 
-      retryStrategy(times) {
-        return Math.min(times * 200, 3000);
-      },
-    });
+try {
+  return await this.connectionPromise;
+} finally {
+  this.connectionPromise = null;
+}
 
-    client.on("connect", () => {
-      logger.info("Redis client connected");
-    });
+}
 
-    client.on("ready", () => {
-      logger.info("Redis client ready");
-    });
+private async initialize(
+client: RedisInstance,
+): Promise<RedisInstance> {
+try {
+await client.connect();
+await client.ping();
 
-    client.on("close", () => {
-      logger.warn("Redis connection closed");
-    });
+  this.client = client;
 
-    client.on("reconnecting", () => {
-      logger.info("Redis reconnecting...");
-    });
+  return client;
+} catch (error) {
+  client.disconnect();
 
-    client.on("end", () => {
-      logger.warn("Redis connection ended");
-    });
+  logger.error(
+    `Failed to connect to Redis: ${
+      error instanceof Error ? error.message : String(error)
+    }`,
+  );
 
-    client.on("error", (error: Error) => {
-      logger.error(`Redis error: ${error.message}`);
-    });
+  throw error;
+}
 
-    try {
-      await client.connect();
-      await client.ping();
+}
 
-      this.client = client;
+private registerListeners(client: RedisInstance): void {
+client.on("connect", () => {
+logger.info("Redis client connected");
+});
 
-      return client;
-    } catch (error) {
-      client.disconnect();
+client.on("ready", () => {
+  logger.info("Redis client ready");
+});
 
-      logger.error(`Failed to connect to Redis: ${(error as Error).message}`);
+client.on("close", () => {
+  logger.warn("Redis connection closed");
+});
 
-      throw error;
-    }
+client.on("reconnecting", () => {
+  logger.info("Redis reconnecting...");
+});
+
+client.on("end", () => {
+  logger.warn("Redis connection ended");
+});
+
+client.on("error", (error: Error) => {
+  logger.error(`Redis error: ${error.message}`);
+});
+
+}
+
+public getClient(): RedisInstance {
+if (!this.client || this.client.status !== "ready") {
+throw new Error(
+"Redis client is not connected. Call connect() during application startup.",
+);
+}
+
+return this.client;
+
+}
+
+public async disconnect(): Promise<void> {
+const client = this.client;
+
+if (!client) {
+  return;
+}
+
+try {
+  if (client.status !== "end") {
+    await client.quit();
   }
+} catch {
+  client.disconnect();
+} finally {
+  this.client = null;
+  logger.info("Redis client disconnected");
+}
 
-  public getClient(): RedisInstance {
-    if (!this.client || this.client.status !== "ready") {
-      throw new Error(
-        "Redis client is not connected. Call connect() during application startup.",
-      );
-    }
+}
 
-    return this.client;
-  }
-
-  public async disconnect(): Promise<void> {
-    if (!this.client) {
-      return;
-    }
-
-    try {
-      await this.client.quit();
-    } catch {
-      this.client.disconnect();
-    } finally {
-      this.client = null;
-      logger.info("Redis client disconnected");
-    }
-  }
-
-  public isConnected(): boolean {
-    return this.client?.status === "ready";
-  }
+public isConnected(): boolean {
+return this.client?.status === "ready";
+}
 }
 
 export const redisClient = new RedisClient();

@@ -1,25 +1,17 @@
 import { Types } from "mongoose";
-import type { IInvitation } from "@infrastructure/database/mongodb/models/InvitationModel.js";
+import type { IInvitationDocument } from "@infrastructure/database/mongodb/models/InvitationModel.js";
 import { InvitationModel } from "@infrastructure/database/mongodb/models/InvitationModel.js";
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.js";
-import type { IInvitationRepository } from "../../domain/repositories/IInvitationRepository.js";
-import {
-  Invitation,
-  InvitationStatus,
-} from "../../domain/entities/Invitation.entity.js";
+import type { IInvitationRepository } from "@application/interfaces/repositories/IInvitationRepository.ts";
+import { Invitation } from "@domain/entities/Invitation.entity.js";
+import {  InvitationStatus } from "@domain/enum/invitation-status.enum.ts";
 
 export class InvitationRepository
-  extends BaseRepository<IInvitation>
+  extends BaseRepository<IInvitationDocument>
   implements IInvitationRepository
 {
   constructor() {
     super(InvitationModel);
-  }
-
-  /** token is select:false on the schema, so re-select it explicitly here. */
-  async findByToken(token: string): Promise<Invitation | null> {
-    const doc = await this.model.findOne({ token }).select("+token").exec();
-    return doc ? this.toDomain(doc) : null;
   }
 
   async findPendingByEmail(email: string): Promise<Invitation | null> {
@@ -29,7 +21,6 @@ export class InvitationRepository
         status: InvitationStatus.PENDING,
         expiresAt: { $gt: new Date() },
       })
-      .select("+token")
       .exec();
     return doc ? this.toDomain(doc) : null;
   }
@@ -41,19 +32,17 @@ export class InvitationRepository
         { $set: this.toPersistence(invitation) },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       )
-      .select("+token")
       .exec();
     return this.toDomain(doc!);
   }
 
-  private toDomain(doc: IInvitation): Invitation {
+  private toDomain(doc: IInvitationDocument): Invitation {
     return Invitation.fromPersistence({
       id: doc._id.toString(),
       email: doc.email,
       role: doc.role,
       clinicId: doc.clinicId.toString(),
       invitedBy: doc.invitedBy.toString(),
-      token: doc.token,
       status: doc.status,
       expiresAt: doc.expiresAt,
       createdAt: doc.createdAt,
@@ -67,7 +56,6 @@ export class InvitationRepository
       role: invitation.role,
       clinicId: new Types.ObjectId(invitation.clinicId as string),
       invitedBy: new Types.ObjectId(invitation.invitedBy),
-      token: invitation.token,
       status: invitation.status,
       expiresAt: invitation.expiresAt,
     };

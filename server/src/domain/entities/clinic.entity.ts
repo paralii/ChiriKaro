@@ -6,17 +6,15 @@ export interface ClinicProps {
   name: string;
   address?: string | null;
   phone?: string | null;
-  ownerName?: string | null;
   contactEmail?: string | null;
   ownerAdminId: string | null;
   status: ClinicStatus;
-  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 type NewClinicProps = Pick<ClinicProps, "id" | "name"> &
-  Partial<Pick<ClinicProps, "address" | "phone" | "ownerName" | "contactEmail" | "ownerAdminId" | "status">>;
+  Partial<Pick<ClinicProps, "address" | "phone" | "contactEmail" | "ownerAdminId" | "status">>;
 
   const MIN_NAME_LENGTH = 2;
   const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
@@ -53,22 +51,15 @@ export class Clinic {
       name,
       address: props.address ?? null,
       phone: props.phone ?? null,
-      ownerName: props.ownerName ?? null,
       contactEmail,
       ownerAdminId,
       status,
-      isActive: status === ClinicStatus.APPROVED,
       createdAt: now,
       updatedAt: new Date(now),
     });
   }
 
   static fromPersistence(props: ClinicProps): Clinic {
-    if (props.isActive && props.status !== ClinicStatus.APPROVED) {
-      throw new InvalidClinicDataError(
-        `Clinic ${props.id} is active but has status ${props.status}`,
-      );
-    }
     return new Clinic({
       ...props,
       createdAt: new Date(props.createdAt),
@@ -78,19 +69,16 @@ export class Clinic {
 
   approve(): void {
     this.props.status = ClinicStatus.APPROVED;
-    this.props.isActive = true;
     this.touch();
   }
 
   reject(): void {
     this.props.status = ClinicStatus.REJECTED;
-    this.props.isActive = false;
     this.touch();
   }
 
   block(): void {
     this.props.status = ClinicStatus.BLOCKED;
-    this.props.isActive = false;
     this.touch();
   }
 
@@ -101,12 +89,10 @@ export class Clinic {
 
   markPending(): void {
     this.props.status = ClinicStatus.PENDING;
-    this.props.isActive = false;
     this.touch();
   }
 
   deactivate(): void {
-    this.props.isActive = false;
     this.touch();
   }
 
@@ -118,11 +104,9 @@ export class Clinic {
   get name() { return this.props.name; }
   get address() { return this.props.address; }
   get phone() { return this.props.phone; }
-  get ownerName() { return this.props.ownerName; }
   get contactEmail() { return this.props.contactEmail; }
   get ownerAdminId() { return this.props.ownerAdminId; }
   get status() { return this.props.status; }
-  get isActive() { return this.props.isActive; }
   get createdAt() { return new Date(this.props.createdAt); }
   get updatedAt() { return new Date(this.props.updatedAt); }
 }

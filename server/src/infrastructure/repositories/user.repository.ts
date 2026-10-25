@@ -1,10 +1,14 @@
 import { Types } from "mongoose";
-import type { IUserDocument } from "@infrastructure/database/mongodb/models/UserModel.js";
-import { UserModel } from "@infrastructure/database/mongodb/models/UserModel.js";
-import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.js";
-import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
-import { User } from "../../domain/entities/user.entity.js";
-import type { Role } from "../../domain/value-objects/Role.js";
+
+import { User } from "@domain/entities/user.entity.ts";
+import { Role } from "@domain/value-objects/Role.ts";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
+
+import type { IUserDocument } from "@infrastructure/database/mongodb/models/UserModel.ts";
+import { UserModel } from "@infrastructure/database/mongodb/models/UserModel.ts";
+import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
+
+import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 
 export class MongoUserRepository
   extends BaseRepository<IUserDocument>
@@ -15,21 +19,16 @@ export class MongoUserRepository
   }
 
   async findById(id: string): Promise<User | null> {
-    const doc = await this.model.findById(id).exec();
+    const doc = await super.findDocumentById(id);
     return doc ? this.toDomain(doc) : null;
   }
 
-  /**
-   * password is select:false on the schema, so we explicitly re-select it here.
-   * This is the ONE place that needs the hash - LoginUseCase compares it via
-   * IPasswordHasher.compare(raw, user.passwordHash), never touching Mongoose.
-   */
   async findByEmail(email: string): Promise<User | null> {
-    const doc = await this.model
-      .findOne({ email: email.toLowerCase() })
-      .select("+password")
-      .exec();
-    return doc ? this.toDomain(doc) : null;
+    const document = await super.findOneDocument({
+      email: email.toLowerCase().trim(),
+    });
+
+    return document ? this.toDomain(document) : null;
   }
 
   async findByGoogleId(googleId: string): Promise<User | null> {
@@ -41,62 +40,79 @@ export class MongoUserRepository
   }
 
   async findByClinic(clinicId: string): Promise<User[]> {
-    const docs = await this.model.find({ clinicId }).exec();
+    const docs = await super.findDocument({
+      clinicId: new Types.ObjectId(clinicId),
+    });
     return docs.map((doc) => this.toDomain(doc));
   }
 
-  /** Used by SeedSuperAdminUseCase to stay idempotent - don't seed twice. */
+  async existsByEmail(email: string): Promise<boolean> {
+    const document = await this.model.exists({
+      email: email.toLowerCase().trim(),
+    });
+
+    return document !== null;
+  }
+
   async existsByRole(role: Role): Promise<boolean> {
-    const count = await this.model.countDocuments({ role });
-    return count > 0;
+    const document = await this.model.exists({
+      role: role,
+    });
+    return document !== null;
   }
 
-  /**
-   * Acts as both create and update: the domain entity already carries its id
-   * (assigned via IIdGenerator before User.create() is called), so we upsert
-   * on _id rather than branching create/update logic here.
-   */
   async save(user: User): Promise<User> {
-    const doc = await this.model
-      .findOneAndUpdate(
-        { _id: new Types.ObjectId(user.id) },
-        { $set: this.toPersistence(user) },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      )
-      .select("+password")
-      .exec();
-    return this.toDomain(doc!);
+    const document = await super.create(this.toPersistence(user));
+
+    return this.toDomain(document);
   }
 
-  private toDomain(doc: IUserDocument): User {
+  async update(user: User): Promise<User> {
+    const document = await super.updateDocumentById(
+      user.id,
+      this.toPersistence(user),
+    );
+
+    if (!document) {
+      throw new Error(`User with ID ${user.id} not found`);
+    }
+
+    return this.toDomain(document);
+  }
+
+  private toDomain(document: IUserDocument): User {
     return User.fromPersistence({
-      id: doc._id.toString(),
-      name: doc.name,
-      email: doc.email,
-      passwordHash: doc.password ?? "",
-      role: doc.role,
-      status: doc.status,
-      clinicId: doc.clinicId ? doc.clinicId.toString() : null,
-      googleId: doc.googleId ?? "",
-      avatar: doc.avatar ?? null,
-      isEmailVerified: doc.isEmailVerified,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
+      id: document._id.toString(),
+      name: document.name,
+      email: document.email,
+      ...(document.password !== undefined
+        ? { passwordHash: document.password }
+        : {}),
+      role: document.role as Role,
+      status: document.status as UserStatus,
+      clinicId: document.clinicId?.toString() ?? null,
+      ...(document.googleId !== undefined
+        ? { googleId: document.googleId }
+        : {}),
+      avatar: document.avatar ?? null,
+      isEmailVerified: document.isEmailVerified,
+      createdAt: document.createdAt,
+      updatedAt: document.updatedAt,
     });
   }
 
-  private toPersistence(user: User) {
+  private toPersistence(user: User): Partial<IUserDocument> {
     return {
       name: user.name,
       email: user.email,
-      // Only overwrite password if the entity actually carries one -
-      // avoids wiping the hash on updates that don't touch it.
-      ...(user.passwordHash ? { password: user.passwordHash } : {}),
+      ...(user.passwordHash !== undefined
+        ? { password: user.passwordHash }
+        : {}),
       role: user.role,
       status: user.status,
       clinicId: user.clinicId ? new Types.ObjectId(user.clinicId) : null,
-      ...(user.googleId ? { googleId: user.googleId } : {}),
-      avatar: user.avatar,
+      ...(user.googleId !== undefined ? { googleId: user.googleId } : {}),
+      ...(user.avatar !== undefined ? { avatar: user.avatar } : {}),
       isEmailVerified: user.isEmailVerified,
     };
   }

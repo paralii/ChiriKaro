@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
-import type { IClinic } from "@infrastructure/database/mongodb/models/ClinicModel.js";
-import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel.js";
-import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.js";
-import type { IClinicRepository } from "../../domain/repositories/IClinicRepository.js";
-import { Clinic } from "../../domain/entities/clinic.entity.js";
+import type { IClinicDocument } from "@infrastructure/database/mongodb/models/ClinicModel.ts";
+import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel.ts";
+import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
+import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
+import { Clinic } from "@domain/entities/clinic.entity.ts";
 
 export class ClinicRepository
-  extends BaseRepository<IClinic>
+  extends BaseRepository<IClinicDocument>
   implements IClinicRepository
 {
   constructor() {
@@ -14,7 +14,7 @@ export class ClinicRepository
   }
 
   async findById(id: string): Promise<Clinic | null> {
-    const doc = await this.model.findById(id).exec();
+    const doc = await super.findDocumentById(id);
     return doc ? this.toDomain(doc) : null;
   }
 
@@ -34,17 +34,15 @@ export class ClinicRepository
     return this.toDomain(doc!);
   }
 
-  private toDomain(doc: IClinic): Clinic {
+  private toDomain(doc: IClinicDocument): Clinic {
     return Clinic.fromPersistence({
       id: doc._id.toString(),
       name: doc.name,
       address: doc.address ?? null,
       phone: doc.phone ?? null,
-      ownerName: doc.ownerName ?? null,
       contactEmail: doc.contactEmail ?? null,
       ownerAdminId: doc.ownerAdminId ? doc.ownerAdminId.toString() : null,
       status: doc.status,
-      isActive: doc.isActive,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
@@ -55,13 +53,11 @@ export class ClinicRepository
       name: clinic.name,
       address: clinic.address,
       phone: clinic.phone,
-      ownerName: clinic.ownerName,
       contactEmail: clinic.contactEmail,
       ownerAdminId: clinic.ownerAdminId
         ? new Types.ObjectId(clinic.ownerAdminId)
         : null,
       status: clinic.status,
-      isActive: clinic.isActive,
     };
   }
 }

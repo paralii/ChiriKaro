@@ -1,9 +1,13 @@
-import { MongoUserRepository } from "../infrastructure/repositories/user.repository.js";
-import { PasswordService } from "../infrastructure/services/bcrypt.password.service.js";
-import { Role } from "../domain/value-objects/Role.js";
-import { UserStatus } from "../shared/enums/user-statues.enum.js";
-import { mongoDatabase } from "../infrastructure/database/mongodb/index.js";
-import { logger } from "../infrastructure/logger/logger.js";
+import { randomUUID } from "node:crypto";
+import { User } from "@domain/entities/user.entity.js";
+import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
+import { PasswordService } from "@infrastructure/services/bcrypt/bcrypt.password.service.ts";
+import { Role } from "@domain/value-objects/Role.ts";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
+import { MongoDatabase } from "@infrastructure/database/mongodb/mongodb.ts";
+import { logger } from "@infrastructure/logger/logger.ts";
+
+export const mongoDatabase = new MongoDatabase();
 
 interface SeedSuperAdminEnv {
   name: string;
@@ -42,11 +46,9 @@ const run = async (): Promise<void> => {
 
     if (existing) {
       if (existing.role !== Role.SUPER_ADMIN) {
-        throw new Error(`The configured admin email is already used by a ${existing.role} account`);
-      }
-      if (existing.status !== UserStatus.ACTIVE) {
-        existing.activate();
-        await userRepository.save(existing);
+        throw new Error(
+          `The configured admin email is already used by a ${existing.role} account`,
+        );
       }
       logger.warn(
         `Seed skipped: a super admin with email "${email}" already exists`,
@@ -56,19 +58,18 @@ const run = async (): Promise<void> => {
 
     const hashedPassword = await passwordService.hash(password);
 
-    const admin = await userRepository.create({
+    const admin = User.create({
+      id: randomUUID(),
       name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
+      email,
+      passwordHash: hashedPassword,
       role: Role.SUPER_ADMIN,
       status: UserStatus.ACTIVE,
       clinicId: null,
       isEmailVerified: true,
     });
 
-    logger.info(
-      `Seeded first admin: ${admin.email} (id: ${admin._id.toString()})`,
-    );
+    const savedAdmin = await userRepository.save(admin); logger.info(`Seeded first admin: ${savedAdmin.email}`);
   } finally {
     await mongoDatabase.disconnect();
   }

@@ -12,9 +12,9 @@ const bootstrap = async (): Promise<void> => {
     await mongoDatabase.connect();
     await redisClient.connect();
 
-    server = app.instance.listen(process.env.port, () => {
+    server = app.instance.listen(process.env.PORT, () => {
       logger.info(
-        `Server running in ${process.env.nodeEnv} mode on port ${process.env.port}`,
+        `Server running in ${process.env.NODE_ENV} mode on PORT ${process.env.PORT}`,
       );
     });
   } catch (error) {

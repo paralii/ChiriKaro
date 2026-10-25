@@ -1,15 +1,20 @@
 import express from "express";
-import type { Application, Router } from "express";
+import type { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+import { authRouter } from "@infrastructure/di/auth.container.ts";
 
 export class App {
   public readonly instance: Application;
 
   constructor() {
     this.instance = express();
+
     this.initializeGlobalMiddlewares();
     this.initializeHealthCheck();
+    this.initializeRoutes();
+    this.registerErrorHandlers();
   }
 
   private initializeGlobalMiddlewares(): void {
@@ -42,18 +47,11 @@ export class App {
     });
   }
 
-  public registerRoutes(router: Router): void {
-    this.instance.use("/api", router);
+  private initializeRoutes(): void {
+    this.instance.use("/api", authRouter);
   }
 
   public registerErrorHandlers(): void {
-    this.instance.use((_req, res) => {
-      res.status(404).json({
-        success: false,
-        message: "Route not found",
-      });
-    });
-
     this.instance.use(
       (
         err: Error,
@@ -67,6 +65,13 @@ export class App {
         });
       },
     );
+
+    this.instance.use((_req, res) => {
+      res.status(404).json({
+        success: false,
+        message: "Route not found",
+      });
+    });
   }
 }
 

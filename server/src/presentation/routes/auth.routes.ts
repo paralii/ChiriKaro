@@ -1,24 +1,30 @@
 import { Router } from "express";
 import type { RequestHandler } from "express";
 
-import type { AuthController } from "../controllers/auth.controller.js";
+import type { AuthController } from "@presentation/controllers/auth.controller.ts";
 
 export interface AuthRouterMiddlewares {
   authenticate: RequestHandler;
-  googleRedirect: RequestHandler;
-  googleAuthenticate: RequestHandler;
+  googleRedirect?: RequestHandler;
+  googleAuthenticate?: RequestHandler;
   sensitiveRateLimiter?: RequestHandler;
 }
 
-export function AuthRouter(
+export function createAuthRouter(
   authController: AuthController,
   middlewares: AuthRouterMiddlewares,
 ): Router {
   const router = Router();
 
-  const { authenticate, googleRedirect, googleAuthenticate } = middlewares;
-  const sensitive: RequestHandler[] = middlewares.sensitiveRateLimiter
-    ? [middlewares.sensitiveRateLimiter]
+  const {
+    authenticate,
+    googleRedirect,
+    googleAuthenticate,
+    sensitiveRateLimiter,
+  } = middlewares;
+
+  const sensitive: RequestHandler[] = sensitiveRateLimiter
+    ? [sensitiveRateLimiter]
     : [];
 
   //Registration
@@ -31,8 +37,8 @@ export function AuthRouter(
   router.get("/auth/profile", authenticate, authController.getProfile);
 
   //Email verification (OTP)
-  router.post("/auth/verify-otp", ...sensitive, authController.verifyOtp);
-  router.post("/auth/resend-otp", ...sensitive, authController.resendOtp);
+  router.post("/auth/verify-otp", authController.verifyOtp);
+  router.post("/auth/resend-otp",...sensitive, authController.resendOtp);
 
   //Password recovery
   router.post(
@@ -45,14 +51,24 @@ export function AuthRouter(
     ...sensitive,
     authController.resetPassword,
   );
+  router.post(
+    "/change-password",
+    authenticate,
+    authController.changePassword,
+  );
 
   //Google OAuth
-  router.get("/auth/google", googleRedirect);
-  router.get(
-    "/auth/google/callback",
-    googleAuthenticate,
-    authController.googleAuth,
-  );
+  if (googleRedirect) {
+    router.get("/google", googleRedirect);
+  }
+
+  if (googleAuthenticate) {
+    router.get(
+      "/google/callback",
+      googleAuthenticate,
+      authController.googleAuth,
+    );
+  }
 
   return router;
 }

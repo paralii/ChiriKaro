@@ -51,7 +51,7 @@ export function AuthRouter(
   router.get(
     "/auth/google/callback",
     googleAuthenticate,
-    authController.googleCallback,
+    authController.googleAuth,
   );
 
   return router;

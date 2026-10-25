@@ -1,4 +1,4 @@
-import type { TokenPayload } from "../application/interfaces/ITokenService.js";
+import type { TokenPayload } from "@application/interfaces/services/ITokenService.ts";
 
 declare global {
   namespace Express {

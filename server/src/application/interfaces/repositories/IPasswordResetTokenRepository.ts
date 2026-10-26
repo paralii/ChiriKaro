@@ -5,7 +5,7 @@ export interface PasswordResetTokenRecord {
 }
 
 export interface IPasswordResetTokenRepository {
-  findByTokenHash(tokenHash: string) : Promise<PasswordResetTokenRecord | null >;
+  findByTokenHash(tokenHash: string): Promise<PasswordResetTokenRecord | null>;
   save(record: PasswordResetTokenRecord): Promise<void>;
   deleteByUserId(userId: string): Promise<void>;
 }

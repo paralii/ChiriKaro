@@ -69,7 +69,8 @@ const run = async (): Promise<void> => {
       isEmailVerified: true,
     });
 
-    const savedAdmin = await userRepository.save(admin); logger.info(`Seeded first admin: ${savedAdmin.email}`);
+    const savedAdmin = await userRepository.save(admin);
+    logger.info(`Seeded first admin: ${savedAdmin.email}`);
   } finally {
     await mongoDatabase.disconnect();
   }

@@ -19,4 +19,3 @@ export interface ITokenService {
   verifyRefreshToken(token: string): TokenPayload;
   revokeRefreshToken(refreshToken: string): Promise<void>;
 }
-

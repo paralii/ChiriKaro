@@ -12,7 +12,8 @@ export interface SendEmailOptions {
   attachments?: EmailAttachment[];
 }
 
-export type OtpEmailPurpose = "registration" | "password-reset" | "password-change";
+export type OtpEmailPurpose =
+  "registration" | "password-reset" | "password-change";
 
 export interface IEmailService {
   sendMail(options: SendEmailOptions): Promise<void>;
@@ -27,7 +28,12 @@ export interface IEmailService {
     name: string,
     resetLink: string,
   ): Promise<void>;
-  sendOtpEmail(to: string, name: string, code: string, purpose: OtpEmailPurpose): Promise<void>;
+  sendOtpEmail(
+    to: string,
+    name: string,
+    code: string,
+    purpose: OtpEmailPurpose,
+  ): Promise<void>;
   sendInviteEmail(
     to: string,
     name: string,

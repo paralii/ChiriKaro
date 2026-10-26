@@ -1,7 +1,5 @@
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
-import {
-  PasswordResetTokenModel,
-} from "@infrastructure/database/mongodb/models/PasswordResetTokenModel.ts";
+import { PasswordResetTokenModel } from "@infrastructure/database/mongodb/models/PasswordResetTokenModel.ts";
 
 import type {
   IPasswordResetTokenRepository,
@@ -33,21 +31,23 @@ export class MongoPasswordResetTokenRepository
   }
 
   async save(record: PasswordResetTokenRecord): Promise<void> {
-    await this.model.findOneAndUpdate(
-      { userId: record.userId },
-      {
-        $set: {
-          userId: record.userId,
-          tokenHash: record.tokenHash,
-          expiresAt: record.expiresAt,
+    await this.model
+      .findOneAndUpdate(
+        { userId: record.userId },
+        {
+          $set: {
+            userId: record.userId,
+            tokenHash: record.tokenHash,
+            expiresAt: record.expiresAt,
+          },
         },
-      },
-      {
-        upsert: true,
-        new: true,
-        runValidators: true,
-      },
-    ).exec();
+        {
+          upsert: true,
+          new: true,
+          runValidators: true,
+        },
+      )
+      .exec();
   }
 
   async deleteByUserId(userId: string): Promise<void> {

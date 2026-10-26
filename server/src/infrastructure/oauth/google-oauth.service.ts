@@ -4,7 +4,10 @@ import { UnauthorizedError } from "@shared/errors/index.js";
 
 import { googleOAuthConfig } from "@infrastructure/oauth/google-oauth.config.ts";
 
-import type {IOAuthService, OAuthProfile } from "@application/interfaces/services/IOAuthService.ts";
+import type {
+  IOAuthService,
+  OAuthProfile,
+} from "@application/interfaces/services/IOAuthService.ts";
 
 const GOOGLE_SCOPES = ["openid", "email", "profile"];
 
@@ -31,29 +34,34 @@ export class GoogleOAuthService implements IOAuthService {
     try {
       const { tokens } = await this.client.getToken({
         code,
-        redirect_uri: googleOAuthConfig.callbackUrl
+        redirect_uri: googleOAuthConfig.callbackUrl,
       });
 
-    if (!tokens.id_token) {
-      throw new UnauthorizedError(
-        "Google authentication failed: missing id token",
-      );
-    }
+      if (!tokens.id_token) {
+        throw new UnauthorizedError(
+          "Google authentication failed: missing id token",
+        );
+      }
 
-    const ticket = await this.client.verifyIdToken({
-      idToken: tokens.id_token,
-      audience: googleOAuthConfig.clientId,
-    });
+      const ticket = await this.client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: googleOAuthConfig.clientId,
+      });
 
-    const payload = ticket.getPayload();
+      const payload = ticket.getPayload();
 
-    if (!payload || !payload.sub || !payload.email || payload.email_verified !== true) {
-      throw new UnauthorizedError(
-        "Google authentication failed: invalid profile payload",
-      );
-    }
+      if (
+        !payload ||
+        !payload.sub ||
+        !payload.email ||
+        payload.email_verified !== true
+      ) {
+        throw new UnauthorizedError(
+          "Google authentication failed: invalid profile payload",
+        );
+      }
 
-    return {
+      return {
         googleId: payload.sub,
         email: payload.email,
         emailVerified: payload.email_verified,

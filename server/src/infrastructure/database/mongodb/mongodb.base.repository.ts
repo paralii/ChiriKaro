@@ -20,7 +20,10 @@ export abstract class BaseRepository<T extends Document> {
     return this.model.find(filter).exec();
   }
 
-  public async updateDocumentById(id: string, data: UpdateQuery<T>): Promise<T | null> {
+  public async updateDocumentById(
+    id: string,
+    data: UpdateQuery<T>,
+  ): Promise<T | null> {
     return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 

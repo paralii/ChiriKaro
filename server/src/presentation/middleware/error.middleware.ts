@@ -42,7 +42,11 @@ const resolveErrorDetails = (
   errors?: Record<string, string[]>;
 } => {
   if (err instanceof AppError) {
-    const result: { statusCode: number; message: string; errors?: Record<string, string[]> } = {
+    const result: {
+      statusCode: number;
+      message: string;
+      errors?: Record<string, string[]>;
+    } = {
       statusCode: err.statusCode,
       message: err.message,
     };

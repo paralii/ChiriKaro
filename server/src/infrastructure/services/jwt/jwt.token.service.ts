@@ -7,7 +7,6 @@ import type {
   GeneratedRefreshToken,
 } from "@application/interfaces/services/ITokenService.ts";
 
-
 export class TokenService implements ITokenService {
   generateAccessToken(payload: TokenPayload): string {
     return Jwt.sign(

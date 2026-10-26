@@ -25,7 +25,7 @@ import { ChangePasswordUseCase } from "@application/use-cases/auth/change-passwo
 
 import { AuthController } from "@presentation/controllers/auth.controller.ts";
 import { createAuthRouter } from "@presentation/routes/auth.routes.ts";
-import { AuthMiddleware  } from "@presentation/middleware/auth.middleware.ts";
+import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
 
 const userRepository = new MongoUserRepository();
 const clinicRepository = new ClinicRepository();
@@ -119,10 +119,10 @@ export const authController = new AuthController(
 const authMiddleware = new AuthMiddleware({
   tokenService,
   userRepository,
-  clinicRepository
+  clinicRepository,
 });
 export const authRouter = createAuthRouter(authController, {
   authenticate: authMiddleware.authenticate,
-//   googleRedirect,
-//   googleAuthenticate,
+  //   googleRedirect,
+  //   googleAuthenticate,
 });

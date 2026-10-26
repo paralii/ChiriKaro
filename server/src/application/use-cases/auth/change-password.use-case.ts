@@ -18,7 +18,9 @@ export class ChangePasswordUseCase {
     }
 
     if (!user.passwordHash) {
-      throw new BadRequestError("Password change is unavailable for this account");
+      throw new BadRequestError(
+        "Password change is unavailable for this account",
+      );
     }
 
     const isPasswordValid = await this.passwordService.compare(
@@ -36,9 +38,7 @@ export class ChangePasswordUseCase {
       );
     }
 
-    const newPasswordHash = await this.passwordService.hash(
-      dto.newPassword,
-    );
+    const newPasswordHash = await this.passwordService.hash(dto.newPassword);
 
     user.changePasswordHash(newPasswordHash);
 

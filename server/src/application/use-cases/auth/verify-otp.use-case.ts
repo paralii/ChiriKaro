@@ -1,6 +1,6 @@
 import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
 
-import type{ VerifyOtpDto } from "@application/dto/auth/verify-otp.dto.ts";
+import type { VerifyOtpDto } from "@application/dto/auth/verify-otp.dto.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
@@ -37,10 +37,7 @@ export class VerifyOtpUseCase {
       throw new BadRequestError("Invalid or expired verification code");
     }
 
-    const isValid = this.otpService.verify(
-      dto.code,
-      challenge.codeHash,
-    );
+    const isValid = this.otpService.verify(dto.code, challenge.codeHash);
 
     if (!isValid) {
       throw new BadRequestError("Invalid verification code");

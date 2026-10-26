@@ -21,7 +21,7 @@ export class ForgotPasswordUseCase {
     const user = await this.userRepository.findByEmail(dto.email);
 
     if (!user) {
-      return
+      return;
     }
 
     const generatedToken = this.passwordResetTokenService.generate();

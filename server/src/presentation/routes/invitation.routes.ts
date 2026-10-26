@@ -3,7 +3,6 @@ import type { RequestHandler } from "express";
 
 import type { InvitationController } from "../controllers/invitation.controller.js";
 
-
 // import { randomBytes } from "crypto";
 // import type { Request, Response } from "express";
 // import { Types } from "mongoose";

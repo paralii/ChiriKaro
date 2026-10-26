@@ -1,5 +1,8 @@
 import crypto from "node:crypto";
-import type { IOtpService, GeneratedOtp } from "@application/interfaces/services/IOtpService.ts";
+import type {
+  IOtpService,
+  GeneratedOtp,
+} from "@application/interfaces/services/IOtpService.ts";
 import { OTP_CONSTANTS } from "@shared/constants/otp.constants.js";
 
 export class OtpService implements IOtpService {

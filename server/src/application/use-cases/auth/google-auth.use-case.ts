@@ -2,10 +2,7 @@ import { User } from "@domain/entities/user.entity.ts";
 import { Role } from "@domain/value-objects/Role.ts";
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 
-import {
-  ConflictError,
-  UnauthorizedError,
-} from "@shared/errors/index.js";
+import { ConflictError, UnauthorizedError } from "@shared/errors/index.js";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 
@@ -16,9 +13,7 @@ import type {
 import type { IIdGenerator } from "@application/interfaces/services/IIdGenerator.ts";
 import type { OAuthProfile } from "@application/interfaces/services/IOAuthService.ts";
 
-import type {
-  GoogleAuthResponseDTO,
-} from "@application/dto/auth/oauth.dto.ts";
+import type { GoogleAuthResponseDTO } from "@application/dto/auth/oauth.dto.ts";
 
 export class GoogleAuthUseCase {
   constructor(
@@ -27,9 +22,7 @@ export class GoogleAuthUseCase {
     private readonly idGenerator: IIdGenerator,
   ) {}
 
-  public async execute(
-    profile: OAuthProfile,
-  ): Promise<GoogleAuthResponseDTO> {
+  public async execute(profile: OAuthProfile): Promise<GoogleAuthResponseDTO> {
     if (!profile.googleId || !profile.email) {
       throw new UnauthorizedError("Invalid Google account");
     }

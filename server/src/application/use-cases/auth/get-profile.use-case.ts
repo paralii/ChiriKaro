@@ -5,9 +5,9 @@ import type { IUserRepository } from "@application/interfaces/repositories/IUser
 import type { GetProfileResponseDTO } from "@application/dto/auth/get-user.dto.ts";
 
 export class GetProfileUseCase {
-  constructor(private readonly userRepository: IUserRepository){}
+  constructor(private readonly userRepository: IUserRepository) {}
 
-  public async execute(userId: string) : Promise<GetProfileResponseDTO> {
+  public async execute(userId: string): Promise<GetProfileResponseDTO> {
     const user = await this.userRepository.findById(userId);
 
     if (!user) {

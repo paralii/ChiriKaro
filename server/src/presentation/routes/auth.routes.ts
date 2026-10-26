@@ -38,7 +38,7 @@ export function createAuthRouter(
 
   //Email verification (OTP)
   router.post("/auth/verify-otp", authController.verifyOtp);
-  router.post("/auth/resend-otp",...sensitive, authController.resendOtp);
+  router.post("/auth/resend-otp", ...sensitive, authController.resendOtp);
 
   //Password recovery
   router.post(
@@ -51,11 +51,7 @@ export function createAuthRouter(
     ...sensitive,
     authController.resetPassword,
   );
-  router.post(
-    "/change-password",
-    authenticate,
-    authController.changePassword,
-  );
+  router.post("/change-password", authenticate, authController.changePassword);
 
   //Google OAuth
   if (googleRedirect) {

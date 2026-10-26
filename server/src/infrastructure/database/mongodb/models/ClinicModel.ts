@@ -113,7 +113,7 @@ const clinicSchema = new Schema<IClinicDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const ClinicModel = model<IClinicDocument>("Clinic", clinicSchema);

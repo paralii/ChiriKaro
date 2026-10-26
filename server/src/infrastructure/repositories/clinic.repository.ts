@@ -28,7 +28,7 @@ export class ClinicRepository
       .findOneAndUpdate(
         { _id: new Types.ObjectId(clinic.id) },
         { $set: this.toPersistence(clinic) },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, new: true, setDefaultsOnInsert: true },
       )
       .exec();
     return this.toDomain(doc!);

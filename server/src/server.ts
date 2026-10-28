@@ -1,5 +1,5 @@
 import { Server } from "http";
-import { app } from "./app.js";
+import { app } from "./app.ts";
 import { logger } from "@infrastructure/logger/logger.ts";
 import { MongoDatabase } from "@infrastructure/database/mongodb/mongodb.ts";
 import { redisClient } from "@infrastructure/redis/redis.client.ts";

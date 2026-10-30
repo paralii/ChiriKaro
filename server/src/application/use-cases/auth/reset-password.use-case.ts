@@ -7,8 +7,9 @@ import type { IPasswordService } from "@application/interfaces/services/IPasswor
 import type { IPasswordResetTokenService } from "@application/interfaces/services/IPasswordResetTokenService.js";
 
 import type { ResetPasswordDto } from "@application/dto/auth/reset-password.dto.ts";
+import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
 
-export class ResetPasswordUseCase {
+export class ResetPasswordUseCase implements IResetPasswordUseCase{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
@@ -36,8 +37,9 @@ export class ResetPasswordUseCase {
 
     user.changePasswordHash(passwordHash);
 
+    await this.passwordResetTokenRepository.deleteByUserId(user.id);
+    
     await this.userRepository.update(user);
 
-    await this.passwordResetTokenRepository.deleteByUserId(user.id);
   }
 }

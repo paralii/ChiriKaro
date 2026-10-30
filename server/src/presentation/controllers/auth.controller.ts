@@ -6,12 +6,12 @@ import type { IRegisterUseCase } from "@application/interfaces/use-cases/auth/IR
 import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILoginUseCase.ts";
 import type { IVerifyOtpUseCase } from "@application/interfaces/use-cases/auth/IVerifyOtpUseCase.ts";
 import type { IResendOtpUseCase } from "@application/interfaces/use-cases/auth/IResendOtpUseCase.ts";
+import type { IForgotPasswordUseCase } from "@application/interfaces/use-cases/auth/IForgotPasswordUseCase.ts";
+import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
 
 import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
 import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
 import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
-import { ForgotPasswordUseCase } from "@application/use-cases/auth/forgot-password.use-case.ts";
-import { ResetPasswordUseCase } from "@application/use-cases/auth/reset-password.use-case.ts";
 import { GoogleAuthUseCase } from "@application/use-cases/auth/google-auth.use-case.ts";
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
@@ -21,13 +21,14 @@ export class AuthController {
   constructor(
     private readonly registerUseCase: IRegisterUseCase,
     private readonly loginUseCase: ILoginUseCase,
+    private readonly verifyOtpUseCase: IVerifyOtpUseCase,
+    private readonly resendOtpUseCase: IResendOtpUseCase,
+    private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: IResetPasswordUseCase,
+    
     private readonly logoutUseCase: LogoutUseCase,
     private readonly getProfileUseCase: GetProfileUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
-    private readonly resetPasswordUseCase: ResetPasswordUseCase,
-    private readonly verifyOtpUseCase: IVerifyOtpUseCase,
-    private readonly resendOtpUseCase: IResendOtpUseCase,
     private readonly googleAuthUseCase: GoogleAuthUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
@@ -141,11 +142,7 @@ export class AuthController {
     try {
       await this.forgotPasswordUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        message:
-          "If the account exists, password reset instructions will be sent.",
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("If the account exists, password reset instructions will be sent."));
     } catch (error) {
       next(error);
     }
@@ -157,12 +154,10 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
+      console.log('controller hit')
       await this.resetPasswordUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        message: "Password reset successfully",
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Password reset successfully"));
     } catch (error) {
       next(error);
     }

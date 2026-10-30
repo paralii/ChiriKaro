@@ -7,8 +7,9 @@ import type { IPasswordResetTokenService } from "@application/interfaces/service
 import type { ForgotPasswordDto } from "@application/dto/auth/reset-password.dto.ts";
 
 import type { IPasswordResetLinkGenerator } from "@application/interfaces/services/ILinkGenerator.ts";
+import type { IForgotPasswordUseCase } from "@application/interfaces/use-cases/auth/IForgotPasswordUseCase.ts";
 
-export class ForgotPasswordUseCase {
+export class ForgotPasswordUseCase implements IForgotPasswordUseCase{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
@@ -19,7 +20,6 @@ export class ForgotPasswordUseCase {
 
   public async execute(dto: ForgotPasswordDto): Promise<void> {
     const user = await this.userRepository.findByEmail(dto.email);
-
     if (!user) {
       return;
     }

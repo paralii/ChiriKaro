@@ -1,7 +1,6 @@
 export interface OtpChallenge {
   codeHash: string;
   expiresAt: Date;
-  attempts: number;
 }
 
 export interface IOtpRepository {

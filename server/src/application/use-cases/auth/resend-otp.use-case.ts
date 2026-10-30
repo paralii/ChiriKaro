@@ -1,5 +1,7 @@
 import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
 
+import type { IResendOtpUseCase } from "@application/interfaces/use-cases/auth/IResendOtpUseCase.ts";
+
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
 
@@ -8,7 +10,7 @@ import type { IEmailService } from "@application/interfaces/services/IEmailServi
 
 import type { ResendOtpDto } from "@application/dto/auth/resend-otp.dto.ts";
 
-export class ResendOtpUseCase {
+export class ResendOtpUseCase implements IResendOtpUseCase{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpRepository: IOtpRepository,
@@ -42,7 +44,6 @@ export class ResendOtpUseCase {
       {
         codeHash,
         expiresAt,
-        attempts: 0,
       },
       ttlSeconds,
     );

@@ -1,14 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
+import { HttpStatus } from "@shared/enums/http-status.enum.ts";
+import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 
-import { RegisterUseCase } from "@application/use-cases/auth/register.use-case.ts";
-import { LoginUseCase } from "@application/use-cases/auth/login.use-case.ts";
+import type { IRegisterUseCase } from "@application/interfaces/use-cases/auth/IRegisterUseCase.ts";
+import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILoginUseCase.ts";
+import type { IVerifyOtpUseCase } from "@application/interfaces/use-cases/auth/IVerifyOtpUseCase.ts";
+import type { IResendOtpUseCase } from "@application/interfaces/use-cases/auth/IResendOtpUseCase.ts";
+
+import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
 import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
 import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
-import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
 import { ForgotPasswordUseCase } from "@application/use-cases/auth/forgot-password.use-case.ts";
 import { ResetPasswordUseCase } from "@application/use-cases/auth/reset-password.use-case.ts";
-import { VerifyOtpUseCase } from "@application/use-cases/auth/verify-otp.use-case.ts";
-import { ResendOtpUseCase } from "@application/use-cases/auth/resend-otp.use-case.ts";
 import { GoogleAuthUseCase } from "@application/use-cases/auth/google-auth.use-case.ts";
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
@@ -16,15 +19,15 @@ import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
 
 export class AuthController {
   constructor(
-    private readonly registerUseCase: RegisterUseCase,
-    private readonly loginUseCase: LoginUseCase,
+    private readonly registerUseCase: IRegisterUseCase,
+    private readonly loginUseCase: ILoginUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly getProfileUseCase: GetProfileUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
-    private readonly verifyOtpUseCase: VerifyOtpUseCase,
-    private readonly resendOtpUseCase: ResendOtpUseCase,
+    private readonly verifyOtpUseCase: IVerifyOtpUseCase,
+    private readonly resendOtpUseCase: IResendOtpUseCase,
     private readonly googleAuthUseCase: GoogleAuthUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
@@ -37,10 +40,10 @@ export class AuthController {
     try {
       const result = await this.registerUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        data: result.user,
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success(
+        "User registered",
+          result.user
+      ));
     } catch (error) {
       next(error);
     }
@@ -60,10 +63,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(200).json({
-        success: true,
-        data: result.user,
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("User Logined",
+        result.user
+      ));
     } catch (error) {
       next(error);
     }
@@ -125,10 +127,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(200).json({
-        success: true,
-        message: "Token refreshed successfully",
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Token refreshed successfully"));
     } catch (error) {
       next(error);
     }
@@ -177,10 +176,7 @@ export class AuthController {
     try {
       const result = await this.verifyOtpUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        data: result,
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Otp verified", result));
     } catch (error) {
       next(error);
     }

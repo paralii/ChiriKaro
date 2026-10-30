@@ -8,8 +8,9 @@ import type {
   ITokenService,
   TokenPayload,
 } from "@application/interfaces/services/ITokenService.ts";
+import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILoginUseCase.ts";
 
-export class LoginUseCase {
+export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordService: IPasswordService,

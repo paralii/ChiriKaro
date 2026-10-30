@@ -3,7 +3,7 @@ import type { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { authRouter } from "@infrastructure/di/auth.container.ts";
+import { authRouter } from "@container/auth.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 
@@ -45,7 +45,7 @@ export class App {
         .status(200)
         .json(
           ApiResponse.success("Server is running and health is good", {
-            timestamp: new Date().toISOString(),
+            timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
           }),
         );
     });
@@ -72,7 +72,7 @@ export class App {
     this.instance.use((_req, res) => {
       res
         .status(HttpStatus.NOT_FOUND)
-        .json(ApiResponse.failed("Internal server error"));
+        .json(ApiResponse.failed("Route not found"));
     });
   }
 }

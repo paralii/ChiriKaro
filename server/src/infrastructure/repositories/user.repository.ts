@@ -82,7 +82,7 @@ export class MongoUserRepository
 
   private toDomain(document: IUserDocument): User {
     return User.fromPersistence({
-      id: document._id.toString(),
+      _id: document._id.toString(),
       name: document.name,
       email: document.email,
       ...(document.password !== undefined

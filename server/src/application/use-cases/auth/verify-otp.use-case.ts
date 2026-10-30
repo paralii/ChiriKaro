@@ -1,11 +1,12 @@
 import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
 
+import type { IVerifyOtpUseCase } from "@application/interfaces/use-cases/auth/IVerifyOtpUseCase.ts";
 import type { VerifyOtpDto } from "@application/dto/auth/verify-otp.dto.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 
-export class VerifyOtpUseCase {
+export class VerifyOtpUseCase implements IVerifyOtpUseCase{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpRepository: IOtpRepository,
@@ -14,7 +15,6 @@ export class VerifyOtpUseCase {
 
   public async execute(dto: VerifyOtpDto): Promise<void> {
     const user = await this.userRepository.findByEmail(dto.email);
-
     if (!user) {
       throw new NotFoundError("User");
     }
@@ -24,9 +24,7 @@ export class VerifyOtpUseCase {
     }
 
     const otpKey = `registration-otp:${user.id}`;
-
     const challenge = await this.otpRepository.findByKey(otpKey);
-
     if (!challenge) {
       throw new BadRequestError("Invalid or expired verification code");
     }
@@ -38,15 +36,18 @@ export class VerifyOtpUseCase {
     }
 
     const isValid = this.otpService.verify(dto.code, challenge.codeHash);
+    console.log(isValid);
 
     if (!isValid) {
       throw new BadRequestError("Invalid verification code");
     }
 
     user.verifyEmail();
+console.log('verified')
+await this.userRepository.update(user);
+console.log('updated');
 
-    await this.userRepository.update(user);
-
-    await this.otpRepository.delete(otpKey);
+await this.otpRepository.delete(otpKey);
+console.log('otp deleted')
   }
 }

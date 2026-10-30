@@ -33,7 +33,6 @@ const userSchema = new Schema<IUserDocument>(
     },
     password: {
       type: String,
-      select: false,
     },
     role: {
       type: String,

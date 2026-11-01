@@ -9,7 +9,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed:admin": "tsx src/scripts/seedSuperAdmin.ts",
+    "seed:admin": "tsx src/scripts/seed-super-admin.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\" \"*.{json,md}\"",

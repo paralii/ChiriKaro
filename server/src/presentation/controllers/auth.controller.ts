@@ -8,11 +8,11 @@ import type { IVerifyOtpUseCase } from "@application/interfaces/use-cases/auth/I
 import type { IResendOtpUseCase } from "@application/interfaces/use-cases/auth/IResendOtpUseCase.ts";
 import type { IForgotPasswordUseCase } from "@application/interfaces/use-cases/auth/IForgotPasswordUseCase.ts";
 import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
+import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
 
 import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
 import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
 import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
-import { GoogleAuthUseCase } from "@application/use-cases/auth/google-auth.use-case.ts";
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
 import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
@@ -25,11 +25,11 @@ export class AuthController {
     private readonly resendOtpUseCase: IResendOtpUseCase,
     private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
     private readonly resetPasswordUseCase: IResetPasswordUseCase,
+    private readonly googleAuthUseCase: IGoogleAuthUseCase,
     
     private readonly logoutUseCase: LogoutUseCase,
     private readonly getProfileUseCase: GetProfileUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly googleAuthUseCase: GoogleAuthUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
 
@@ -84,10 +84,7 @@ export class AuthController {
 
       AuthCookieHelper.clearAuthCookies(res);
 
-      res.status(200).json({
-        success: true,
-        message: "Logged out successfully",
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Logged out successfully"));
     } catch (error) {
       next(error);
     }
@@ -103,10 +100,7 @@ export class AuthController {
         res.locals.auth.userId,
       );
 
-      res.status(200).json({
-        success: true,
-        data: result,
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success('',result));
     } catch (error) {
       next(error);
     }
@@ -154,7 +148,6 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      console.log('controller hit')
       await this.resetPasswordUseCase.execute(req.body);
 
       res.status(HttpStatus.OK).json(ApiResponse.success("Password reset successfully"));
@@ -185,10 +178,7 @@ export class AuthController {
     try {
       await this.resendOtpUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        message: "If applicable, a verification code will be sent.",
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("If applicable, a verification code will be sent."));
     } catch (error) {
       next(error);
     }
@@ -208,10 +198,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(200).json({
-        success: true,
-        data: result.user,
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success('google user authorized',result.user));
     } catch (error) {
       next(error);
     }
@@ -228,10 +215,7 @@ export class AuthController {
         userId: res.locals.auth.userId,
       });
 
-      res.status(200).json({
-        success: true,
-        message: "Password changed successfully",
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Password changed successfully"));
     } catch (error) {
       next(error);
     }

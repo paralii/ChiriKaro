@@ -6,7 +6,7 @@ import type { IUserRepository } from "@application/interfaces/repositories/IUser
 import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRepository.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 
-export class VerifyOtpUseCase implements IVerifyOtpUseCase{
+export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpRepository: IOtpRepository,
@@ -36,18 +36,15 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase{
     }
 
     const isValid = this.otpService.verify(dto.code, challenge.codeHash);
-    console.log(isValid);
 
     if (!isValid) {
       throw new BadRequestError("Invalid verification code");
     }
 
     user.verifyEmail();
-console.log('verified')
-await this.userRepository.update(user);
-console.log('updated');
 
-await this.otpRepository.delete(otpKey);
-console.log('otp deleted')
+    await this.userRepository.update(user);
+
+    await this.otpRepository.delete(otpKey);
   }
 }

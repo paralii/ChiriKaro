@@ -10,16 +10,15 @@ import type {
   ITokenService,
   TokenPayload,
 } from "@application/interfaces/services/ITokenService.ts";
-import type { IIdGenerator } from "@application/interfaces/services/IIdGenerator.ts";
 import type { OAuthProfile } from "@application/interfaces/services/IOAuthService.ts";
 
 import type { GoogleAuthResponseDTO } from "@application/dto/auth/oauth.dto.ts";
+import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
 
-export class GoogleAuthUseCase {
+export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: ITokenService,
-    private readonly idGenerator: IIdGenerator,
   ) {}
 
   public async execute(profile: OAuthProfile): Promise<GoogleAuthResponseDTO> {
@@ -42,7 +41,6 @@ export class GoogleAuthUseCase {
       }
 
       user = User.create({
-        id: this.idGenerator.generate(),
         name: profile.name,
         email: profile.email,
         role: Role.PATIENT,

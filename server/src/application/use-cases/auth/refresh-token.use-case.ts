@@ -4,8 +4,9 @@ import { UnauthorizedError } from "@shared/errors/index.ts";
 import type { RefreshTokenResult } from "@application/dto/auth/refresh-token.dto.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { ITokenService } from "@application/interfaces/services/ITokenService.ts";
+import type { IRefreshTokenUseCase } from "@application/interfaces/use-cases/auth/IRefreshTokenUseCase.ts";
 
-export class RefreshTokenUseCase {
+export class RefreshTokenUseCase implements IRefreshTokenUseCase{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: ITokenService,

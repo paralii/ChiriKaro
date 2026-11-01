@@ -9,8 +9,8 @@ import type { IResendOtpUseCase } from "@application/interfaces/use-cases/auth/I
 import type { IForgotPasswordUseCase } from "@application/interfaces/use-cases/auth/IForgotPasswordUseCase.ts";
 import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
 import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
+import type { IRefreshTokenUseCase } from "@application/interfaces/use-cases/auth/IRefreshTokenUseCase.ts";
 
-import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
 import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
 import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
@@ -26,10 +26,10 @@ export class AuthController {
     private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
     private readonly resetPasswordUseCase: IResetPasswordUseCase,
     private readonly googleAuthUseCase: IGoogleAuthUseCase,
+    private readonly refreshTokenUseCase: IRefreshTokenUseCase,
     
     private readonly logoutUseCase: LogoutUseCase,
     private readonly getProfileUseCase: GetProfileUseCase,
-    private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
 

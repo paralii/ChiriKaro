@@ -35,9 +35,11 @@ import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/au
 import { GoogleAuthUseCase } from "@application/use-cases/auth/google-auth.use-case.ts";
 import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
 
+import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
+import type { IRefreshTokenUseCase } from "@application/interfaces/use-cases/auth/IRefreshTokenUseCase.ts";
+
 import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
 import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
-import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
 import { createAuthRouter } from "@presentation/routes/auth.routes.ts";
@@ -75,7 +77,7 @@ const logoutUseCase = new LogoutUseCase(tokenService);
 
 const getProfileUseCase = new GetProfileUseCase(userRepository);
 
-const refreshTokenUseCase = new RefreshTokenUseCase(
+const refreshTokenUseCase: IRefreshTokenUseCase = new RefreshTokenUseCase(
   userRepository,
   tokenService,
 );
@@ -126,9 +128,9 @@ export const authController = new AuthController(
   forgotPasswordUseCase,
   resetPasswordUseCase,
   googleAuthUseCase,
+  refreshTokenUseCase,
   logoutUseCase,
   getProfileUseCase,
-  refreshTokenUseCase,
   changePasswordUseCase,
 );
 

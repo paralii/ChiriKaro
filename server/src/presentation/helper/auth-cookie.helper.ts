@@ -27,7 +27,7 @@ export class AuthCookieHelper {
     res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
       ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/api/auth/refresh-token",
+      path: "/",
     });
   }
 
@@ -38,7 +38,7 @@ export class AuthCookieHelper {
 
     res.clearCookie(REFRESH_TOKEN_COOKIE, {
       ...cookieOptions,
-      path: "/api/auth/refresh-token",
+      path: "/",
     });
   }
 }

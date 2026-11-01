@@ -45,6 +45,7 @@ import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-c
 import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
 
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
+import type { IChangePasswordUseCase } from "@application/interfaces/use-cases/auth/IChangePasswordUseCase.ts";
 
 import { createAuthRouter } from "@presentation/routes/auth.routes.ts";
 
@@ -79,7 +80,9 @@ const loginUseCase: ILoginUseCase = new LoginUseCase(
 
 const logoutUseCase: ILogoutUseCase = new LogoutUseCase(tokenService);
 
-const getProfileUseCase:IGetProfileUseCase = new GetProfileUseCase(userRepository);
+const getProfileUseCase: IGetProfileUseCase = new GetProfileUseCase(
+  userRepository,
+);
 
 const refreshTokenUseCase: IRefreshTokenUseCase = new RefreshTokenUseCase(
   userRepository,
@@ -119,7 +122,7 @@ const googleAuthUseCase: IGoogleAuthUseCase = new GoogleAuthUseCase(
   tokenService,
 );
 
-const changePasswordUseCase = new ChangePasswordUseCase(
+const changePasswordUseCase: IChangePasswordUseCase = new ChangePasswordUseCase(
   userRepository,
   passwordService,
 );
@@ -144,9 +147,7 @@ const authMiddleware = new AuthMiddleware({
   clinicRepository,
 });
 
-const googleOAuthMiddleware = new GoogleOAuthMiddleware(
-  googleOAuthService,
-);
+const googleOAuthMiddleware = new GoogleOAuthMiddleware(googleOAuthService);
 
 export const authRouter = createAuthRouter(authController, {
   authenticate: authMiddleware.authenticate,

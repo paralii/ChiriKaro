@@ -51,7 +51,11 @@ export function createAuthRouter(
     ...sensitive,
     authController.resetPassword,
   );
-  router.post("/change-password", authenticate, authController.changePassword);
+  router.post(
+    "/auth/change-password",
+    authenticate,
+    authController.changePassword,
+  );
 
   if (googleRedirect) {
     router.get("/auth/google", googleRedirect);

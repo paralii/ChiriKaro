@@ -12,8 +12,7 @@ import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/
 import type { IRefreshTokenUseCase } from "@application/interfaces/use-cases/auth/IRefreshTokenUseCase.ts";
 import type { ILogoutUseCase } from "@application/interfaces/use-cases/auth/ILogoutUseCase.ts";
 import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
-
-import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
+import type { IChangePasswordUseCase } from "@application/interfaces/use-cases/auth/IChangePasswordUseCase.ts";
 
 import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
 
@@ -29,8 +28,7 @@ export class AuthController {
     private readonly refreshTokenUseCase: IRefreshTokenUseCase,
     private readonly logoutUseCase: ILogoutUseCase,
     private readonly getProfileUseCase: IGetProfileUseCase,
-
-    private readonly changePasswordUseCase: ChangePasswordUseCase,
+    private readonly changePasswordUseCase: IChangePasswordUseCase,
   ) {}
 
   public register = async (
@@ -41,10 +39,9 @@ export class AuthController {
     try {
       const result = await this.registerUseCase.execute(req.body);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success(
-        "User registered",
-          result.user
-      ));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("User registered", result.user));
     } catch (error) {
       next(error);
     }
@@ -64,9 +61,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("User Logined",
-        result.user
-      ));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("User Logined", result.user));
     } catch (error) {
       next(error);
     }
@@ -84,7 +81,9 @@ export class AuthController {
 
       AuthCookieHelper.clearAuthCookies(res);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("Logged out successfully"));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Logged out successfully"));
     } catch (error) {
       next(error);
     }
@@ -96,11 +95,9 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.getProfileUseCase.execute(
-        req.user!.sub,
-      );
+      const result = await this.getProfileUseCase.execute(req.user!.sub);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success('',result));
+      res.status(HttpStatus.OK).json(ApiResponse.success("", result));
     } catch (error) {
       next(error);
     }
@@ -122,7 +119,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("Token refreshed successfully"));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Token refreshed successfully"));
     } catch (error) {
       next(error);
     }
@@ -136,7 +135,13 @@ export class AuthController {
     try {
       await this.forgotPasswordUseCase.execute(req.body);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("If the account exists, password reset instructions will be sent."));
+      res
+        .status(HttpStatus.OK)
+        .json(
+          ApiResponse.success(
+            "If the account exists, password reset instructions will be sent.",
+          ),
+        );
     } catch (error) {
       next(error);
     }
@@ -150,7 +155,9 @@ export class AuthController {
     try {
       await this.resetPasswordUseCase.execute(req.body);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("Password reset successfully"));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Password reset successfully"));
     } catch (error) {
       next(error);
     }
@@ -164,7 +171,9 @@ export class AuthController {
     try {
       const result = await this.verifyOtpUseCase.execute(req.body);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("Otp verified", result));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Otp verified", result));
     } catch (error) {
       next(error);
     }
@@ -178,7 +187,13 @@ export class AuthController {
     try {
       await this.resendOtpUseCase.execute(req.body);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("If applicable, a verification code will be sent."));
+      res
+        .status(HttpStatus.OK)
+        .json(
+          ApiResponse.success(
+            "If applicable, a verification code will be sent.",
+          ),
+        );
     } catch (error) {
       next(error);
     }
@@ -198,7 +213,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(HttpStatus.OK).json(ApiResponse.success('google user authorized',result.user));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("google user authorized", result.user));
     } catch (error) {
       next(error);
     }
@@ -212,10 +229,12 @@ export class AuthController {
     try {
       await this.changePasswordUseCase.execute({
         ...req.body,
-        userId: res.locals.auth.userId,
+        userId: req.user!.sub,
       });
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("Password changed successfully"));
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Password changed successfully"));
     } catch (error) {
       next(error);
     }

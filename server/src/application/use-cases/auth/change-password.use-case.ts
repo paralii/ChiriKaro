@@ -3,8 +3,9 @@ import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
 import type { ChangePasswordDto } from "@application/dto/auth/change-password.dto.ts";
+import type { IChangePasswordUseCase } from "@application/interfaces/use-cases/auth/IChangePasswordUseCase.ts";
 
-export class ChangePasswordUseCase {
+export class ChangePasswordUseCase implements IChangePasswordUseCase{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordService: IPasswordService,

@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { User } from "@domain/entities/user.entity.js";
 import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
 import { PasswordService } from "@infrastructure/services/bcrypt/bcrypt.password.service.ts";
@@ -59,7 +58,6 @@ const run = async (): Promise<void> => {
     const hashedPassword = await passwordService.hash(password);
 
     const admin = User.create({
-      id: randomUUID(),
       name,
       email,
       passwordHash: hashedPassword,

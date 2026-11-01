@@ -1,6 +1,5 @@
 import { Role } from "@domain/value-objects/Role.js";
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";
-import { randomUUID } from "node:crypto";
 import { User } from "@domain/entities/user.entity.js";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { PasswordService } from "@infrastructure/services/bcrypt/bcrypt.password.service.ts";
@@ -43,7 +42,6 @@ export const seedSuperAdmin = async ({
   const hashedPassword = await passwordService.hash(password);
 
   const admin = User.create({
-    id: randomUUID(),
     name,
     email: normalizedEmail,
     passwordHash: hashedPassword,

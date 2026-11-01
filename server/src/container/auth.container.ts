@@ -42,6 +42,8 @@ import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
 import type { ILogoutUseCase } from "@application/interfaces/use-cases/auth/ILogoutUseCase.ts";
 
 import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
+import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
+
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
 import { createAuthRouter } from "@presentation/routes/auth.routes.ts";
@@ -77,7 +79,7 @@ const loginUseCase: ILoginUseCase = new LoginUseCase(
 
 const logoutUseCase: ILogoutUseCase = new LogoutUseCase(tokenService);
 
-const getProfileUseCase = new GetProfileUseCase(userRepository);
+const getProfileUseCase:IGetProfileUseCase = new GetProfileUseCase(userRepository);
 
 const refreshTokenUseCase: IRefreshTokenUseCase = new RefreshTokenUseCase(
   userRepository,

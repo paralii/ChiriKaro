@@ -3,8 +3,9 @@ import { NotFoundError } from "@shared/errors/index.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 
 import type { GetProfileResponseDTO } from "@application/dto/auth/get-user.dto.ts";
+import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
 
-export class GetProfileUseCase {
+export class GetProfileUseCase implements IGetProfileUseCase{
   constructor(private readonly userRepository: IUserRepository) {}
 
   public async execute(userId: string): Promise<GetProfileResponseDTO> {

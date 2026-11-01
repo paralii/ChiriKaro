@@ -11,8 +11,8 @@ import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/au
 import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
 import type { IRefreshTokenUseCase } from "@application/interfaces/use-cases/auth/IRefreshTokenUseCase.ts";
 import type { ILogoutUseCase } from "@application/interfaces/use-cases/auth/ILogoutUseCase.ts";
+import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
 
-import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
 import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
 
 import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
@@ -28,8 +28,8 @@ export class AuthController {
     private readonly googleAuthUseCase: IGoogleAuthUseCase,
     private readonly refreshTokenUseCase: IRefreshTokenUseCase,
     private readonly logoutUseCase: ILogoutUseCase,
+    private readonly getProfileUseCase: IGetProfileUseCase,
 
-    private readonly getProfileUseCase: GetProfileUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
 
@@ -97,7 +97,7 @@ export class AuthController {
   ): Promise<void> => {
     try {
       const result = await this.getProfileUseCase.execute(
-        res.locals.auth.userId,
+        req.user!.sub,
       );
 
       res.status(HttpStatus.OK).json(ApiResponse.success('',result));

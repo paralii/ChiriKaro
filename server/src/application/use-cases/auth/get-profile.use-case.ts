@@ -6,10 +6,10 @@ import type { GetProfileResponseDTO } from "@application/dto/auth/get-user.dto.t
 import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
 
 export class GetProfileUseCase implements IGetProfileUseCase{
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly _userRepository: IUserRepository) {}
 
   public async execute(userId: string): Promise<GetProfileResponseDTO> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this._userRepository.findById(userId);
 
     if (!user) {
       throw new NotFoundError("User");

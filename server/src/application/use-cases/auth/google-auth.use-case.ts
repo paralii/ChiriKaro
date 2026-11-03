@@ -17,8 +17,8 @@ import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/
 
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly tokenService: ITokenService,
+    private readonly _userRepository: IUserRepository,
+    private readonly _tokenService: ITokenService,
   ) {}
 
   public async execute(profile: OAuthProfile): Promise<GoogleAuthResponseDTO> {
@@ -29,10 +29,10 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       throw new UnauthorizedError("Google email must be verified");
     }
 
-    let user = await this.userRepository.findByGoogleId(profile.googleId);
+    let user = await this._userRepository.findByGoogleId(profile.googleId);
 
     if (!user) {
-      const existingUser = await this.userRepository.findByEmail(profile.email);
+      const existingUser = await this._userRepository.findByEmail(profile.email);
       if (existingUser) {
         throw new ConflictError(
           "An account with this email already exists. " +
@@ -51,7 +51,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         status: UserStatus.ACTIVE,
       });
 
-      user = await this.userRepository.save(user);
+      user = await this._userRepository.save(user);
     }
 
     if (user.status !== UserStatus.ACTIVE) {
@@ -65,9 +65,9 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       clinicId: user.clinicId,
     };
 
-    const accessToken = this.tokenService.generateAccessToken(tokenPayload);
+    const accessToken = this._tokenService.generateAccessToken(tokenPayload);
     const { refreshToken, expiresIn } =
-      this.tokenService.generateRefreshToken(tokenPayload);
+      this._tokenService.generateRefreshToken(tokenPayload);
 
     return {
       user: {

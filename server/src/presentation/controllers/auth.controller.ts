@@ -18,17 +18,17 @@ import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
 
 export class AuthController {
   constructor(
-    private readonly registerUseCase: IRegisterUseCase,
-    private readonly loginUseCase: ILoginUseCase,
-    private readonly verifyOtpUseCase: IVerifyOtpUseCase,
-    private readonly resendOtpUseCase: IResendOtpUseCase,
-    private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
-    private readonly resetPasswordUseCase: IResetPasswordUseCase,
-    private readonly googleAuthUseCase: IGoogleAuthUseCase,
-    private readonly refreshTokenUseCase: IRefreshTokenUseCase,
-    private readonly logoutUseCase: ILogoutUseCase,
-    private readonly getProfileUseCase: IGetProfileUseCase,
-    private readonly changePasswordUseCase: IChangePasswordUseCase,
+    private readonly _registerUseCase: IRegisterUseCase,
+    private readonly _loginUseCase: ILoginUseCase,
+    private readonly _verifyOtpUseCase: IVerifyOtpUseCase,
+    private readonly _resendOtpUseCase: IResendOtpUseCase,
+    private readonly _forgotPasswordUseCase: IForgotPasswordUseCase,
+    private readonly _resetPasswordUseCase: IResetPasswordUseCase,
+    private readonly _googleAuthUseCase: IGoogleAuthUseCase,
+    private readonly _refreshTokenUseCase: IRefreshTokenUseCase,
+    private readonly _logoutUseCase: ILogoutUseCase,
+    private readonly _getProfileUseCase: IGetProfileUseCase,
+    private readonly _changePasswordUseCase: IChangePasswordUseCase,
   ) {}
 
   public register = async (
@@ -37,7 +37,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.registerUseCase.execute(req.body);
+      const result = await this._registerUseCase.execute(req.body);
 
       res
         .status(HttpStatus.OK)
@@ -53,7 +53,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.loginUseCase.execute(req.body);
+      const result = await this._loginUseCase.execute(req.body);
 
       AuthCookieHelper.setAuthCookies(
         res,
@@ -75,7 +75,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.logoutUseCase.execute({
+      await this._logoutUseCase.execute({
         refreshToken: req.cookies?.refreshToken,
       });
 
@@ -95,7 +95,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.getProfileUseCase.execute(req.user!.sub);
+      const result = await this._getProfileUseCase.execute(req.user!.sub);
 
       res.status(HttpStatus.OK).json(ApiResponse.success("", result));
     } catch (error) {
@@ -109,7 +109,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.refreshTokenUseCase.execute(
+      const result = await this._refreshTokenUseCase.execute(
         req.cookies?.refreshToken,
       );
 
@@ -133,7 +133,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.forgotPasswordUseCase.execute(req.body);
+      await this._forgotPasswordUseCase.execute(req.body);
 
       res
         .status(HttpStatus.OK)
@@ -153,7 +153,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.resetPasswordUseCase.execute(req.body);
+      await this._resetPasswordUseCase.execute(req.body);
 
       res
         .status(HttpStatus.OK)
@@ -169,7 +169,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.verifyOtpUseCase.execute(req.body);
+      const result = await this._verifyOtpUseCase.execute(req.body);
 
       res
         .status(HttpStatus.OK)
@@ -185,7 +185,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.resendOtpUseCase.execute(req.body);
+      await this._resendOtpUseCase.execute(req.body);
 
       res
         .status(HttpStatus.OK)
@@ -205,7 +205,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.googleAuthUseCase.execute(req.body);
+      const result = await this._googleAuthUseCase.execute(req.body);
 
       AuthCookieHelper.setAuthCookies(
         res,
@@ -227,7 +227,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.changePasswordUseCase.execute({
+      await this._changePasswordUseCase.execute({
         ...req.body,
         userId: req.user!.sub,
       });

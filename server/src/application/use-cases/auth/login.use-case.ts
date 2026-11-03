@@ -12,13 +12,13 @@ import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILogi
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly passwordService: IPasswordService,
-    private readonly tokenService: ITokenService,
+    private readonly _userRepository: IUserRepository,
+    private readonly _passwordService: IPasswordService,
+    private readonly _tokenService: ITokenService,
   ) {}
 
   public async execute(dto: LoginDto): Promise<LoginResult> {
-    const user = await this.userRepository.findByEmail(dto.email);
+    const user = await this._userRepository.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedError("Invalid email");
     }
@@ -29,7 +29,7 @@ export class LoginUseCase implements ILoginUseCase {
       throw new UnauthorizedError("Invalid credentials");
     }
 
-    const isPasswordValid = await this.passwordService.compare(
+    const isPasswordValid = await this._passwordService.compare(
       dto.password,
       user.passwordHash,
     );
@@ -45,10 +45,10 @@ export class LoginUseCase implements ILoginUseCase {
       clinicId: user.clinicId,
     };
 
-    const accessToken = this.tokenService.generateAccessToken(tokenPayload);
+    const accessToken = this._tokenService.generateAccessToken(tokenPayload);
 
     const { refreshToken, expiresIn } =
-      this.tokenService.generateRefreshToken(tokenPayload);
+      this._tokenService.generateRefreshToken(tokenPayload);
 
     return {
       user: {

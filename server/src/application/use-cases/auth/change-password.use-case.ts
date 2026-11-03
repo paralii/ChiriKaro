@@ -7,12 +7,12 @@ import type { IChangePasswordUseCase } from "@application/interfaces/use-cases/a
 
 export class ChangePasswordUseCase implements IChangePasswordUseCase{
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly passwordService: IPasswordService,
+    private readonly _userRepository: IUserRepository,
+    private readonly _passwordService: IPasswordService,
   ) {}
 
   public async execute(dto: ChangePasswordDto): Promise<void> {
-    const user = await this.userRepository.findById(dto.userId);
+    const user = await this._userRepository.findById(dto.userId);
 
     if (!user) {
       throw new NotFoundError("User not found");
@@ -24,7 +24,7 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase{
       );
     }
 
-    const isPasswordValid = await this.passwordService.compare(
+    const isPasswordValid = await this._passwordService.compare(
       dto.currentPassword,
       user.passwordHash,
     );
@@ -39,10 +39,10 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase{
       );
     }
 
-    const newPasswordHash = await this.passwordService.hash(dto.newPassword);
+    const newPasswordHash = await this._passwordService.hash(dto.newPassword);
 
     user.changePasswordHash(newPasswordHash);
 
-    await this.userRepository.update(user);
+    await this._userRepository.update(user);
   }
 }

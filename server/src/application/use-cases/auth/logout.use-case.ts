@@ -4,9 +4,9 @@ import type { ITokenService } from "@application/interfaces/services/ITokenServi
 import type { ILogoutUseCase } from "@application/interfaces/use-cases/auth/ILogoutUseCase.ts";
 
 export class LogoutUseCase implements ILogoutUseCase{
-  constructor(private readonly tokenService: ITokenService) {}
+  constructor(private readonly _tokenService: ITokenService) {}
 
   public async execute(dto: LogoutDto): Promise<void> {
-    await this.tokenService.revokeRefreshToken(dto.refreshToken);
+    await this._tokenService.revokeRefreshToken(dto.refreshToken);
   }
 }

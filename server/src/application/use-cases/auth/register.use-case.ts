@@ -13,15 +13,15 @@ import type { IEmailService } from "@application/interfaces/services/IEmailServi
 
 export class RegisterUseCase implements IRegisterUseCase {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly passwordService: IPasswordService,
-    private readonly otpService: IOtpService,
-    private readonly otpRepository: IOtpRepository,
-    private readonly emailService: IEmailService,
+    private readonly _userRepository: IUserRepository,
+    private readonly _passwordService: IPasswordService,
+    private readonly _otpService: IOtpService,
+    private readonly _otpRepository: IOtpRepository,
+    private readonly _emailService: IEmailService,
   ) {}
 
   public async execute(dto: RegisterDTO) {
-    const emailExists = await this.userRepository.existsByEmail(dto.email);
+    const emailExists = await this._userRepository.existsByEmail(dto.email);
     if (emailExists) {
       throw new ConflictError("Email is already registered");
     }
@@ -36,7 +36,7 @@ export class RegisterUseCase implements IRegisterUseCase {
     }
 
     const passwordHash = dto.password
-      ? await this.passwordService.hash(dto.password)
+      ? await this._passwordService.hash(dto.password)
       : undefined;
 
     const user = User.create({
@@ -50,9 +50,9 @@ export class RegisterUseCase implements IRegisterUseCase {
       isEmailVerified: false,
     });
 
-    const { code, codeHash, expiresAt } = this.otpService.generate();
+    const { code, codeHash, expiresAt } = this._otpService.generate();
 
-    const persistedUser = await this.userRepository.save(user);
+    const persistedUser = await this._userRepository.save(user);
 
     const otpKey = `registration-otp:${persistedUser.id}`;
 
@@ -61,7 +61,7 @@ export class RegisterUseCase implements IRegisterUseCase {
       Math.floor((expiresAt.getTime() - Date.now()) / 1000),
     );
 
-    await this.otpRepository.save(
+    await this._otpRepository.save(
       otpKey,
       {
         codeHash,
@@ -71,14 +71,14 @@ export class RegisterUseCase implements IRegisterUseCase {
     );
 
     try {
-      await this.emailService.sendOtpEmail(
+      await this._emailService.sendOtpEmail(
         persistedUser.email,
         persistedUser.name,
         code,
         "registration",
       );
     } catch {
-      await this.otpRepository.delete(otpKey);
+      await this._otpRepository.delete(otpKey);
 
       throw new Error(
         "Registration could not be completed because the verification email failed. Please try again.",

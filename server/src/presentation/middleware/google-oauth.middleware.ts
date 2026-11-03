@@ -5,7 +5,7 @@ import type { IOAuthService } from "@application/interfaces/services/IOAuthServi
 import { UnauthorizedError } from "@shared/errors/index.ts";
 
 export class GoogleOAuthMiddleware {
-  constructor(private readonly googleOAuthService: IOAuthService) {}
+  constructor(private readonly _googleOAuthService: IOAuthService) {}
 
   public redirect = (
     _req: Request,
@@ -22,7 +22,7 @@ export class GoogleOAuthMiddleware {
         maxAge: 5 * 60 * 1000,
       });
 
-      res.redirect(this.googleOAuthService.getAuthUrl(state));
+      res.redirect(this._googleOAuthService.getAuthUrl(state));
     } catch (error) {
       next(error);
     }
@@ -47,7 +47,7 @@ export class GoogleOAuthMiddleware {
       ) {
         throw new UnauthorizedError("Invalid Google OAuth callback");
       }
-      const profile = await this.googleOAuthService.getProfileFromCode(code);
+      const profile = await this._googleOAuthService.getProfileFromCode(code);
 
       req.googleProfile = profile;
 

@@ -9,11 +9,7 @@ export const authService = {
   resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),
   forgotPassword:(email: string) => api.post("/auth/forgot-password", {email}),
   resetPassword:(token: string, newPassword: string) => api.post("/auth/reset-password", {token, newPassword}),
-
+  changePassword: (body: { currentPassword: string; newPassword: string; otp: string }) => api.post('/auth/profile/password', body),
+  getProfile: () => api.get('/auth/profile'),
   logout: (refreshToken: string | null) => api.post('/auth/logout', { refreshToken }),
-  updateProfile: (name: string) => api.patch<{ name: string }>('/auth/profile', { name }),
-  verifyCurrentPassword: (currentPassword: string) => api.post('/auth/profile/password/verify-current', { currentPassword }),
-  changePassword: (body: { currentPassword: string; newPassword: string; otp: string }) => api.patch('/auth/profile/password', body),
-  getInvitation: (token: string) => api.get<{ email: string; role: string }>(`/invitation/${encodeURIComponent(token)}`),
-  acceptInvitation: (body: { token: string; name: string; password: string }) => api.post('/invitation/accept', body),
 };

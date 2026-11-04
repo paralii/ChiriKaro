@@ -7,9 +7,10 @@ export const authService = {
   register: (body: { name: string; email: string; password: string; role: Role }) => api.post<RegisterResult>('/auth/register', body),
   verifyOtp: (email: string, code: string) => api.post('/auth/verify-otp', { email, code }),
   resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),
+  forgotPassword:(email: string) => api.post("/auth/forgot-password", {email}),
+  resetPassword:(token: string, newPassword: string) => api.post("/auth/reset-password", {token, newPassword}),
 
   logout: (refreshToken: string | null) => api.post('/auth/logout', { refreshToken }),
-  resetPassword: (body: { email: string; otp: string; password: string }) => api.post('/auth/reset-password', body),
   updateProfile: (name: string) => api.patch<{ name: string }>('/auth/profile', { name }),
   verifyCurrentPassword: (currentPassword: string) => api.post('/auth/profile/password/verify-current', { currentPassword }),
   changePassword: (body: { currentPassword: string; newPassword: string; otp: string }) => api.patch('/auth/profile/password', body),

@@ -9,7 +9,8 @@ export const authService = {
   resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),
   forgotPassword:(email: string) => api.post("/auth/forgot-password", {email}),
   resetPassword:(token: string, newPassword: string) => api.post("/auth/reset-password", {token, newPassword}),
-  changePassword: (body: { currentPassword: string; newPassword: string; otp: string }) => api.post('/auth/profile/password', body),
+  changePassword: (body: { userId: string, currentPassword: string; newPassword: string;}) => api.post('/auth/change-password', body),
   getProfile: () => api.get('/auth/profile'),
+  refreshToken: () => api.post('/auth/refresh-token'),
   logout: (refreshToken: string | null) => api.post('/auth/logout', { refreshToken }),
 };

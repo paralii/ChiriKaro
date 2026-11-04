@@ -9,14 +9,14 @@ export function PublicNav() {
       <nav className="flex items-center gap-8 max-md:gap-5">
         {" "}
         <Link
-          to="/register/patient"
+          to="/login/patient"
           className="text-[12px] font-medium text-[#626777] transition hover:text-brand max-[420px]:hidden"
         >
           {" "}
           Find Care{" "}
         </Link>{" "}
         <Link
-          to="/register/clinic"
+          to="/login/clinic"
           className="text-[12px] font-medium text-[#626777] transition hover:text-brand"
         >
           {" "}

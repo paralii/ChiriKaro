@@ -1,7 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { AuthTemplate } from '@/components/templates/AuthTemplate';
 import { SignInForm } from '@/components/organisms/SignInForm';
-import { displayRoles, loginRole, type LoginRoleKey } from '@/shared/constants/roles';
+import { loginRole, type LoginRoleKey } from '@/shared/constants/roles';
 
 export default function LoginPage() {
   const { role: param } = useParams();
@@ -15,14 +15,13 @@ export default function LoginPage() {
     return <Navigate to="/" replace />;
   }
 
-  const role = param as LoginRoleKey;
-  const label = displayRoles[role].toLowerCase();
+  const role = param as LoginRoleKey;;
 
   const intro = role === 'patient'
     ? 'Use your patient account to continue.'
     : role === 'clinic'
       ? 'Use your clinic account to continue.'
-      : `Use the ${label} account linked to your clinic invitation.`;
+      : `Use the ${role} account linked to your clinic invitation.`;
 
   const actionText = role === 'patient'
     ? (
@@ -45,7 +44,7 @@ export default function LoginPage() {
   return (
     <AuthTemplate
       kicker="SECURE ACCESS"
-      title={`Sign in as ${label}`}
+      title={`Sign in as ${role}`}
       intro={intro}
       actionText={actionText}
     >

@@ -1,14 +1,24 @@
 import type { Role } from "@store/slices/authSlice";
 
-export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
-export type Clinic = { id: string; name: string; address?: string | null; phone?: string | null; ownerName?: string; contactEmail?: string; status: string; isActive: boolean };
-export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
-export type Invitation = { email: string; role: 'DOCTOR' | 'STAFF'; inviteUrl: string };
 export type AuthResult = {
   user: { id: string; name: string; email: string; role: Role ; clinicId?: string | null; status?: string };
   accessToken: string;
   refreshToken: string;
 };
+export type RegisterResult = {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: Role;
+  };
+  message: string;
+};
+
+export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
+export type Clinic = { id: string; name: string; address?: string | null; phone?: string | null; ownerName?: string; contactEmail?: string; status: string; isActive: boolean };
+export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
+export type Invitation = { email: string; role: 'DOCTOR' | 'STAFF'; inviteUrl: string };
 export type WorkingHour = { day: string; isOpen: boolean; startTime: string; endTime: string };
 export type ClinicDocument = { documentType: string; documentKey: string; uploadedAt: string };
 export type ClinicProfile = {

@@ -1,12 +1,25 @@
 import type { Role } from '@/store/slices/authSlice';
 
 export const roleLabels: Record<Role, string> = {
-  patient: 'Patient', doctor: 'Doctor', clinic_admin: 'Clinic', staff: 'Staff', super_admin: 'Super admin',
+  PATIENT: 'Patient',
+  DOCTOR: 'Doctor',
+  CLINIC_ADMIN: 'Clinic',
+  STAFF: 'Staff',
+  SUPER_ADMIN: 'Super admin',
 };
 export const displayRoles: Record<string, string> = {
-  patient: 'Patient', clinic: 'Clinic', 'super-admin': 'Super admin', doctor: 'Doctor', staff: 'Staff',
+  PATIENT: 'Patient',
+  CLINIC_ADMIN: 'Clinic',
+  SUPER_ADMIN: 'Super admin',
+  DOCTOR: 'Doctor',
+  STAFF: 'Staff',
 };
 export const loginRole = {
-  patient: 'PATIENT', clinic: 'CLINIC_ADMIN', doctor: 'DOCTOR', staff: 'STAFF', 'super-admin': 'SUPER_ADMIN',
+  patient: 'PATIENT',
+  clinic: 'CLINIC_ADMIN',
+  doctor: 'DOCTOR',
+  staff: 'STAFF',
+  'super-admin': 'SUPER_ADMIN',
 } as const;
+
 export type LoginRoleKey = keyof typeof loginRole;

@@ -1,12 +1,13 @@
 import { api } from '@/shared/lib/http';
-import type { AuthResult } from '@/shared/types';
+import type { AuthResult, RegisterResult } from '@/shared/types';
+import type { Role } from '@/store/slices/authSlice';
 
 export const authService = {
   login: (body: { email: string; password: string; }) => api.post<AuthResult>('/auth/login', body),
-  
-  
-  requestOtp: (email: string, purpose: 'register' | 'password-reset' | 'profile-change') => api.post('/auth/request-otp', { email, purpose }),
-  register: (body: { name: string; email: string; password: string; otp: string }) => api.post<AuthResult>('/auth/register', body),
+  register: (body: { name: string; email: string; password: string; role: Role }) => api.post<RegisterResult>('/auth/register', body),
+  verifyOtp: (email: string, code: string) => api.post('/auth/verify-otp', { email, code }),
+  resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),
+
   logout: (refreshToken: string | null) => api.post('/auth/logout', { refreshToken }),
   resetPassword: (body: { email: string; otp: string; password: string }) => api.post('/auth/reset-password', body),
   updateProfile: (name: string) => api.patch<{ name: string }>('/auth/profile', { name }),

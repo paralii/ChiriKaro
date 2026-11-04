@@ -1,11 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export type Role =
-  | "patient"
-  | "doctor"
-  | "clinic_admin"
-  | "super_admin"
-  | "staff";
+  | "PATIENT"
+  | "DOCTOR"
+  | "CLINIC_ADMIN"
+  | "SUPER_ADMIN"
+  | "STAFF";
 
 export interface UserProfile {
   id: string;

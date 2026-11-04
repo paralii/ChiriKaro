@@ -207,9 +207,6 @@ export default function HomePage() {
             </h4>
 
             <div className="mt-4 flex flex-col gap-3 text-[12px] text-[#858895]">
-              <Link to="/clinics" className="transition hover:text-brand">
-                Explore Clinics
-              </Link>
 
               <Link to="/login/patient" className="transition hover:text-brand">
                 Patient Login
@@ -230,9 +227,6 @@ export default function HomePage() {
             </h4>
 
             <div className="mt-4 flex flex-col gap-3 text-[12px] text-[#858895]">
-              <Link to="/for-clinics" className="transition hover:text-brand">
-                Clinic Software
-              </Link>
 
               <Link to="/login/clinic" className="transition hover:text-brand">
                 Clinic Login

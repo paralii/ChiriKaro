@@ -23,14 +23,14 @@ export function HomeHero() {
         </p>
 
         <div className="mt-7 flex items-center gap-3.5 max-[420px]:flex-col max-[420px]:items-start">
-          <Link to="/clinics">
+          <Link to="/login/patient">
             <Button tabIndex={-1}>
               Explore Clinics <span aria-hidden="true">&#8594;</span>
             </Button>
           </Link>
 
           <Link
-            to="/for-clinics"
+            to="/login/clinic"
             className="rounded-lg border border-[#e2e3eb] bg-white px-5 py-3 text-[12px] font-semibold text-[#555b6b] transition hover:border-brand hover:text-brand"
           >
             For Clinics

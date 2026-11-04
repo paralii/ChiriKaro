@@ -80,7 +80,7 @@ export function PortalStrip() {
           </div>
 
           <Link
-            to="/clinics"
+            to="/register/patient"
             className="mt-9 inline-flex items-center gap-2 text-[12px] font-semibold text-brand transition group-hover:gap-3"
           >
             Explore Clinics <span aria-hidden="true">→</span>
@@ -147,7 +147,7 @@ export function PortalStrip() {
           </div>
 
           <Link
-            to="/for-clinics"
+            to="/register/clinics"
             className="mt-9 inline-flex items-center gap-2 text-[12px] font-semibold text-ck-teal transition group-hover:gap-3"
           >
             Discover Clinic Software <span aria-hidden="true">→</span>

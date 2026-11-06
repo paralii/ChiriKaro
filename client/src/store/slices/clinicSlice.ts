@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { clinicService } from '@/services/clinicService';
-import type { Clinic } from '@/types';
+import type { Clinic } from '@/shared/types';
 
 export const loadClinic = createAsyncThunk('clinic/load', () => clinicService.dashboard());
 

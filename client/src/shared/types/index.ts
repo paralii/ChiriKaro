@@ -1,4 +1,4 @@
-import type { Role } from "@store/slices/authSlice";
+import type { Role } from "@/features/auth/store/authSlice";
 
 export type AuthResult = {
   user: { id: string; name: string; email: string; role: Role ; clinicId?: string | null; status?: string };

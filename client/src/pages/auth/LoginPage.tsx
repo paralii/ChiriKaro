@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { AuthTemplate } from '@/components/templates/AuthTemplate';
-import { SignInForm } from '@/components/organisms/SignInForm';
+import { SignInForm } from '@/features/auth/components/SignInForm';
 import { loginRole, type LoginRoleKey } from '@/shared/constants/roles';
 
 export default function LoginPage() {

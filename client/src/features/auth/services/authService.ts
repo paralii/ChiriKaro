@@ -1,6 +1,6 @@
 import { api } from '@/shared/lib/http';
 import type { AuthResult, RegisterResult } from '@/shared/types';
-import type { Role } from '@/store/slices/authSlice';
+import type { Role } from '@/features/auth/store/authSlice';
 
 export const authService = {
   login: (body: { email: string; password: string; }) => api.post<AuthResult>('/auth/login', body),

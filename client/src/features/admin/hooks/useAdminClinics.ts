@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { changeClinicStatus } from '@/store/slices/adminClinicsSlice';
+import { changeClinicStatus } from '@/features/admin/store/adminClinicsSlice';
 import type { ClinicStatus } from '@/shared/types';
 
 export function useAdminClinics() {

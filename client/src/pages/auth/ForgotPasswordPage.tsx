@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { AuthTemplate } from "@/components/templates/AuthTemplate";
-import { ForgotPasswordForm } from "@features/auth/ForgotPasswordForm";
+import { ForgotPasswordForm } from "@/features/auth/components/ForgotPasswordForm";
 
 export default function ForgotPasswordPage() {
   return (

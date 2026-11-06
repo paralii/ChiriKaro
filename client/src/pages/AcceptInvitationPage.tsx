@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthTemplate } from '@/components/templates/AuthTemplate';
-import { InvitationAcceptForm } from '@/components/organisms/InvitationAcceptForm';
+import { InvitationAcceptForm } from '@/features/auth/components/InvitationAcceptForm';
 
 export default function AcceptInvitationPage() {
   const [role, setRole] = useState('');

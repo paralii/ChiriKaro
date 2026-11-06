@@ -8,8 +8,8 @@ import { Input } from '@components/atoms/Input';
 import { SectionHeading } from '@components/molecules/SectionHeading';
 import { Notices } from '@components/molecules/Notices';
 import { useAction } from '@shared/hooks/useAction';
-import { useCooldown } from '@shared/hooks/useCooldown';
-import { authService } from '@services/authService';
+import { useCooldown } from '@/features/auth/hooks/useCooldown';
+import { authService } from '@/features/auth/services/authService';
 
 export function ChangePasswordForm({ email }: { email: string }) {
   const [step, setStep] = useState<'current' | 'new'>('current');

@@ -5,7 +5,7 @@ import { TextField } from '@/components/molecules/FormField';
 import { PasswordField } from '@/components/molecules/PasswordField';
 import { AuthSubmitButton } from '@/components/molecules/AuthSubmitButton';
 import { Notices } from '@/components/molecules/Notices';
-import { useLogin } from '@/shared/hooks/useLogin';
+import { useLogin } from '@/features/auth/hooks/useLogin';
 
 export function SignInForm({ emailPlaceholder = 'you@example.com', extras = true }: { emailPlaceholder?: string; extras?: boolean }) {
   const [email, setEmail] = useState('');

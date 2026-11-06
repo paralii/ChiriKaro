@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/atoms/Card';
-import { EmptyState } from '@/components/atoms/EmptyState';
+import { EmptyState } from '@/components/molecules/EmptyState';
 import { DataTable } from '@/components/molecules/DataTable';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
-import { DoctorReviewRow } from '@/components/organisms/DoctorReviewRow';
-import { DoctorReviewDetail } from '@/components/organisms/DoctorReviewDetail';
+import { DoctorReviewRow } from '@/features/doctor/components/DoctorReviewRow';
+import { DoctorReviewDetail } from '@/features/doctor/components/DoctorReviewDetail';
 import { useAction } from '@/shared/hooks/useAction';
-import { clinicService } from '@/services/clinicService';
+import { clinicService } from '@/features/clinic/services/clinicService';
 import { openSignedUrl } from '@/services/storageService';
 import type { DoctorDetail, DoctorSummary } from '@/shared/types';
 

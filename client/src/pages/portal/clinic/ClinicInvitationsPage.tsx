@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Card } from '@/components/atoms/Card';
 import { Notices } from '@/components/molecules/Notices';
-import { InviteForm } from '@/components/organisms/InviteForm';
+import { InviteForm } from '@/features/clinic/components/InviteForm';
 import { useAction } from '@/shared/hooks/useAction';
-import { clinicService } from '@/services/clinicService';
+import { clinicService } from '@/features/clinic/services/clinicService';
 import { useAppSelector } from '@/store/hooks';
 import { normalizeEmail } from '@/shared/utils/validators';
 import type { Invitation } from '@/shared/types';

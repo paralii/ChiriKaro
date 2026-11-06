@@ -6,10 +6,10 @@ import { PortalTopbar } from '@/components/organisms/PortalTopbar';
 import { PageHeading } from '@/components/molecules/PageHeading';
 import { getPageTitle, navItems } from '@/shared/constants/navigation';
 import { roleLabels } from '@/shared/constants/roles';
-import { useLogout } from '@/shared/hooks/useLogout';
+import { useLogout } from '@/features/auth/hooks/useLogout';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { loadAdminClinics } from '@/store/slices/adminClinicsSlice';
-import { loadClinic } from '@/store/slices/clinicSlice';
+import { loadAdminClinics } from '@/features/admin/store/adminClinicsSlice';
+import { loadClinic } from '@/features/clinic/store/clinicSlice';
 
 export default function PortalLayout() {
   const dispatch = useAppDispatch();

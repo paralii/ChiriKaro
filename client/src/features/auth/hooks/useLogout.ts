@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { logout } from '@/store/slices/authSlice';
-import { authService } from '@/services/authService';
+import { logout } from '@/features/auth/store/authSlice';
+import { authService } from '@/features/auth/services/authService';
 
 export function useLogout() {
   const dispatch = useAppDispatch();

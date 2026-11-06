@@ -3,7 +3,7 @@ import { TextLink } from '@/components/atoms/TextLink';
 import { MetricCard, MetricGrid } from '@/components/molecules/MetricCard';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { WelcomeBand } from '@/components/molecules/WelcomeBand';
-import { ClinicCards } from '@/components/organisms/ClinicCard';
+import { ClinicCards } from '@/features/clinic/components/molecules/ClinicCard';
 import { featuredClinics } from '@/shared/constants/sampleClinics';
 import { useAppSelector } from '@/store/hooks';
 

@@ -1,5 +1,5 @@
-import { api } from '@/lib/http';
-import type { Clinic, ClinicStatus, ClinicSummary } from '@/types';
+import { api } from '@/shared/lib/http';
+import type { Clinic, ClinicStatus, ClinicSummary } from '@/shared/types';
 
 export const superAdminService = {
   listClinics: () => api.get<Clinic[]>('/super-admin/clinics'),

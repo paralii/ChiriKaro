@@ -1,5 +1,5 @@
-import { api } from '@/lib/http';
-import type { DoctorProfile, Slot, SlotConfig, WorkingHour } from '@/types';
+import { api } from '@/shared/lib/http';
+import type { DoctorProfile, Slot, SlotConfig, WorkingHour } from '@/shared/types';
 
 export const doctorService = {
   getProfile: () => api.get<DoctorProfile>('/doctor/profile'),

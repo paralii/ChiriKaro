@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { superAdminService } from '@/services/superAdminService';
+import { superAdminService } from '@/features/admin/services/superAdminService';
 import type { Clinic, ClinicStatus, ClinicSummary } from '@/shared/types';
 
 const initialState = {

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { AuthTemplate } from '@/components/templates/AuthTemplate';
-import { SignInForm } from '@/components/organisms/SignInForm';
+import { SignInForm } from '@/features/auth/components/SignInForm';
 
 export default function SuperAdminLoginPage() {
   return (

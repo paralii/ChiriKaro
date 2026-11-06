@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 
 import { AuthTemplate } from "@/components/templates/AuthTemplate";
-import { PatientRegisterForm } from "@/components/organisms/PatientRegisterForm";
-import { ClinicRegisterForm } from "@/components/organisms/ClinicRegisterForm";
+import { PatientRegisterForm } from "@/features/patient/components/PatientRegisterForm";
+import { ClinicRegisterForm } from "@/features/clinic/components/ClinicRegisterForm";
 
 export default function RegisterPage() {
   const { role } = useParams();

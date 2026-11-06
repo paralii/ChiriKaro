@@ -1,4 +1,4 @@
-import type { Role } from '@/store/slices/authSlice';
+import type { Role } from '@/features/auth/store/authSlice';
 
 export type NavEntry = { path: string; label: string };
 

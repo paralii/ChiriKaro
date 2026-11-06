@@ -1,7 +1,7 @@
 import { Badge } from '@components/atoms/Badge';
 import { statusTone } from '@shared/utils/statusTones';
 import { Button } from '@components/atoms/Button';
-import { EmptyState } from '@components/atoms/EmptyState';
+import { EmptyState } from '@/components/molecules/EmptyState';
 import { CellTitle, DataTable, tdClass } from '@components/molecules/DataTable';
 import type { Clinic, ClinicStatus } from '@shared/types';
 

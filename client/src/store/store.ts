@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice';
-import adminClinicsReducer from './slices/adminClinicsSlice';
-import clinicReducer from './slices/clinicSlice';
+import authReducer from '../features/auth/store/authSlice';
+import adminClinicsReducer from '../features/admin/store/adminClinicsSlice';
+import clinicReducer from '../features/clinic/store/clinicSlice';
 
 export const store = configureStore({
   reducer: {

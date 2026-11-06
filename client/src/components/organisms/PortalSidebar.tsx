@@ -2,7 +2,7 @@ import { BrandLockup } from '@/components/atoms/BrandLockup';
 import { NavItem, SideMark, sideLinkClass } from '@/components/molecules/NavItem';
 import { roleLabels } from '@/shared/constants/roles';
 import type { NavEntry } from '@/shared/constants/navigation';
-import type { Role } from '@/store/slices/authSlice';
+import type { Role } from '@/features/auth/store/authSlice';
 
 export function PortalSidebar({ role, workspaceName, items, pendingCount = 0, onLogout }: {
   role: Role; workspaceName?: string; items: NavEntry[]; pendingCount?: number; onLogout: () => void;

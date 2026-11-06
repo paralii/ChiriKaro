@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@components/atoms/Button';
 import { Input } from '@components/atoms/Input';
 import { FormField } from './FormField';
-import { useCooldown } from '@shared/hooks/useCooldown';
+import { useCooldown } from '@/features/auth/hooks/useCooldown';
 import { getErrorMessage } from '@shared/lib/http';
 import { validateEmail } from '@shared/utils/validators';
 

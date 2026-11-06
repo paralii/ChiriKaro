@@ -3,8 +3,8 @@ import { useAction } from "@shared/hooks/useAction";
 import { useAppDispatch } from "@store/hooks";
 import {
   setUser,
-} from "@store/slices/authSlice";
-import { authService } from "@services/authService";
+} from "@/features/auth/store/authSlice";
+import { authService } from "@/features/auth/services/authService";
 import { normalizeEmail, validateEmail } from "@shared/utils/validators";
 
 export function useLogin() {

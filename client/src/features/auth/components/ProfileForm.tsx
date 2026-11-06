@@ -5,7 +5,7 @@ import { TextField } from '@/components/molecules/FormField';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { Notices } from '@/components/molecules/Notices';
 import { useAction } from '@/shared/hooks/useAction';
-import { authService } from '@/services/authService';
+import { authService } from '@/features/auth/services/authService';
 
 export function ProfileForm({ name, email, roleLabel }: { name: string; email: string; roleLabel: string }) {
   const [value, setValue] = useState(name);

@@ -1,22 +1,22 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Form } from "@/components/atoms/Form";
-import { TextButton } from "@/components/atoms/TextLink";
-import { TextField } from "@/components/molecules/FormField";
-import { PasswordField } from "@/components/molecules/PasswordField";
-import { OtpField } from "@/components/molecules/OtpField";
-import { AuthSubmitButton } from "@/components/molecules/AuthSubmitButton";
-import { Notices } from "@/components/molecules/Notices";
+import { Form } from "@components/atoms/Form";
+import { TextButton } from "@components/atoms/TextLink";
+import { TextField } from "@components/molecules/FormField";
+import { PasswordField } from "@components/molecules/PasswordField";
+import { OtpField } from "@components/molecules/OtpField";
+import { AuthSubmitButton } from "@components/molecules/AuthSubmitButton";
+import { Notices } from "@components/molecules/Notices";
 
-import { useAction } from "@/shared/hooks/useAction";
-import { useOtpStep } from "@/shared/hooks/useOtpStep";
+import { useAction } from "@shared/hooks/useAction";
+import { useOtpStep } from "@/features/auth/hooks/useOtpStep";
 
-import { authService } from "@/services/authService";
+import { authService } from "@/features/auth/services/authService";
 
-import { normalizeEmail, validateEmail } from "@/shared/utils/validators";
+import { normalizeEmail, validateEmail } from "@shared/utils/validators";
 
-export function PatientRegisterForm({
+export function ClinicRegisterForm({
   onVerifyingChange,
 }: {
   onVerifyingChange?: (v: boolean) => void;
@@ -35,7 +35,7 @@ export function PatientRegisterForm({
 
   function validateDetails() {
     if (name.trim().length < 2) {
-      throw new Error("Name must be at least 2 characters long.");
+      throw new Error("Owner name must be at least 2 characters long.");
     }
 
     if (!validateEmail(email)) {
@@ -58,7 +58,7 @@ export function PatientRegisterForm({
       name: name.trim(),
       email: normalizeEmail(email),
       password,
-      role: "PATIENT",
+      role: "CLINIC_ADMIN",
     });
 
     otp.setVerifying(true);
@@ -82,7 +82,7 @@ export function PatientRegisterForm({
 
         await authService.verifyOtp(normalizeEmail(email), otpCode.trim());
 
-        navigate("/login/patient", { replace: true });
+        navigate("/login/clinic", { replace: true });
       },
       {
         fallback: "We could not complete registration. Please try again.",
@@ -98,7 +98,7 @@ export function PatientRegisterForm({
         {!otp.verifying ? (
           <>
             <TextField
-              label="Full name"
+              label="Owner's full name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your full name"
@@ -111,11 +111,8 @@ export function PatientRegisterForm({
               label="Email address"
               type="email"
               value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setOtpCode("");
-              }}
-              placeholder="you@example.com"
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="owner@clinic.com"
               autoComplete="email"
               required
             />
@@ -162,7 +159,6 @@ export function PatientRegisterForm({
               onClick={() => {
                 otp.setVerifying(false);
                 setError("");
-                setMessage("");
               }}
             >
               Edit registration details

@@ -2,8 +2,8 @@ import { Card } from '@/components/atoms/Card';
 import { Badge } from '@/components/atoms/Badge';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
-import { ClinicTable } from '@/components/organisms/ClinicTable';
-import { useAdminClinics } from '@/shared/hooks/useAdminClinics';
+import { ClinicTable } from '@/features/clinic/components/ClinicTable';
+import { useAdminClinics } from '@/features/admin/hooks/useAdminClinics';
 
 export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?: boolean }) {
   const { items, busy, error, message, changeStatus } = useAdminClinics();

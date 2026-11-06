@@ -6,7 +6,7 @@ import { PasswordField } from "@components/molecules/PasswordField";
 import { AuthSubmitButton } from "@components/molecules/AuthSubmitButton";
 import { Notices } from "@components/molecules/Notices";
 import { useAction } from "@shared/hooks/useAction";
-import { authService } from "@services/authService";
+import { authService } from "@/features/auth/services/authService";
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState("");

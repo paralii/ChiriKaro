@@ -24,23 +24,39 @@ export class ClinicRepository
   }
 
   async save(clinic: Clinic): Promise<Clinic> {
+    const data = this.toPersistence(clinic);
+
+    if (!clinic.id) {
+      const doc = await this.model.create(data);
+      return this.toDomain(doc);
+    }
+
     const doc = await this.model
-      .findOneAndUpdate(
-        { _id: new Types.ObjectId(clinic.id) },
-        { $set: this.toPersistence(clinic) },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
+      .findByIdAndUpdate(
+        clinic.id,
+        { $set: data },
+        { new: true, runValidators: true },
       )
       .exec();
+
     return this.toDomain(doc!);
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await super.deleteDocumentById(id);
   }
 
   private toDomain(doc: IClinicDocument): Clinic {
     return Clinic.fromPersistence({
-      id: doc._id.toString(),
+      _id: doc._id.toString(),
       name: doc.name,
       address: doc.address ?? null,
+      city: doc.city ?? null,
+      state: doc.state ?? null,
+      pincode: doc.pincode ?? null,
       phone: doc.phone ?? null,
       contactEmail: doc.contactEmail ?? null,
+      registrationNumber: doc.registrationNumber ?? null,
       ownerAdminId: doc.ownerAdminId ? doc.ownerAdminId.toString() : null,
       status: doc.status,
       createdAt: doc.createdAt,
@@ -51,12 +67,16 @@ export class ClinicRepository
   private toPersistence(clinic: Clinic) {
     return {
       name: clinic.name,
-      address: clinic.address,
-      phone: clinic.phone,
-      contactEmail: clinic.contactEmail,
+      address: clinic.address ?? null,
+      phone: clinic.phone ?? null,
+      city: clinic.city ?? null,
+      state: clinic.state ?? null,
+      pincode: clinic.pincode ?? null,
+      contactEmail: clinic.contactEmail ?? null,
       ownerAdminId: clinic.ownerAdminId
         ? new Types.ObjectId(clinic.ownerAdminId)
         : null,
+      registrationNumber: clinic.registrationNumber ?? null,
       status: clinic.status,
     };
   }

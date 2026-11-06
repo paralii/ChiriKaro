@@ -1,32 +1,34 @@
 import type { Request, Response, NextFunction } from "express";
+import { HttpStatus } from "@shared/enums/http-status.enum.ts";
+import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 
-import { RegisterUseCase } from "@application/use-cases/auth/register.use-case.ts";
-import { LoginUseCase } from "@application/use-cases/auth/login.use-case.ts";
-import { LogoutUseCase } from "@application/use-cases/auth/logout.use-case.ts";
-import { GetProfileUseCase } from "@application/use-cases/auth/get-profile.use-case.ts";
-import { RefreshTokenUseCase } from "@application/use-cases/auth/refresh-token.use-case.ts";
-import { ForgotPasswordUseCase } from "@application/use-cases/auth/forgot-password.use-case.ts";
-import { ResetPasswordUseCase } from "@application/use-cases/auth/reset-password.use-case.ts";
-import { VerifyOtpUseCase } from "@application/use-cases/auth/verify-otp.use-case.ts";
-import { ResendOtpUseCase } from "@application/use-cases/auth/resend-otp.use-case.ts";
-import { GoogleAuthUseCase } from "@application/use-cases/auth/google-auth.use-case.ts";
-import { ChangePasswordUseCase } from "@application/use-cases/auth/change-password.use-case.ts";
+import type { IRegisterUseCase } from "@application/interfaces/use-cases/auth/IRegisterUseCase.ts";
+import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILoginUseCase.ts";
+import type { IVerifyOtpUseCase } from "@application/interfaces/use-cases/auth/IVerifyOtpUseCase.ts";
+import type { IResendOtpUseCase } from "@application/interfaces/use-cases/auth/IResendOtpUseCase.ts";
+import type { IForgotPasswordUseCase } from "@application/interfaces/use-cases/auth/IForgotPasswordUseCase.ts";
+import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
+import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
+import type { IRefreshTokenUseCase } from "@application/interfaces/use-cases/auth/IRefreshTokenUseCase.ts";
+import type { ILogoutUseCase } from "@application/interfaces/use-cases/auth/ILogoutUseCase.ts";
+import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
+import type { IChangePasswordUseCase } from "@application/interfaces/use-cases/auth/IChangePasswordUseCase.ts";
 
 import { AuthCookieHelper } from "@presentation/helper/auth-cookie.helper.ts";
 
 export class AuthController {
   constructor(
-    private readonly registerUseCase: RegisterUseCase,
-    private readonly loginUseCase: LoginUseCase,
-    private readonly logoutUseCase: LogoutUseCase,
-    private readonly getProfileUseCase: GetProfileUseCase,
-    private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
-    private readonly resetPasswordUseCase: ResetPasswordUseCase,
-    private readonly verifyOtpUseCase: VerifyOtpUseCase,
-    private readonly resendOtpUseCase: ResendOtpUseCase,
-    private readonly googleAuthUseCase: GoogleAuthUseCase,
-    private readonly changePasswordUseCase: ChangePasswordUseCase,
+    private readonly _registerUseCase: IRegisterUseCase,
+    private readonly _loginUseCase: ILoginUseCase,
+    private readonly _verifyOtpUseCase: IVerifyOtpUseCase,
+    private readonly _resendOtpUseCase: IResendOtpUseCase,
+    private readonly _forgotPasswordUseCase: IForgotPasswordUseCase,
+    private readonly _resetPasswordUseCase: IResetPasswordUseCase,
+    private readonly _googleAuthUseCase: IGoogleAuthUseCase,
+    private readonly _refreshTokenUseCase: IRefreshTokenUseCase,
+    private readonly _logoutUseCase: ILogoutUseCase,
+    private readonly _getProfileUseCase: IGetProfileUseCase,
+    private readonly _changePasswordUseCase: IChangePasswordUseCase,
   ) {}
 
   public register = async (
@@ -35,12 +37,11 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.registerUseCase.execute(req.body);
+      const result = await this._registerUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        data: result.user,
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("User registered", result.user));
     } catch (error) {
       next(error);
     }
@@ -52,7 +53,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.loginUseCase.execute(req.body);
+      const result = await this._loginUseCase.execute(req.body);
 
       AuthCookieHelper.setAuthCookies(
         res,
@@ -60,10 +61,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(200).json({
-        success: true,
-        data: result.user,
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("User Logined", result.user));
     } catch (error) {
       next(error);
     }
@@ -75,16 +75,15 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.logoutUseCase.execute({
+      await this._logoutUseCase.execute({
         refreshToken: req.cookies?.refreshToken,
       });
 
       AuthCookieHelper.clearAuthCookies(res);
 
-      res.status(200).json({
-        success: true,
-        message: "Logged out successfully",
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Logged out successfully"));
     } catch (error) {
       next(error);
     }
@@ -96,14 +95,9 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.getProfileUseCase.execute(
-        res.locals.auth.userId,
-      );
+      const result = await this._getProfileUseCase.execute(req.user!.sub);
 
-      res.status(200).json({
-        success: true,
-        data: result,
-      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("", result));
     } catch (error) {
       next(error);
     }
@@ -115,7 +109,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.refreshTokenUseCase.execute(
+      const result = await this._refreshTokenUseCase.execute(
         req.cookies?.refreshToken,
       );
 
@@ -125,10 +119,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(200).json({
-        success: true,
-        message: "Token refreshed successfully",
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Token refreshed successfully"));
     } catch (error) {
       next(error);
     }
@@ -140,13 +133,15 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.forgotPasswordUseCase.execute(req.body);
+      await this._forgotPasswordUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        message:
-          "If the account exists, password reset instructions will be sent.",
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(
+          ApiResponse.success(
+            "If the account exists, password reset instructions will be sent.",
+          ),
+        );
     } catch (error) {
       next(error);
     }
@@ -158,12 +153,11 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.resetPasswordUseCase.execute(req.body);
+      await this._resetPasswordUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        message: "Password reset successfully",
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Password reset successfully"));
     } catch (error) {
       next(error);
     }
@@ -175,12 +169,11 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.verifyOtpUseCase.execute(req.body);
+      const result = await this._verifyOtpUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        data: result,
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Otp verified", result));
     } catch (error) {
       next(error);
     }
@@ -192,12 +185,15 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.resendOtpUseCase.execute(req.body);
+      await this._resendOtpUseCase.execute(req.body);
 
-      res.status(200).json({
-        success: true,
-        message: "If applicable, a verification code will be sent.",
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(
+          ApiResponse.success(
+            "If applicable, a verification code will be sent.",
+          ),
+        );
     } catch (error) {
       next(error);
     }
@@ -209,7 +205,7 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const result = await this.googleAuthUseCase.execute(req.body);
+      const result = await this._googleAuthUseCase.execute(req.body);
 
       AuthCookieHelper.setAuthCookies(
         res,
@@ -217,10 +213,9 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res.status(200).json({
-        success: true,
-        data: result.user,
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("google user authorized", result.user));
     } catch (error) {
       next(error);
     }
@@ -232,15 +227,14 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.changePasswordUseCase.execute({
+      await this._changePasswordUseCase.execute({
         ...req.body,
-        userId: res.locals.auth.userId,
+        userId: req.user!.sub,
       });
 
-      res.status(200).json({
-        success: true,
-        message: "Password changed successfully",
-      });
+      res
+        .status(HttpStatus.OK)
+        .json(ApiResponse.success("Password changed successfully"));
     } catch (error) {
       next(error);
     }

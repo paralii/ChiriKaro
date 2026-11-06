@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { Button } from '@/components/atoms/Button';
-import { Form } from '@/components/atoms/Form';
-import { TextField } from '@/components/molecules/FormField';
-import type { ClinicProfile } from '@/types';
+import { Button } from '@components/atoms/Button';
+import { Form } from '@components/atoms/Form';
+import { TextField } from '@components/molecules/FormField';
+import type { ClinicProfile } from '@shared/types';
 
 export function ClinicProfileForm({ initial, busy, onSave }: { initial: ClinicProfile; busy: boolean; onSave: (values: ClinicProfile) => void }) {
   const [v, setV] = useState(initial);

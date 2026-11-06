@@ -1,8 +1,9 @@
-import { Badge, statusTone } from '@/components/atoms/Badge';
-import { Button } from '@/components/atoms/Button';
-import { EmptyState } from '@/components/atoms/EmptyState';
-import { CellTitle, DataTable, tdClass } from '@/components/molecules/DataTable';
-import type { Clinic, ClinicStatus } from '@/types';
+import { Badge } from '@components/atoms/Badge';
+import { statusTone } from '@shared/utils/statusTones';
+import { Button } from '@components/atoms/Button';
+import { EmptyState } from '@components/atoms/EmptyState';
+import { CellTitle, DataTable, tdClass } from '@components/molecules/DataTable';
+import type { Clinic, ClinicStatus } from '@shared/types';
 
 export function ClinicTable({ clinics, onStatus, busy }: { clinics: Clinic[]; onStatus: (id: string, status: ClinicStatus) => void; busy: boolean }) {
   if (!clinics.length) return <EmptyState>No clinics to show yet.</EmptyState>;

@@ -6,10 +6,10 @@ import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { DoctorReviewRow } from '@/components/organisms/DoctorReviewRow';
 import { DoctorReviewDetail } from '@/components/organisms/DoctorReviewDetail';
-import { useAction } from '@/hooks/useAction';
+import { useAction } from '@/shared/hooks/useAction';
 import { clinicService } from '@/services/clinicService';
 import { openSignedUrl } from '@/services/storageService';
-import type { DoctorDetail, DoctorSummary } from '@/types';
+import type { DoctorDetail, DoctorSummary } from '@/shared/types';
 
 export default function ClinicDoctorReviewPage() {
   const [doctors, setDoctors] = useState<DoctorSummary[]>([]);

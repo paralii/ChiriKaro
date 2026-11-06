@@ -1,22 +1,30 @@
 import { renderBaseTemplate } from "@infrastructure/email/templates/index.ts";
 import type { OtpEmailPurpose } from "@application/interfaces/services/IEmailService.ts";
 
-const otpCopy: Record<OtpEmailPurpose, { title: string; instruction: string }> = {
-  registration: {
-    title: "Verify your email address",
-    instruction: "Use this code to finish creating your ChiriKaro account. It expires in 10 minutes.",
-  },
-  "password-reset": {
-    title: "Reset your password",
-    instruction: "Use this code to reset your ChiriKaro password. It expires in 10 minutes.",
-  },
-  "password-change": {
-    title: "Confirm your password change",
-    instruction: "Use this code to confirm the password change you requested. It expires in 10 minutes.",
-  },
-};
+const otpCopy: Record<OtpEmailPurpose, { title: string; instruction: string }> =
+  {
+    registration: {
+      title: "Verify your email address",
+      instruction:
+        "Use this code to finish creating your ChiriKaro account. It expires in 10 minutes.",
+    },
+    "password-reset": {
+      title: "Reset your password",
+      instruction:
+        "Use this code to reset your ChiriKaro password. It expires in 10 minutes.",
+    },
+    "password-change": {
+      title: "Confirm your password change",
+      instruction:
+        "Use this code to confirm the password change you requested. It expires in 10 minutes.",
+    },
+  };
 
-export const renderOtpTemplate = (name: string, code: string, purpose: OtpEmailPurpose): string =>
+export const renderOtpTemplate = (
+  name: string,
+  code: string,
+  purpose: OtpEmailPurpose,
+): string =>
   renderBaseTemplate({
     title: otpCopy[purpose].title,
     bodyHtml: `

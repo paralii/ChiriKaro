@@ -14,19 +14,27 @@ export interface ClinicProps {
 }
 
 type NewClinicProps = Pick<ClinicProps, "id" | "name"> &
-  Partial<Pick<ClinicProps, "address" | "phone" | "contactEmail" | "ownerAdminId" | "status">>;
+  Partial<
+    Pick<
+      ClinicProps,
+      "address" | "phone" | "contactEmail" | "ownerAdminId" | "status"
+    >
+  >;
 
-  const MIN_NAME_LENGTH = 2;
-  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
-  
-  function requireNonBlank(value: string | null | undefined, field: string): string {
-    const trimmed = value?.trim();
-    if (!trimmed) {
-      throw new InvalidClinicDataError(`Clinic ${field} must not be blank`);
-    }
-    return trimmed;
+const MIN_NAME_LENGTH = 2;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
+
+function requireNonBlank(
+  value: string | null | undefined,
+  field: string,
+): string {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    throw new InvalidClinicDataError(`Clinic ${field} must not be blank`);
   }
- 
+  return trimmed;
+}
+
 export class Clinic {
   private constructor(private props: ClinicProps) {}
 
@@ -34,16 +42,24 @@ export class Clinic {
     const id = requireNonBlank(props.id, "id");
     const name = props.name?.trim();
     if (!name || name.length < MIN_NAME_LENGTH) {
-      throw new InvalidClinicDataError(`Clinic name must be at least ${MIN_NAME_LENGTH} characters`);
+      throw new InvalidClinicDataError(
+        `Clinic name must be at least ${MIN_NAME_LENGTH} characters`,
+      );
     }
     const contactEmail =
-      props.contactEmail == null ? null : requireNonBlank(props.contactEmail, "contactEmail");
+      props.contactEmail == null
+        ? null
+        : requireNonBlank(props.contactEmail, "contactEmail");
     if (contactEmail !== null && !EMAIL_PATTERN.test(contactEmail)) {
-      throw new InvalidClinicDataError("Clinic contactEmail is not a valid email address");
+      throw new InvalidClinicDataError(
+        "Clinic contactEmail is not a valid email address",
+      );
     }
     const ownerAdminId =
-      props.ownerAdminId == null ? null : requireNonBlank(props.ownerAdminId, "ownerAdminId");
- 
+      props.ownerAdminId == null
+        ? null
+        : requireNonBlank(props.ownerAdminId, "ownerAdminId");
+
     const now = new Date();
     const status = props.status ?? ClinicStatus.PENDING;
     return new Clinic({
@@ -100,13 +116,31 @@ export class Clinic {
     this.props.updatedAt = new Date();
   }
 
-  get id() { return this.props.id; }
-  get name() { return this.props.name; }
-  get address() { return this.props.address; }
-  get phone() { return this.props.phone; }
-  get contactEmail() { return this.props.contactEmail; }
-  get ownerAdminId() { return this.props.ownerAdminId; }
-  get status() { return this.props.status; }
-  get createdAt() { return new Date(this.props.createdAt); }
-  get updatedAt() { return new Date(this.props.updatedAt); }
+  get id() {
+    return this.props.id;
+  }
+  get name() {
+    return this.props.name;
+  }
+  get address() {
+    return this.props.address;
+  }
+  get phone() {
+    return this.props.phone;
+  }
+  get contactEmail() {
+    return this.props.contactEmail;
+  }
+  get ownerAdminId() {
+    return this.props.ownerAdminId;
+  }
+  get status() {
+    return this.props.status;
+  }
+  get createdAt() {
+    return new Date(this.props.createdAt);
+  }
+  get updatedAt() {
+    return new Date(this.props.updatedAt);
+  }
 }

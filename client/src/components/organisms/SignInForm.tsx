@@ -5,13 +5,12 @@ import { TextField } from '@/components/molecules/FormField';
 import { PasswordField } from '@/components/molecules/PasswordField';
 import { AuthSubmitButton } from '@/components/molecules/AuthSubmitButton';
 import { Notices } from '@/components/molecules/Notices';
-import { useLogin } from '@/hooks/useLogin';
-import type { LoginRoleKey } from '@/constants/roles';
+import { useLogin } from '@/shared/hooks/useLogin';
 
-export function SignInForm({ role, emailPlaceholder = 'you@example.com', extras = true }: { role: LoginRoleKey; emailPlaceholder?: string; extras?: boolean }) {
+export function SignInForm({ emailPlaceholder = 'you@example.com', extras = true }: { emailPlaceholder?: string; extras?: boolean }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, busy, error } = useLogin(role);
+  const { login, busy, error } = useLogin();
 
   const submit = (e: FormEvent) => { e.preventDefault(); void login(email, password); };
 

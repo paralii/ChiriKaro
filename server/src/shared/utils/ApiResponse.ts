@@ -34,4 +34,8 @@ export class ApiResponse<T = unknown> {
   public static created<T>(message: string, data?: T): ApiResponse<T> {
     return new ApiResponse<T>(true, message, data);
   }
+  
+  public static failed(message: string): ApiResponse {
+    return new ApiResponse(false, message);
+  }
 }

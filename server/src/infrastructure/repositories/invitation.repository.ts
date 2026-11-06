@@ -4,7 +4,7 @@ import { InvitationModel } from "@infrastructure/database/mongodb/models/Invitat
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.js";
 import type { IInvitationRepository } from "@application/interfaces/repositories/IInvitationRepository.ts";
 import { Invitation } from "@domain/entities/Invitation.entity.js";
-import {  InvitationStatus } from "@domain/enum/invitation-status.enum.ts";
+import { InvitationStatus } from "@domain/enum/invitation-status.enum.ts";
 
 export class InvitationRepository
   extends BaseRepository<IInvitationDocument>
@@ -30,7 +30,7 @@ export class InvitationRepository
       .findOneAndUpdate(
         { _id: new Types.ObjectId(invitation.id) },
         { $set: this.toPersistence(invitation) },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, new: true, setDefaultsOnInsert: true },
       )
       .exec();
     return this.toDomain(doc!);

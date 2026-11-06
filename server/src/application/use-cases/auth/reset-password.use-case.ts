@@ -7,37 +7,39 @@ import type { IPasswordService } from "@application/interfaces/services/IPasswor
 import type { IPasswordResetTokenService } from "@application/interfaces/services/IPasswordResetTokenService.js";
 
 import type { ResetPasswordDto } from "@application/dto/auth/reset-password.dto.ts";
+import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
 
-export class ResetPasswordUseCase {
+export class ResetPasswordUseCase implements IResetPasswordUseCase{
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
-    private readonly passwordService: IPasswordService,
-    private readonly passwordResetTokenService: IPasswordResetTokenService,
+    private readonly _userRepository: IUserRepository,
+    private readonly _passwordResetTokenRepository: IPasswordResetTokenRepository,
+    private readonly _passwordService: IPasswordService,
+    private readonly _passwordResetTokenService: IPasswordResetTokenService,
   ) {}
 
   public async execute(dto: ResetPasswordDto): Promise<void> {
-    const tokenHash = this.passwordResetTokenService.hash(dto.token);
+    const tokenHash = this._passwordResetTokenService.hash(dto.token);
 
     const resetToken =
-      await this.passwordResetTokenRepository.findByTokenHash(tokenHash);
+      await this._passwordResetTokenRepository.findByTokenHash(tokenHash);
 
     if (!resetToken || resetToken.expiresAt <= new Date()) {
       throw new BadRequestError("Invalid or expired password reset token");
     }
 
-    const user = await this.userRepository.findById(resetToken.userId);
+    const user = await this._userRepository.findById(resetToken.userId);
 
     if (!user) {
       throw new BadRequestError("Invalid or expired password reset token");
     }
 
-    const passwordHash = await this.passwordService.hash(dto.newPassword);
+    const passwordHash = await this._passwordService.hash(dto.newPassword);
 
     user.changePasswordHash(passwordHash);
 
-    await this.userRepository.update(user);
+    await this._passwordResetTokenRepository.deleteByUserId(user.id);
+    
+    await this._userRepository.update(user);
 
-    await this.passwordResetTokenRepository.deleteByUserId(user.id);
   }
 }

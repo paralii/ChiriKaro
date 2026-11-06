@@ -8,7 +8,8 @@
     /* Module */
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions" :true,
+    "allowImportingTsExtensions": true,
+    // "rewriteRelativeImportExtensions": true,
 
     /* Project */
     "rootDir": "./src",
@@ -21,8 +22,7 @@
       "@domain/*": ["./src/domain/*"],
       "@infrastructure/*": ["./src/infrastructure/*"],
       "@presentation/*": ["./src/presentation/*"],
-      "@shared/*": ["./src/shared/*"],
-
+      "@shared/*": ["./src/shared/*"]
     },
 
     /* Node */

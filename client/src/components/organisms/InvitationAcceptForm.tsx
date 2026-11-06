@@ -1,13 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Form } from '@/components/atoms/Form';
-import { TextField } from '@/components/molecules/FormField';
-import { PasswordField } from '@/components/molecules/PasswordField';
-import { AuthSubmitButton } from '@/components/molecules/AuthSubmitButton';
-import { Notices } from '@/components/molecules/Notices';
-import { useAction } from '@/hooks/useAction';
-import { authService } from '@/services/authService';
-import { validateEmail } from '@/utils/validators';
+import { Form } from '@components/atoms/Form';
+import { TextField } from '@components/molecules/FormField';
+import { PasswordField } from '@components/molecules/PasswordField';
+import { AuthSubmitButton } from '@components/molecules/AuthSubmitButton';
+import { Notices } from '@components/molecules/Notices';
+import { useAction } from '@shared/hooks/useAction';
+import { authService } from '@services/authService';
+import { validateEmail } from '@shared/utils/validators';
 
 export function InvitationAcceptForm({ onLoaded }: { onLoaded?: (role: string) => void }) {
   const [params] = useSearchParams();

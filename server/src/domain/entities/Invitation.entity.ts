@@ -26,7 +26,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
 function requireNonBlank(value: string, field: string): string {
   const trimmed = value?.trim();
   if (!trimmed) {
-    throw new InvalidInvitationDataError(`Invitation ${field} must not be blank`);
+    throw new InvalidInvitationDataError(
+      `Invitation ${field} must not be blank`,
+    );
   }
   return trimmed;
 }
@@ -45,22 +47,26 @@ export class Invitation {
     const id = requireNonBlank(props.id, "id");
     const email = requireNonBlank(props.email, "email");
     if (!EMAIL_PATTERN.test(email)) {
-      throw new InvalidInvitationDataError("Invitation email is not a valid email address");
+      throw new InvalidInvitationDataError(
+        "Invitation email is not a valid email address",
+      );
     }
     const invitedBy = requireNonBlank(props.invitedBy, "invitedBy");
 
-    const needsClinicId = isClinicScopedRole(props.role);  
+    const needsClinicId = isClinicScopedRole(props.role);
     const clinicId = props.clinicId?.trim() ?? "";
 
     if (needsClinicId && !clinicId) {
       throw new InvalidRoleAssignmentError(
-        `Role ${props.role} requires a clinicId`
+        `Role ${props.role} requires a clinicId`,
       );
     }
 
     const ttl = props.ttl ?? DEFAULT_TTL_HOURS;
     if (!Number.isFinite(ttl) || ttl <= 0) {
-      throw new InvalidInvitationDataError("Invitation ttl must be a finite number greater than 0");
+      throw new InvalidInvitationDataError(
+        "Invitation ttl must be a finite number greater than 0",
+      );
     }
 
     const now = new Date();
@@ -134,7 +140,7 @@ export class Invitation {
     }
     return false;
   }
- 
+
   private isPastExpiry(): boolean {
     return new Date() > this.props.expiresAt;
   }
@@ -143,13 +149,31 @@ export class Invitation {
     this.props.updatedAt = new Date();
   }
 
-  get id() { return this.props.id; }
-  get email() { return this.props.email; }
-  get role() { return this.props.role; }
-  get clinicId() { return this.props.clinicId; }
-  get invitedBy() { return this.props.invitedBy; }
-  get status() { return this.props.status; }
-  get expiresAt() { return this.props.expiresAt; }
-  get createdAt() { return this.props.createdAt; }
-  get updatedAt() { return this.props.updatedAt; }
+  get id() {
+    return this.props.id;
+  }
+  get email() {
+    return this.props.email;
+  }
+  get role() {
+    return this.props.role;
+  }
+  get clinicId() {
+    return this.props.clinicId;
+  }
+  get invitedBy() {
+    return this.props.invitedBy;
+  }
+  get status() {
+    return this.props.status;
+  }
+  get expiresAt() {
+    return this.props.expiresAt;
+  }
+  get createdAt() {
+    return this.props.createdAt;
+  }
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
 }

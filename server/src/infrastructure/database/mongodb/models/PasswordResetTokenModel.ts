@@ -7,28 +7,27 @@ export interface IPasswordResetTokenDocument extends Document {
   expiresAt: Date;
 }
 
-const passwordResetTokenSchema =
-  new Schema<IPasswordResetTokenDocument>(
-    {
-      userId: {
-        type: String,
-        required: true,
-        unique: true,
-      },
-      tokenHash: {
-        type: String,
-        required: true,
-        unique: true,
-      },
-      expiresAt: {
-        type: Date,
-        required: true,
-      },
+const passwordResetTokenSchema = new Schema<IPasswordResetTokenDocument>(
+  {
+    userId: {
+      type: String,
+      required: true,
+      unique: true,
     },
-    {
-      timestamps: true,
+    tokenHash: {
+      type: String,
+      required: true,
+      unique: true,
     },
-  );
+    expiresAt: {
+      type: Date,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 export const PasswordResetTokenModel = model<IPasswordResetTokenDocument>(
   "PasswordResetToken",

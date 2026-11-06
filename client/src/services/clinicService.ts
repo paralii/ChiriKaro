@@ -1,5 +1,5 @@
-import { api } from '@/lib/http';
-import type { Clinic, ClinicDocument, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/types';
+import { api } from '@/shared/lib/http';
+import type { Clinic, ClinicDocument, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/shared/types';
 
 const enc = encodeURIComponent;
 

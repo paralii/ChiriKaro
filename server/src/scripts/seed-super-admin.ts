@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { User } from "@domain/entities/user.entity.js";
 import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
 import { PasswordService } from "@infrastructure/services/bcrypt/bcrypt.password.service.ts";
@@ -59,7 +58,6 @@ const run = async (): Promise<void> => {
     const hashedPassword = await passwordService.hash(password);
 
     const admin = User.create({
-      id: randomUUID(),
       name,
       email,
       passwordHash: hashedPassword,
@@ -69,7 +67,8 @@ const run = async (): Promise<void> => {
       isEmailVerified: true,
     });
 
-    const savedAdmin = await userRepository.save(admin); logger.info(`Seeded first admin: ${savedAdmin.email}`);
+    const savedAdmin = await userRepository.save(admin);
+    logger.info(`Seeded first admin: ${savedAdmin.email}`);
   } finally {
     await mongoDatabase.disconnect();
   }

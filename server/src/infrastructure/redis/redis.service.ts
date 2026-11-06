@@ -9,7 +9,6 @@ import { redisClient } from "@infrastructure/redis/redis.client.ts";
 import { logger } from "@infrastructure/logger/logger.js";
 
 export class RedisService implements IOtpRepository {
-  private readonly keyPrefix = "otp:";
 
   constructor(
     private readonly getRedis: () => RedisInstance = () =>
@@ -95,7 +94,7 @@ export class RedisService implements IOtpRepository {
   }
 
   private buildKey(key: string): string {
-    return `${this.keyPrefix}${key}`;
+    return `${key}`;
   }
 
   private isOtpChallenge(value: unknown): value is OtpChallenge {
@@ -108,8 +107,6 @@ export class RedisService implements IOtpRepository {
     return (
       typeof challenge.codeHash === "string" &&
       typeof challenge.expiresAt === "string" &&
-      Number.isInteger(challenge.attempts) &&
-      (challenge.attempts as number) >= 0 &&
       !Number.isNaN(Date.parse(challenge.expiresAt))
     );
   }

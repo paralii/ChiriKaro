@@ -4,7 +4,7 @@ import { Card } from '@/components/atoms/Card';
 import { DetailList } from '@/components/molecules/DetailList';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { WelcomeBand } from '@/components/molecules/WelcomeBand';
-import { roleLabels } from '@/constants/roles';
+import { roleLabels } from '@/shared/constants/roles';
 import { useAppSelector } from '@/store/hooks';
 import AdminDashboardPage from './admin/AdminDashboardPage';
 import ClinicDashboardPage from './clinic/ClinicDashboardPage';

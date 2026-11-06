@@ -6,7 +6,13 @@
     "types": ["vite/client"],
     // "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@app*": ["./src/app/*"],
+      "@components*": ["./src/components/*"],
+      "@features*": ["./src/features/*"],
+      "@store*": ["./src/store/*"],
+      "@services*": ["./src/services/*"],
+      "@shared*": ["./src/shared/*"],
     },
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,

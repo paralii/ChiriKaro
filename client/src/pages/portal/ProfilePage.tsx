@@ -1,7 +1,7 @@
 import { Card } from '@/components/atoms/Card';
 import { ProfileForm } from '@/components/organisms/ProfileForm';
 import { ChangePasswordForm } from '@/components/organisms/ChangePasswordForm';
-import { roleLabels } from '@/constants/roles';
+import { roleLabels } from '@/shared/constants/roles';
 import { useAppSelector } from '@/store/hooks';
 import ClinicSetupPage from './clinic/ClinicSetupPage';
 

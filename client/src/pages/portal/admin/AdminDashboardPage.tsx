@@ -4,7 +4,7 @@ import { MetricCard, MetricGrid } from '@/components/molecules/MetricCard';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { ClinicTable } from '@/components/organisms/ClinicTable';
-import { useAdminClinics } from '@/hooks/useAdminClinics';
+import { useAdminClinics } from '@/shared/hooks/useAdminClinics';
 
 export default function AdminDashboardPage() {
   const { items, summary, busy, error, message, changeStatus } = useAdminClinics();

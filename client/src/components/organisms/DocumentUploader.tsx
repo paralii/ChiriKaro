@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { FileInput } from '@/components/atoms/FileInput';
-import { Select } from '@/components/atoms/Select';
-import { FormField } from '@/components/molecules/FormField';
-import { DocumentList } from '@/components/molecules/DocumentList';
+import { FileInput } from '@components/atoms/FileInput';
+import { Select } from '@components/atoms/Select';
+import { FormField } from '@components/molecules/FormField';
+import { DocumentList } from '@components/molecules/DocumentList';
 
 export function DocumentUploader({ types, documents, busy, showStatus, onUpload, onOpen }: {
   types: string[];

@@ -5,9 +5,7 @@ import type {
   IPasswordResetTokenService,
 } from "@application/interfaces/services/IPasswordResetTokenService.js";
 
-export class PasswordResetTokenService
-  implements IPasswordResetTokenService
-{
+export class PasswordResetTokenService implements IPasswordResetTokenService {
   private readonly expiresInMs = 15 * 60 * 1000;
 
   public generate(): GeneratedPasswordResetToken {

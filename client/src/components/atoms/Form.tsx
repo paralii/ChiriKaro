@@ -1,5 +1,5 @@
 import type { FormHTMLAttributes } from 'react';
-import { cn } from '@/lib/cn';
+import { cn } from '@shared/lib/cn';
 
 export function Form({ className, ...props }: FormHTMLAttributes<HTMLFormElement>) {
   return <form className={cn('grid gap-4', className)} {...props} />;

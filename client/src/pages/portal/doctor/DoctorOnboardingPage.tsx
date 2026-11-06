@@ -11,13 +11,13 @@ import { DocumentUploader } from '@/components/organisms/DocumentUploader';
 import { WorkingHoursForm } from '@/components/organisms/WorkingHoursForm';
 import { DoctorAvailabilityStep } from '@/components/organisms/DoctorAvailabilityStep';
 import { DoctorReviewStep } from '@/components/organisms/DoctorReviewStep';
-import { defaultHours } from '@/constants/schedule';
-import { useAction } from '@/hooks/useAction';
+import { defaultHours } from '@/shared/constants/schedule';
+import { useAction } from '@/shared/hooks/useAction';
 import { doctorService } from '@/services/doctorService';
 import { openSignedUrl, uploadToSignedUrl } from '@/services/storageService';
-import { emptyDoctorProfile, findInvalidHours, findResumeStep } from '@/utils/doctor';
-import { phonePattern } from '@/utils/validators';
-import type { DoctorProfile, Slot } from '@/types';
+import { emptyDoctorProfile, findInvalidHours, findResumeStep } from '@/shared/utils/doctor';
+import { phonePattern } from '@/shared/utils/validators';
+import type { DoctorProfile, Slot } from '@/shared/types';
 
 const steps = ['Professional details', 'Documents', 'Working hours', 'Availability', 'Review'];
 const docTypes = ['Professional license', 'Qualification certificate', 'Identity document', 'Additional certificate'];

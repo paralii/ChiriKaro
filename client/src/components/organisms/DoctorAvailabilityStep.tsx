@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { Button } from '@/components/atoms/Button';
-import { Form } from '@/components/atoms/Form';
-import { TextField } from '@/components/molecules/FormField';
-import type { Slot } from '@/types';
+import { Button } from '@components/atoms/Button';
+import { Form } from '@components/atoms/Form';
+import { TextField } from '@components/molecules/FormField';
+import type { Slot } from '@shared/types';
 
 export function DoctorAvailabilityStep({ slotDuration, bufferMinutes, slots, busy, onSaveConfig, onGenerate }: {
   slotDuration: number; bufferMinutes: number; slots: Slot[]; busy: boolean;

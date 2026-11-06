@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
-import { Button } from '@/components/atoms/Button';
-import type { DoctorProfile } from '@/types';
+import { Button } from '@components/atoms/Button';
+import type { DoctorProfile } from '@shared/types';
 
 export function DoctorReviewStep({ profile, busy, onSubmit }: { profile: DoctorProfile; busy: boolean; onSubmit: () => void }) {
   const rows: [string, string | number][] = [

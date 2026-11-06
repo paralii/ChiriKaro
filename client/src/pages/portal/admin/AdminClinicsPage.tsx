@@ -3,7 +3,7 @@ import { Badge } from '@/components/atoms/Badge';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { ClinicTable } from '@/components/organisms/ClinicTable';
-import { useAdminClinics } from '@/hooks/useAdminClinics';
+import { useAdminClinics } from '@/shared/hooks/useAdminClinics';
 
 export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?: boolean }) {
   const { items, busy, error, message, changeStatus } = useAdminClinics();

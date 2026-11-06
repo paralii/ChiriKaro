@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { Button } from '@/components/atoms/Button';
-import { Form } from '@/components/atoms/Form';
-import { TextField } from '@/components/molecules/FormField';
-import { parseList } from '@/utils/doctor';
-import type { DoctorProfile } from '@/types';
+import { Button } from '@components/atoms/Button';
+import { Form } from '@components/atoms/Form';
+import { TextField } from '@components/molecules/FormField';
+import { parseList } from '@shared/utils/doctor';
+import type { DoctorProfile } from '@shared/types';
 
 export function DoctorProfessionalForm({ initial, busy, onSave }: { initial: DoctorProfile; busy: boolean; onSave: (values: DoctorProfile) => void }) {
   const [p, setP] = useState(initial);

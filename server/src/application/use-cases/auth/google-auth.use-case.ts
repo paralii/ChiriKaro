@@ -2,10 +2,7 @@ import { User } from "@domain/entities/user.entity.ts";
 import { Role } from "@domain/value-objects/Role.ts";
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 
-import {
-  ConflictError,
-  UnauthorizedError,
-} from "@shared/errors/index.js";
+import { ConflictError, UnauthorizedError } from "@shared/errors/index.js";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 
@@ -13,23 +10,18 @@ import type {
   ITokenService,
   TokenPayload,
 } from "@application/interfaces/services/ITokenService.ts";
-import type { IIdGenerator } from "@application/interfaces/services/IIdGenerator.ts";
 import type { OAuthProfile } from "@application/interfaces/services/IOAuthService.ts";
 
-import type {
-  GoogleAuthResponseDTO,
-} from "@application/dto/auth/oauth.dto.ts";
+import type { GoogleAuthResponseDTO } from "@application/dto/auth/oauth.dto.ts";
+import type { IGoogleAuthUseCase } from "@application/interfaces/use-cases/auth/IGoogleAuthUseCase.ts";
 
-export class GoogleAuthUseCase {
+export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly tokenService: ITokenService,
-    private readonly idGenerator: IIdGenerator,
+    private readonly _userRepository: IUserRepository,
+    private readonly _tokenService: ITokenService,
   ) {}
 
-  public async execute(
-    profile: OAuthProfile,
-  ): Promise<GoogleAuthResponseDTO> {
+  public async execute(profile: OAuthProfile): Promise<GoogleAuthResponseDTO> {
     if (!profile.googleId || !profile.email) {
       throw new UnauthorizedError("Invalid Google account");
     }
@@ -37,10 +29,10 @@ export class GoogleAuthUseCase {
       throw new UnauthorizedError("Google email must be verified");
     }
 
-    let user = await this.userRepository.findByGoogleId(profile.googleId);
+    let user = await this._userRepository.findByGoogleId(profile.googleId);
 
     if (!user) {
-      const existingUser = await this.userRepository.findByEmail(profile.email);
+      const existingUser = await this._userRepository.findByEmail(profile.email);
       if (existingUser) {
         throw new ConflictError(
           "An account with this email already exists. " +
@@ -49,7 +41,6 @@ export class GoogleAuthUseCase {
       }
 
       user = User.create({
-        id: this.idGenerator.generate(),
         name: profile.name,
         email: profile.email,
         role: Role.PATIENT,
@@ -60,7 +51,7 @@ export class GoogleAuthUseCase {
         status: UserStatus.ACTIVE,
       });
 
-      user = await this.userRepository.save(user);
+      user = await this._userRepository.save(user);
     }
 
     if (user.status !== UserStatus.ACTIVE) {
@@ -74,9 +65,9 @@ export class GoogleAuthUseCase {
       clinicId: user.clinicId,
     };
 
-    const accessToken = this.tokenService.generateAccessToken(tokenPayload);
+    const accessToken = this._tokenService.generateAccessToken(tokenPayload);
     const { refreshToken, expiresIn } =
-      this.tokenService.generateRefreshToken(tokenPayload);
+      this._tokenService.generateRefreshToken(tokenPayload);
 
     return {
       user: {

@@ -3,7 +3,9 @@ import type { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { authRouter } from "@infrastructure/di/auth.container.ts";
+import { authRouter } from "@container/auth.container.ts";
+import { ApiResponse } from "@shared/utils/ApiResponse.ts";
+import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 
 export class App {
   public readonly instance: Application;
@@ -39,11 +41,13 @@ export class App {
 
   private initializeHealthCheck(): void {
     this.instance.get("/health", (_req, res) => {
-      res.status(200).json({
-        success: true,
-        message: "Server is running",
-        timestamp: new Date().toISOString(),
-      });
+      res
+        .status(200)
+        .json(
+          ApiResponse.success("Server is running and health is good", {
+            timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+          }),
+        );
     });
   }
 
@@ -59,18 +63,16 @@ export class App {
         res: express.Response,
         _next: express.NextFunction,
       ) => {
-        res.status(500).json({
-          success: false,
-          message: "Internal server error",
-        });
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json(ApiResponse.failed("Internal server error"));
       },
     );
 
     this.instance.use((_req, res) => {
-      res.status(404).json({
-        success: false,
-        message: "Route not found",
-      });
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json(ApiResponse.failed("Route not found"));
     });
   }
 }

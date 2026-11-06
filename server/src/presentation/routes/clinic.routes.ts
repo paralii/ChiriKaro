@@ -15,7 +15,8 @@ export function ClinicRouter(
 ): Router {
   const router = Router();
 
-  const { authenticate, authorizeClinicAdmin, authorizeSuperAdmin } = middlewares;
+  const { authenticate, authorizeClinicAdmin, authorizeSuperAdmin } =
+    middlewares;
 
   //Clinic registration
   router.post("/clinics/register", clinicController.register);

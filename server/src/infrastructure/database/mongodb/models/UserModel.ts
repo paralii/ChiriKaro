@@ -33,7 +33,6 @@ const userSchema = new Schema<IUserDocument>(
     },
     password: {
       type: String,
-      select: false,
     },
     role: {
       type: String,
@@ -41,7 +40,7 @@ const userSchema = new Schema<IUserDocument>(
     },
     status: {
       type: String,
-      required: true
+      required: true,
     },
     clinicId: {
       type: Schema.Types.ObjectId,
@@ -63,7 +62,7 @@ const userSchema = new Schema<IUserDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const UserModel = model<IUserDocument>("User", userSchema);

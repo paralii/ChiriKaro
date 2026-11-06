@@ -6,14 +6,14 @@ import { ClinicProfileForm } from '@/components/organisms/ClinicProfileForm';
 import { SpecializationsForm } from '@/components/organisms/SpecializationsForm';
 import { WorkingHoursForm } from '@/components/organisms/WorkingHoursForm';
 import { DocumentUploader } from '@/components/organisms/DocumentUploader';
-import { defaultHours } from '@/constants/schedule';
-import { useAction } from '@/hooks/useAction';
+import { defaultHours } from '@/shared/constants/schedule';
+import { useAction } from '@/shared/hooks/useAction';
 import { clinicService } from '@/services/clinicService';
 import { openSignedUrl, uploadToSignedUrl } from '@/services/storageService';
 import { useAppDispatch } from '@/store/hooks';
 import { patchClinic } from '@/store/slices/clinicSlice';
-import { findInvalidHours, parseList } from '@/utils/doctor';
-import type { ClinicDocument, ClinicProfile } from '@/types';
+import { findInvalidHours, parseList } from '@/shared/utils/doctor';
+import type { ClinicDocument, ClinicProfile } from '@/shared/types';
 
 export default function ClinicSetupPage() {
   const dispatch = useAppDispatch();

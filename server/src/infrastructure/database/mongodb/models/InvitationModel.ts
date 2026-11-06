@@ -56,12 +56,12 @@ const invitationSchema = new Schema<IInvitationDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 invitationSchema.index({ email: 1, status: 1 });
 
 export const InvitationModel = model<IInvitationDocument>(
   "Invitations",
-  invitationSchema
+  invitationSchema,
 );

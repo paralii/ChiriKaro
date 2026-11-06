@@ -3,12 +3,13 @@ import { NotFoundError } from "@shared/errors/index.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 
 import type { GetProfileResponseDTO } from "@application/dto/auth/get-user.dto.ts";
+import type { IGetProfileUseCase } from "@application/interfaces/use-cases/auth/IGetProfileUseCase.ts";
 
-export class GetProfileUseCase {
-  constructor(private readonly userRepository: IUserRepository){}
+export class GetProfileUseCase implements IGetProfileUseCase{
+  constructor(private readonly _userRepository: IUserRepository) {}
 
-  public async execute(userId: string) : Promise<GetProfileResponseDTO> {
-    const user = await this.userRepository.findById(userId);
+  public async execute(userId: string): Promise<GetProfileResponseDTO> {
+    const user = await this._userRepository.findById(userId);
 
     if (!user) {
       throw new NotFoundError("User");

@@ -1,4 +1,4 @@
-import type { Clinic } from '@/types';
+import type { Clinic } from '@shared/types';
 
 const arts = [
   { bg: 'bg-[#eaf0ff]', ring: 'border-[#c8d4f1]', text: 'text-brand-deep' },

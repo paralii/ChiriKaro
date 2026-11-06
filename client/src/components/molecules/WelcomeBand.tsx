@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
-import { Badge } from '@/components/atoms/Badge';
-import { Eyebrow } from '@/components/atoms/Eyebrow';
+import { cn } from '@shared/lib/cn';
+import { Badge } from '@components/atoms/Badge';
+import { Eyebrow } from '@components/atoms/Eyebrow';
 
 export function WelcomeBand({ pill, eyebrow, title, description, action, variant = 'default', className }: {
   pill?: string; eyebrow?: string; title: ReactNode; description?: ReactNode; action?: ReactNode; variant?: 'default' | 'patient'; className?: string;

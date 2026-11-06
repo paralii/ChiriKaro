@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/cn';
+import { cn } from '@shared/lib/cn';
 
 export function MetricCard({ label, value, note, to, linkText, word }: {
   label: string; value: string | number; note: string; to?: string; linkText?: string; word?: boolean;

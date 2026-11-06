@@ -7,7 +7,7 @@ import {
 } from "@domain/error/DomainError.ts";
 
 export interface UserProps {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   passwordHash?: string;
@@ -23,12 +23,12 @@ export interface UserProps {
 
 type NewUserProps = Pick<
   UserProps,
-  "id" | "name" | "email" | "role" | "clinicId"
+  "name" | "email" | "role" | "clinicId"
 > &
   Partial<
     Pick<
       UserProps,
-      "passwordHash" | "googleId" | "avatar" | "status" | "isEmailVerified"
+      "_id" |"passwordHash" | "googleId" | "avatar" | "status" | "isEmailVerified"
     >
   >;
 
@@ -54,7 +54,6 @@ export class User {
   private constructor(private props: UserProps) {}
 
   static create(props: NewUserProps): User {
-    const id = requireNonBlank(props.id, "id");
     const name = requireNonBlank(props.name, "name");
     const email = requireEmail(props.email).toLowerCase();
 
@@ -81,12 +80,12 @@ export class User {
 
     const now = new Date();
     return new User({
-      id,
+      _id: props._id ?? "" ,
       name,
       email,
       role: props.role,
       clinicId,
-      status: props.status ?? UserStatus.INVITED,
+      status: props.status ?? UserStatus.ACTIVE,
       isEmailVerified: props.isEmailVerified ?? false,
       avatar: props.avatar ?? null,
       ...(passwordHash ? { passwordHash } : {}),
@@ -143,7 +142,7 @@ export class User {
   }
 
   get id() {
-    return this.props.id;
+    return this.props._id;
   }
   get name() {
     return this.props.name;

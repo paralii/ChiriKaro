@@ -1,8 +1,8 @@
-import { TextButton } from '@/components/atoms/TextLink';
-import { DetailList } from '@/components/molecules/DetailList';
-import { DocumentList } from '@/components/molecules/DocumentList';
-import { SectionHeading } from '@/components/molecules/SectionHeading';
-import type { DoctorDetail } from '@/types';
+import { TextButton } from '@components/atoms/TextLink';
+import { DetailList } from '@components/molecules/DetailList';
+import { DocumentList } from '@components/molecules/DocumentList';
+import { SectionHeading } from '@components/molecules/SectionHeading';
+import type { DoctorDetail } from '@shared/types';
 
 export function DoctorReviewDetail({ profile, onClose, onOpenDocument }: { profile: DoctorDetail; onClose: () => void; onOpenDocument: (type: string) => void }) {
   return (

@@ -1,8 +1,6 @@
 import type { IPasswordResetLinkGenerator } from "@application/interfaces/services/ILinkGenerator.ts";
 
-export class PasswordResetLinkGenerator
-  implements IPasswordResetLinkGenerator
-{
+export class PasswordResetLinkGenerator implements IPasswordResetLinkGenerator {
   public generate(token: string): string {
     const frontendUrl = process.env.CLIENT_URL;
 

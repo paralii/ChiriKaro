@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useAction } from "@shared/hooks/useAction";
 import { useAppDispatch } from "@store/hooks";
 import {
-  setAuthSession,
   setUser,
 } from "@store/slices/authSlice";
 import { authService } from "@services/authService";
@@ -27,12 +26,6 @@ export function useLogin() {
         
         dispatch(
           setUser(result.user),
-        );
-        dispatch(
-          setAuthSession({
-            accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
-          }),
         );
         navigate("/app/dashboard", { replace: true });
       },

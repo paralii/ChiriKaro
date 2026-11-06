@@ -17,14 +17,11 @@ export interface UserProfile {
 
 interface AuthState {
   user: UserProfile | null;
-  accessToken: string | null;
-  refreshToken: string | null;
 }
+const persistedAuth = localStorage.getItem("chirikaro-auth");
 
 const initialState: AuthState = {
-  user: null,
-  accessToken: null,
-  refreshToken: null,
+  user: persistedAuth ? JSON.parse(persistedAuth).user : null,
 };
 
 const authSlice = createSlice({
@@ -35,24 +32,11 @@ const authSlice = createSlice({
       state.user = action.payload;
     },
 
-    setAuthSession: (
-      state,
-      action: PayloadAction<{
-        accessToken: string;
-        refreshToken: string;
-      } | null>,
-    ) => {
-      state.accessToken = action.payload?.accessToken ?? null;
-      state.refreshToken = action.payload?.refreshToken ?? null;
-    },
-
     logout: (state) => {
       state.user = null;
-      state.accessToken = null;
-      state.refreshToken = null;
     },
   },
 });
 
-export const { setUser, setAuthSession, logout } = authSlice.actions;
+export const { setUser, logout } = authSlice.actions;
 export default authSlice.reducer;

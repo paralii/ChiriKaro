@@ -1,5 +1,5 @@
-import { Eyebrow } from '@/components/atoms/Eyebrow';
-import { Badge } from '@/components/atoms/Badge';
+import { Eyebrow } from '@components/atoms/Eyebrow';
+import { Badge } from '@components/atoms/Badge';
 
 export function PageHeading({ eyebrow, title, chip }: { eyebrow: string; title: string; chip?: string }) {
   return (

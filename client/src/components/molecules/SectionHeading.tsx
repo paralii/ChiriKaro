@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
+import { cn } from '@shared/lib/cn';
 
 export function SectionHeading({ title, description, action, as: Tag = 'h2', className }: {
   title: ReactNode; description?: ReactNode; action?: ReactNode; as?: 'h2' | 'h3'; className?: string;

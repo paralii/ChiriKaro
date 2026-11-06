@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Button } from '@/components/atoms/Button';
-import { Input } from '@/components/atoms/Input';
+import { Button } from '@components/atoms/Button';
+import { Input } from '@components/atoms/Input';
 import { FormField } from './FormField';
-import { useCooldown } from '@/hooks/useCooldown';
-import { getErrorMessage } from '@/lib/http';
-import { validateEmail } from '@/utils/validators';
+import { useCooldown } from '@shared/hooks/useCooldown';
+import { getErrorMessage } from '@shared/lib/http';
+import { validateEmail } from '@shared/utils/validators';
 
 interface Props {
   email: string;

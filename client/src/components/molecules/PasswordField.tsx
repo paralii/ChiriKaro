@@ -1,6 +1,6 @@
 import { useState, type InputHTMLAttributes } from 'react';
 import { FormField } from './FormField';
-import { Input } from '@/components/atoms/Input';
+import { Input } from '@components/atoms/Input';
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { label?: string };
 

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn';
+import { cn } from '@shared/lib/cn';
 
 export function StepTabs({ steps, active, onSelect }: { steps: string[]; active: number; onSelect: (i: number) => void }) {
   return (

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
+import { cn } from '@shared/lib/cn';
 
 const tones = {
   error: 'border-[#f1cfcb] bg-[#fff2f0] text-[#8e2d2b]',

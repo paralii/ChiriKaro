@@ -1,5 +1,5 @@
-import { ClinicCard } from '@/components/molecules/ClinicCard';
-import type { Clinic } from '@/types';
+import { ClinicCard } from '@components/molecules/ClinicCard';
+import type { Clinic } from '@shared/types';
 
 export function ClinicCards({ clinics }: { clinics: Clinic[] }) {
   return (

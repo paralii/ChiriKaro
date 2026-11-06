@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Badge, statusTone } from '@/components/atoms/Badge';
-import { Button } from '@/components/atoms/Button';
-import { CellTitle, tdClass } from '@/components/molecules/DataTable';
-import type { DoctorSummary } from '@/types';
+import { Badge } from '@components/atoms/Badge';
+import { statusTone } from '@shared/utils/statusTones';
+import { Button } from '@components/atoms/Button';
+import { CellTitle, tdClass } from '@components/molecules/DataTable';
+import type { DoctorSummary } from '@shared/types';
 
 const smallInput = 'h-[31px] w-[95px] min-w-0 rounded-[4px] border border-[#cfd2df] px-[7px] text-[10px]';
 

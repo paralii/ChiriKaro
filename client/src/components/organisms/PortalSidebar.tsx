@@ -1,7 +1,7 @@
 import { BrandLockup } from '@/components/atoms/BrandLockup';
 import { NavItem, SideMark, sideLinkClass } from '@/components/molecules/NavItem';
-import { roleLabels } from '@/constants/roles';
-import type { NavEntry } from '@/constants/navigation';
+import { roleLabels } from '@/shared/constants/roles';
+import type { NavEntry } from '@/shared/constants/navigation';
 import type { Role } from '@/store/slices/authSlice';
 
 export function PortalSidebar({ role, workspaceName, items, pendingCount = 0, onLogout }: {

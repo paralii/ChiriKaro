@@ -1,15 +1,15 @@
 import { useState, type FormEvent } from 'react';
-import { Button } from '@/components/atoms/Button';
-import { Form } from '@/components/atoms/Form';
-import { Notice } from '@/components/atoms/Notice';
-import { TextButton } from '@/components/atoms/TextLink';
-import { FormField, TextField } from '@/components/molecules/FormField';
-import { Input } from '@/components/atoms/Input';
-import { SectionHeading } from '@/components/molecules/SectionHeading';
-import { Notices } from '@/components/molecules/Notices';
-import { useAction } from '@/hooks/useAction';
-import { useCooldown } from '@/hooks/useCooldown';
-import { authService } from '@/services/authService';
+import { Button } from '@components/atoms/Button';
+import { Form } from '@components/atoms/Form';
+import { Notice } from '@components/atoms/Notice';
+import { TextButton } from '@components/atoms/TextLink';
+import { FormField, TextField } from '@components/molecules/FormField';
+import { Input } from '@components/atoms/Input';
+import { SectionHeading } from '@components/molecules/SectionHeading';
+import { Notices } from '@components/molecules/Notices';
+import { useAction } from '@shared/hooks/useAction';
+import { useCooldown } from '@shared/hooks/useCooldown';
+import { authService } from '@services/authService';
 
 export function ChangePasswordForm({ email }: { email: string }) {
   const [step, setStep] = useState<'current' | 'new'>('current');

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Button } from '@/components/atoms/Button';
-import { Form } from '@/components/atoms/Form';
-import { Input } from '@/components/atoms/Input';
-import { Notice } from '@/components/atoms/Notice';
-import { FormField } from '@/components/molecules/FormField';
-import { SectionHeading } from '@/components/molecules/SectionHeading';
-import type { Invitation } from '@/types';
+import { Button } from '@components/atoms/Button';
+import { Form } from '@components/atoms/Form';
+import { Input } from '@components/atoms/Input';
+import { Notice } from '@components/atoms/Notice';
+import { FormField } from '@components/molecules/FormField';
+import { SectionHeading } from '@components/molecules/SectionHeading';
+import type { Invitation } from '@shared/types';
 
 export function InviteForm({ invitee, busy, invitation, onInvite }: {
   invitee: 'doctor' | 'staff member'; busy: boolean; invitation: Invitation | null; onInvite: (email: string) => void;

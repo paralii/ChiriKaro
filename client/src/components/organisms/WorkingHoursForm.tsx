@@ -3,7 +3,7 @@ import { Button } from '@/components/atoms/Button';
 import { Form } from '@/components/atoms/Form';
 import { Input } from '@/components/atoms/Input';
 import { FormField } from '@/components/molecules/FormField';
-import type { WorkingHour } from '@/types';
+import type { WorkingHour } from '@/shared/types';
 
 export function WorkingHoursForm({ initial, busy, onSave, startLabel = 'Opens', endLabel = 'Closes', submitLabel = 'Save working hours' }: {
   initial: WorkingHour[]; busy: boolean; onSave: (hours: WorkingHour[]) => void; startLabel?: string; endLabel?: string; submitLabel?: string;

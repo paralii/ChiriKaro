@@ -2,7 +2,7 @@ import { Badge } from '@/components/atoms/Badge';
 import { Card } from '@/components/atoms/Card';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { ClinicCards } from '@/components/organisms/ClinicCard';
-import { featuredClinics } from '@/constants/sampleClinics';
+import { featuredClinics } from '@/shared/constants/sampleClinics';
 
 export default function PatientClinicsPage() {
   return (

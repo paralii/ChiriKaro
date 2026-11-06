@@ -4,7 +4,7 @@ import { MetricCard, MetricGrid } from '@/components/molecules/MetricCard';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { WelcomeBand } from '@/components/molecules/WelcomeBand';
 import { ClinicCards } from '@/components/organisms/ClinicCard';
-import { featuredClinics } from '@/constants/sampleClinics';
+import { featuredClinics } from '@/shared/constants/sampleClinics';
 import { useAppSelector } from '@/store/hooks';
 
 export default function PatientDashboardPage() {

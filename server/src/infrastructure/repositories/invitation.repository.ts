@@ -53,6 +53,29 @@ export class InvitationRepository
     return docs.map((doc) => this.toDomain(doc));
   }
 
+  async findByTokenHash(tokenHash: string): Promise<Invitation | null> {
+    const doc = await this.model
+      .findOne({ tokenHash })
+      .select("+tokenHash")
+      .exec();
+    return doc ? this.toDomain(doc) : null;
+  }
+
+  async markAcceptedIfPending(id: string, tokenHash: string): Promise<boolean> {
+    const result = await this.model
+      .updateOne(
+        {
+          _id: new Types.ObjectId(id),
+          tokenHash,
+          status: InvitationStatus.PENDING,
+          expiresAt: { $gt: new Date() },
+        },
+        { $set: { status: InvitationStatus.ACCEPTED } },
+      )
+      .exec();
+    return result.modifiedCount === 1;
+  }
+
   async save(invitation: Invitation): Promise<Invitation> {
     if (!invitation.id) {
       const doc = await this.model.create(this.toPersistence(invitation));

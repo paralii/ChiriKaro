@@ -67,6 +67,10 @@ export class MongoUserRepository
     return this.toDomain(document);
   }
 
+  async deleteById(id: string): Promise<void> {
+    await super.deleteDocumentById(id);
+  }
+
   async update(user: User): Promise<User> {
     const document = await super.updateDocumentById(
       user.id,

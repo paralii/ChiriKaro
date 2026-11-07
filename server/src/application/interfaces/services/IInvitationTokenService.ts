@@ -5,4 +5,5 @@ export interface GeneratedInvitationToken {
 
 export interface IInvitationTokenService {
   generate(): GeneratedInvitationToken;
+  hash(token: string): string;
 }

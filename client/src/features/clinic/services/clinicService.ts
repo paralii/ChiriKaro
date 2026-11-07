@@ -3,8 +3,13 @@ import type { Clinic, ClinicDocument, ClinicProfile, DoctorDetail, DoctorSummary
 
 const enc = encodeURIComponent;
 
+export type RegisterClinicRequest = {
+  admin: { name: string; email: string; password: string };
+  clinic: { name: string };
+};
+
 export const clinicService = {
-  register: (body: Record<string, string>) => api.post('/clinics/register', body),
+  register: (body: RegisterClinicRequest) => api.post('/clinic/register', body),
   dashboard: () => api.get<Clinic>('/clinic/dashboard'),
   getProfile: () => api.get<ClinicProfile>('/clinic/profile'),
   updateProfile: (body: Partial<ClinicProfile>) => api.patch<ClinicProfile>('/clinic/profile', body),

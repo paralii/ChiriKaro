@@ -33,6 +33,6 @@ export const doctorService = {
   getUploadUrl: (file: File) => api.post<{ key: string; uploadUrl: string }>('/doctor/documents/upload-url', { fileName: file.name, contentType: file.type, fileSize: file.size }),
   addDocument: (documentType: string, documentKey: string) => api.post<DoctorProfile>('/doctor/documents', { documentType, documentKey }),
   getDocumentUrl: (type: string) => api.get<{ url: string }>(`/doctor/documents/${encodeURIComponent(type)}/download-url`),
-  submitVerification: () => api.post<{ verificationStatus: string }>('/doctor/submit-verification'),
+  submitVerification: () => responseData(api.post<ApiEnvelope<DoctorOnboardingDTO>>('/doctor/verification/submit'), 'Doctor verification status was not returned.'),
   generateSlots: () => api.post<Slot[]>('/doctor/generate-slots'),
 };

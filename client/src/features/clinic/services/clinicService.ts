@@ -1,5 +1,5 @@
 import { api, http } from '@/shared/lib/http';
-import type { ClinicDashboard, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/shared/types';
+import type { ClinicDashboard, ClinicProfile, DoctorDetail, DoctorOnboardingDTO, DoctorSummary, DoctorVerificationSummary, Invitation, WorkingHour } from '@/shared/types';
 
 const enc = encodeURIComponent;
 
@@ -38,6 +38,11 @@ export const clinicService = {
   invite: (body: { email: string; role: 'DOCTOR' | 'STAFF' }) => responseData(api.post<ApiEnvelope<Invitation>>('/clinic/invitations', body), 'Invitation details were not returned.'),
   listPendingInvitations: () => responseData(api.get<ApiEnvelope<Invitation[]>>('/clinic/invitations/pending'), 'Pending invitations were not returned.'),
   resendInvitation: (id: string) => responseData(api.post<ApiEnvelope<Invitation>>(`/clinic/invitations/${enc(id)}/resend`), 'Updated invitation details were not returned.'),
+  listPendingDoctorVerifications: () => responseData(api.get<ApiEnvelope<DoctorVerificationSummary[]>>('/clinic/doctors/pending-verification'), 'Pending doctor verifications were not returned.'),
+  getDoctorVerification: (id: string) => responseData(api.get<ApiEnvelope<DoctorOnboardingDTO>>(`/clinic/doctors/${enc(id)}/verification`), 'Doctor verification details were not returned.'),
+  approveDoctorVerification: (id: string) => responseData(api.post<ApiEnvelope<DoctorOnboardingDTO>>(`/clinic/doctors/${enc(id)}/verification/approve`), 'Doctor approval was not returned.'),
+  rejectDoctorVerification: (id: string, reason: string) => responseData(api.post<ApiEnvelope<DoctorOnboardingDTO>>(`/clinic/doctors/${enc(id)}/verification/reject`, { reason }), 'Doctor rejection was not returned.'),
+  getDoctorVerificationDocument: async (id: string, type: string) => (await http.get<Blob>(`/clinic/doctors/${enc(id)}/verification/documents/${enc(type.trim().replace(/\s+/g, '_'))}`, { responseType: 'blob' })).data,
   listDoctors: () => api.get<DoctorSummary[]>('/clinic/doctors'),
   getDoctor: (id: string) => api.get<DoctorDetail>(`/clinic/doctors/${id}`),
   approveDoctor: (id: string) => api.post(`/clinic/doctors/${id}/approve`),

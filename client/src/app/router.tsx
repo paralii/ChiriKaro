@@ -13,6 +13,7 @@ import ClinicPortalLayout from '@/pages/portal/clinic/ClinicPortalLayout';
 import ClinicDashboardPage from '@/pages/portal/clinic/ClinicDashboardPage';
 import ClinicProfilePage from '@/pages/portal/clinic/ClinicProfilePage';
 import ClinicSetupPage from '@/pages/portal/clinic/ClinicSetupPage';
+import ClinicDoctorReviewPage from '@/pages/portal/clinic/ClinicDoctorReviewPage';
 import ClinicInvitationsPage from '@/pages/portal/clinic/ClinicInvitationsPage';
 import AcceptInvitationPage from '@/pages/AcceptInvitationPage';
 import TeamAccessPage from '@/pages/portal/TeamAccessPage';
@@ -55,6 +56,7 @@ export default function AppRouter() {
           <Route path="profile" element={<ClinicProfilePage />} />
           <Route path="setup" element={<ClinicSetupPage />} />
           <Route path="doctors" element={<ClinicInvitationsPage invitee="doctor" />} />
+          <Route path="review-doctors" element={<ClinicDoctorReviewPage />} />
           <Route path="staff" element={<ClinicInvitationsPage invitee="staff" />} />
         </Route>
       </Route>

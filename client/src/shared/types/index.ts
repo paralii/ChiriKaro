@@ -70,6 +70,14 @@ export type DoctorOnboardingProfile = {
   updatedAt?: string;
 };
 export type DoctorOnboardingDTO = { onboardingStatus: DoctorOnboardingStatus; profile: DoctorOnboardingProfile | null };
+export type DoctorVerificationSummary = {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  professionalTitle: string | null;
+  verificationStatus: DoctorOnboardingStatus;
+  updatedAt: string;
+};
 export type SlotConfig = { slotDuration: number; bufferMinutes: number; consultationFee: number | null };
 export type Slot = { day: string; startTime: string; endTime: string };
 export type DoctorSummary = {

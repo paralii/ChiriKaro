@@ -102,6 +102,11 @@ export default function DoctorOnboardingPage() {
     }, { success: 'Working hours saved.', fallback: 'Could not save working hours.' });
   };
 
+  const submitForVerification = () => void run(async () => {
+    const updated = applyResponse(await doctorService.submitVerification());
+    return updated;
+  }, { success: 'Your profile was submitted to your Clinic Admin for verification.', fallback: 'Could not submit your profile for verification.' });
+
   const upload = (type: string, file: File) => void run(async () => {
     if (!profile?.id) throw new Error('Save your basic information before uploading documents.');
     if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) throw new Error('Choose a PDF, JPG, or PNG file.');
@@ -173,7 +178,12 @@ export default function DoctorOnboardingPage() {
                 ['Documents', `${profile.documents.length} uploaded`],
                 ['Status', profile.onboardingStatus.replaceAll('_', ' ')],
               ]} />
-              <div className="flex justify-start px-[18px] pt-3.5"><Button type="button" variant="secondary" onClick={() => setStep(3)}>Back to documents</Button></div>
+              <div className="flex flex-wrap justify-between gap-2.5 px-[18px] pt-3.5">
+                <Button type="button" variant="secondary" onClick={() => setStep(3)}>Back to documents</Button>
+                <Button type="button" disabled={busy || locked || profile.onboardingStatus !== 'IN_PROGRESS' || findResumeStep(profile) !== 4} onClick={submitForVerification}>
+                  {busy ? 'Submitting...' : profile.onboardingStatus === 'PENDING_VERIFICATION' ? 'Pending verification' : profile.onboardingStatus === 'VERIFIED' ? 'Verified' : profile.onboardingStatus === 'REJECTED' ? 'Save a correction to resubmit' : 'Submit for verification'}
+                </Button>
+              </div>
             </Card>
           ) : null}
         </>

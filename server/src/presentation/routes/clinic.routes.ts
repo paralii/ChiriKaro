@@ -1,7 +1,12 @@
 import { Router } from "express";
-// import type { RequestHandler } from "express";
+import type { RequestHandler } from "express";
 
 import type { ClinicController } from "@presentation/controllers/clinic.controller.ts";
+
+export interface ClinicRouterMiddlewares {
+  authenticate: RequestHandler;
+  authorizeClinicAdmin: RequestHandler;
+}
 
 // export interface ClinicRouterMiddlewares {
 //   authenticate: RequestHandler;
@@ -11,38 +16,35 @@ import type { ClinicController } from "@presentation/controllers/clinic.controll
 
 export function ClinicRouter(
   clinicController: ClinicController,
-  // middlewares: ClinicRouterMiddlewares,
+  middlewares: ClinicRouterMiddlewares,
 ): Router {
   const router = Router();
-
-  // const { authenticate, authorizeClinicAdmin, authorizeSuperAdmin } =
-  //   middlewares;
+  const { authenticate, authorizeClinicAdmin } = middlewares;
 
   //Clinic registration
   router.post("/clinic/register", clinicController.register);
 
-  // //Clinic profile
-  // router.get(
-  //   "/clinic/profile",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.getProfile,
-  // );
+  // Clinic profile and dashboard
+  router.get(
+    "/clinic/profile",
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.getProfile,
+  );
 
-  // router.patch(
-  //   "/clinic/profile",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.updateProfile,
-  // );
+  router.patch(
+    "/clinic/profile",
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.updateProfile,
+  );
 
-  // //Clinic dashboard
-  // router.get(
-  //   "/clinic/dashboard",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.getDashboard,
-  // );
+  router.get(
+    "/clinic/dashboard",
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.getDashboard,
+  );
 
   // //Clinic settings
   // router.put(

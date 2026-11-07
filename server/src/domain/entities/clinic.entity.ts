@@ -147,6 +147,62 @@ export class Clinic {
     this.touch();
   }
 
+  updateProfile(updates: {
+    name?: string;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    phone?: string | null;
+    contactEmail?: string | null;
+    registrationNumber?: string | null;
+  }): void {
+    if (updates.name !== undefined) {
+      const name = updates.name.trim();
+      if (name.length < MIN_NAME_LENGTH) {
+        throw new InvalidClinicDataError(
+          `Clinic name must be at least ${MIN_NAME_LENGTH} characters`,
+        );
+      }
+      this.props.name = name;
+    }
+
+    if (updates.address !== undefined) {
+      this.props.address = optionalTrimmed(updates.address, "address");
+    }
+    if (updates.city !== undefined) {
+      this.props.city = optionalTrimmed(updates.city, "city");
+    }
+    if (updates.state !== undefined) {
+      this.props.state = optionalTrimmed(updates.state, "state");
+    }
+    if (updates.pincode !== undefined) {
+      this.props.pincode = optionalMatching(updates.pincode, "pincode", PINCODE_PATTERN);
+    }
+    if (updates.phone !== undefined) {
+      this.props.phone = optionalMatching(updates.phone, "phone", PHONE_PATTERN);
+    }
+    if (updates.contactEmail !== undefined) {
+      const contactEmail = updates.contactEmail === null
+        ? null
+        : requireNonBlank(updates.contactEmail, "contactEmail");
+      if (contactEmail !== null && !EMAIL_PATTERN.test(contactEmail)) {
+        throw new InvalidClinicDataError(
+          "Clinic contactEmail is not a valid email address",
+        );
+      }
+      this.props.contactEmail = contactEmail;
+    }
+    if (updates.registrationNumber !== undefined) {
+      this.props.registrationNumber = optionalTrimmed(
+        updates.registrationNumber,
+        "registrationNumber",
+      );
+    }
+
+    this.touch();
+  }
+
   markPending(): void {
     this.props.status = ClinicStatus.PENDING;
     this.touch();

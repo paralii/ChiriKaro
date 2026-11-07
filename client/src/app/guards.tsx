@@ -45,3 +45,9 @@ export function RequireStaff() {
   if (!user) return <Navigate to="/login/staff" replace />;
   return user.role === "STAFF" ? <Outlet /> : <Navigate to="/" replace />;
 }
+
+export function RequirePatient() {
+  const user = useAppSelector((s) => s.auth.user);
+  if (!user) return <Navigate to="/login/patient" replace />;
+  return user.role === "PATIENT" ? <Outlet /> : <Navigate to="/" replace />;
+}

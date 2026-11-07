@@ -1,7 +1,7 @@
 import type { Role } from "@/features/auth/store/authSlice";
 
 export type AuthResult = {
-  user: { id: string; name: string; email: string; role: Role ; clinicId?: string | null; status?: string };
+  user: { id: string; name: string; email: string; role: Role ; clinicId?: string | null; avatar?: string | null; status?: string };
   accessToken: string;
   refreshToken: string;
 };
@@ -19,6 +19,11 @@ export type RegisterResult = {
 export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
 export type Clinic = { id: string; name: string; address?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; status: ClinicStatus; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
+export type RoleDashboard = {
+  user: { id: string; name: string; role: Role; clinicId: string | null };
+  clinic: { id: string; name: string; status: ClinicStatus } | null;
+};
+export type PatientProfile = { id: string; name: string; email: string; avatar: string | null; createdAt: string; updatedAt: string };
 export type Invitation = { id: string; email: string; role: 'DOCTOR' | 'STAFF'; clinicId: string; status: string; expiresAt: string; createdAt: string };
 export type InvitationValidation = { email: string; role: 'DOCTOR' | 'STAFF'; clinicId: string; clinicName: string; expiresAt: string };
 export type WorkingHour = { day: string; isOpen: boolean; startTime: string; endTime: string };

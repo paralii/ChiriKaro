@@ -1,25 +1,49 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
-import { TextLink } from '@/components/atoms/TextLink';
+import { DetailList } from '@/components/molecules/DetailList';
 import { MetricCard, MetricGrid } from '@/components/molecules/MetricCard';
+import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { WelcomeBand } from '@/components/molecules/WelcomeBand';
-import { ClinicCards } from '@/features/clinic/components/molecules/ClinicCard';
-import { featuredClinics } from '@/shared/constants/sampleClinics';
+import { roleDashboardService } from '@/features/dashboard/services/roleDashboardService';
+import { useAction } from '@/shared/hooks/useAction';
+import type { RoleDashboard } from '@/shared/types';
 import { useAppSelector } from '@/store/hooks';
 
 export default function PatientDashboardPage() {
-  const user = useAppSelector((s) => s.auth.user)!;
+  const signedInUser = useAppSelector((state) => state.auth.user)!;
+  const [dashboard, setDashboard] = useState<RoleDashboard | null>(null);
+  const { busy, error, run } = useAction();
+
+  useEffect(() => {
+    void run(async () => {
+      const result = await roleDashboardService.getDashboard('PATIENT');
+      setDashboard(result);
+      return result;
+    }, { fallback: 'Could not load your patient dashboard.' });
+  }, [run]);
+
+  const user = dashboard?.user ?? signedInUser;
+  const clinic = dashboard?.clinic;
   return (
     <>
-      <WelcomeBand variant="patient" eyebrow="YOUR CARE, IN ONE PLACE" title={`Good to see you, ${user.name.split(' ')[0]}.`} description="Your next step toward a healthier smile starts here."
-        action={<span className="grid size-14 place-items-center rounded-[17px_17px_17px_5px] border border-[#cfd9f2] bg-white text-[15px] font-bold text-brand">CK</span>} />
+      <Notices error={error} />
+      <WelcomeBand variant="patient" eyebrow="YOUR CARE, IN ONE PLACE" title={`Good to see you, ${user.name.split(' ')[0]}.`} description="Your patient account and clinic information are available here."
+        action={<Link to="/patient/profile"><Button variant="secondary" tabIndex={-1}>Edit profile</Button></Link>} />
       <MetricGrid cols={2}>
-        <MetricCard label="Care profile" value="Ready" note="Your account is active" to="/app/profile" linkText="View profile" />
-        <MetricCard label="Nearby clinics" value="03" note="Featured clinics in Bengaluru" to="/app/clinics" linkText="Explore clinics" />
+        <MetricCard label="Care profile" value={busy ? 'Loading' : 'Ready'} note="Your patient account is active" to="/patient/profile" linkText="View profile" />
+        <MetricCard label="Clinic association" value={clinic?.name ?? (busy ? 'Loading' : 'Not linked')} note={clinic ? `Clinic status: ${clinic.status}` : 'No clinic is linked to this account'} />
       </MetricGrid>
       <Card>
-        <SectionHeading title="Clinics to know" description="Featured practices near you" action={<TextLink to="/app/clinics">See all <span>&#8594;</span></TextLink>} />
-        <ClinicCards clinics={featuredClinics.slice(0, 3)} />
+        <SectionHeading title="Account details" description="Information associated with your patient account" />
+        <DetailList items={[
+          ['Name', user.name],
+          ['Email', signedInUser.email],
+          ['Role', 'Patient'],
+          ['Clinic', clinic?.name ?? 'Not linked'],
+        ]} />
       </Card>
     </>
   );

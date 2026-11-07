@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { RequireClinicAdmin, RequireDoctor, RequireStaff, RequireSuperAdmin } from '@/app/guards';
+import { RequireClinicAdmin, RequireDoctor, RequirePatient, RequireStaff, RequireSuperAdmin } from '@/app/guards';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
@@ -15,6 +15,9 @@ import ClinicProfilePage from '@/pages/portal/clinic/ClinicProfilePage';
 import ClinicInvitationsPage from '@/pages/portal/clinic/ClinicInvitationsPage';
 import AcceptInvitationPage from '@/pages/AcceptInvitationPage';
 import TeamAccessPage from '@/pages/portal/TeamAccessPage';
+import PatientPortalLayout from '@/pages/portal/patient/PatientPortalLayout';
+import PatientDashboardPage from '@/pages/portal/patient/PatientDashboardPage';
+import PatientProfilePage from '@/pages/portal/patient/PatientProfilePage';
 
 export default function AppRouter() {
   return (
@@ -26,6 +29,14 @@ export default function AppRouter() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
+
+      <Route element={<RequirePatient />}>
+        <Route path="/patient" element={<PatientPortalLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<PatientDashboardPage />} />
+          <Route path="profile" element={<PatientProfilePage />} />
+        </Route>
+      </Route>
 
       <Route element={<RequireDoctor />}>
         <Route path="/doctor/dashboard" element={<TeamAccessPage />} />

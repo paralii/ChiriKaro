@@ -32,7 +32,7 @@ export function useLogin() {
           CLINIC_ADMIN: '/clinic/dashboard',
           DOCTOR: '/doctor/dashboard',
           STAFF: '/staff/dashboard',
-          PATIENT: '/app/dashboard',
+          PATIENT: '/patient/dashboard',
         }[result.data.role];
         navigate(destination, { replace: true });
       },

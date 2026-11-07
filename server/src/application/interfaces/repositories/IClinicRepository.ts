@@ -8,4 +8,5 @@ export interface IClinicRepository {
     totalItems: number;
   }>;
   save(clinic: Clinic): Promise<Clinic>;
+  deleteById(id: string): Promise<void>;
 }

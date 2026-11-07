@@ -1,5 +1,6 @@
 import { Document, model, Schema, Types } from "mongoose";
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
+import { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
 
 export interface IClinicWorkingHour {
   day: string;
@@ -27,8 +28,9 @@ export interface IClinicDocument extends Document {
   ownerAdminId?: Types.ObjectId | null;
   services: string[];
   workingHours: IClinicWorkingHour[];
-  documents: IClinicDocument[];
+  documents: IClinicDocumentData[];
   status: ClinicStatus;
+  setupStatus: ClinicSetupStatus;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -109,6 +111,11 @@ const clinicSchema = new Schema<IClinicDocument>(
       type: String,
       enum: Object.values(ClinicStatus),
       default: ClinicStatus.PENDING,
+    },
+    setupStatus: {
+      type: String,
+      enum: Object.values(ClinicSetupStatus),
+      default: ClinicSetupStatus.IN_PROGRESS,
     },
   },
   {

@@ -1,7 +1,6 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import type { RequestHandler } from "express";
-
-import type { DoctorController } from "../controllers/doctor.controller.js";
+import type { DoctorController } from "@presentation/controllers/doctor.controller.ts";
 
 export interface DoctorRouterMiddlewares {
   authenticate: RequestHandler;
@@ -10,140 +9,70 @@ export interface DoctorRouterMiddlewares {
 }
 
 export function DoctorRouter(
-  doctorController: DoctorController,
+  controller: DoctorController,
   middlewares: DoctorRouterMiddlewares,
 ): Router {
   const router = Router();
-
   const { authenticate, authorizeDoctor, authorizeClinicAdmin } = middlewares;
 
-  //Doctor profile
-  router.get(
-    "/doctor/profile",
+  router.get("/doctor/onboarding", authenticate, authorizeDoctor, controller.getOnboarding);
+  router.patch("/doctor/onboarding/:step", authenticate, authorizeDoctor, controller.updateOnboarding);
+  router.post(
+    "/doctor/onboarding/documents",
     authenticate,
     authorizeDoctor,
-    doctorController.getDoctorProfile,
+    express.raw({ type: ["application/pdf", "image/jpeg", "image/png"], limit: "10mb" }),
+    controller.uploadDocument,
+  );
+  router.get(
+    "/doctor/onboarding/documents/:documentType",
+    authenticate,
+    authorizeDoctor,
+    controller.getDocument,
+  );
+
+  router.get("/doctor/verification", authenticate, authorizeDoctor, controller.getVerification);
+  router.post("/doctor/verification/submit", authenticate, authorizeDoctor, controller.submitVerification);
+  router.get("/doctor/consultation-fee", authenticate, authorizeDoctor, controller.getConsultationFee);
+  router.get("/doctor/availability", authenticate, authorizeDoctor, controller.getAvailability);
+  router.put("/doctor/availability", authenticate, authorizeDoctor, controller.configureAvailability);
+  router.post("/doctor/availability/slots", authenticate, authorizeDoctor, controller.generateAvailabilitySlots);
+
+  router.get(
+    "/clinic/doctors/pending-verification",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.listPendingVerifications,
+  );
+  router.get(
+    "/clinic/doctors/:doctorId/verification",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.getVerificationDetails,
   );
   router.patch(
-    "/doctor/profile",
-    authenticate,
-    authorizeDoctor,
-    doctorController.updateDoctorProfile,
-  );
-
-  //Doctor verification
-  router.get(
-    "/doctor/verification",
-    authenticate,
-    authorizeDoctor,
-    doctorController.getDoctorVerification,
-  );
-  router.post(
-    "/doctor/submit-verification",
-    authenticate,
-    authorizeDoctor,
-    doctorController.submitDoctorVerification,
-  );
-
-  //Clinic administration: doctors
-  router.get(
-    "/clinic/doctors",
+    "/clinic/doctors/:doctorId/consultation-fee",
     authenticate,
     authorizeClinicAdmin,
-    doctorController.getClinicDoctors,
+    controller.updateConsultationFee,
   );
-  // router.get(
-  //   "/clinic/doctors/:id",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   doctorController.getDoctorById,
-  // );
-  router.post(
-    "/clinic/doctors/:id/approve",
+  router.get(
+    "/clinic/doctors/:doctorId/verification/documents/:documentType",
     authenticate,
     authorizeClinicAdmin,
-    doctorController.approveDoctor,
+    controller.getClinicDoctorDocument,
   );
   router.post(
-    "/clinic/doctors/:id/reject",
+    "/clinic/doctors/:doctorId/verification/approve",
     authenticate,
     authorizeClinicAdmin,
-    doctorController.rejectDoctor,
+    controller.approveVerification,
   );
-  router.get(
-    "/clinic/doctors/:id/documents/:documentType/download-url",
+  router.post(
+    "/clinic/doctors/:doctorId/verification/reject",
     authenticate,
     authorizeClinicAdmin,
-    doctorController.getClinicDoctorDocumentDownloadUrl,
+    controller.rejectVerification,
   );
-  router.patch(
-    "/clinic/doctors/:id/fee",
-    authenticate,
-    authorizeClinicAdmin,
-    doctorController.updateDoctorConsultationFee,
-  );
-
-  //Doctor documents
-  router.post(
-    "/doctor/documents/upload-url",
-    authenticate,
-    authorizeDoctor,
-    doctorController.generateDoctorDocumentUploadUrl,
-  );
-  router.get(
-    "/doctor/documents/:documentType/download-url",
-    authenticate,
-    authorizeDoctor,
-    doctorController.getDoctorDocumentUrl,
-  );
-  router.get(
-    "/doctor/documents",
-    authenticate,
-    authorizeDoctor,
-    doctorController.getDoctorDocuments,
-  );
-  router.post(
-    "/doctor/documents",
-    authenticate,
-    authorizeDoctor,
-    doctorController.saveDoctorDocument,
-  );
-
-  //Doctor availability
-  router.get(
-    "/doctor/availability",
-    authenticate,
-    authorizeDoctor,
-    doctorController.getDoctorAvailability,
-  );
-  router.put(
-    "/doctor/availability",
-    authenticate,
-    authorizeDoctor,
-    doctorController.updateDoctorAvailability,
-  );
-
-  //Doctor slot configuration
-  router.get(
-    "/doctor/slot-config",
-    authenticate,
-    authorizeDoctor,
-    doctorController.getDoctorSlotConfig,
-  );
-  router.put(
-    "/doctor/slot-config",
-    authenticate,
-    authorizeDoctor,
-    doctorController.updateDoctorSlotConfig,
-  );
-
-  //Appointment slot generation
-  router.post(
-    "/doctor/generate-slots",
-    authenticate,
-    authorizeDoctor,
-    doctorController.generateDoctorSlots,
-  );
-
   return router;
 }

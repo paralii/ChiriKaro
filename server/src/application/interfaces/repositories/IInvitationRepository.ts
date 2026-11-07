@@ -1,6 +1,11 @@
 import { Invitation } from "@domain/entities/Invitation.entity.ts";
 
 export interface IInvitationRepository {
-  findPendingByEmail(email: string): Promise<Invitation | null>;
+  findPendingByEmail(email: string, clinicId: string): Promise<Invitation | null>;
+  findPendingById(id: string, clinicId: string): Promise<Invitation | null>;
+  findPendingByClinic(clinicId: string): Promise<Invitation[]>;
+  findByTokenHash(tokenHash: string): Promise<Invitation | null>;
+  markAcceptedIfPending(id: string, tokenHash: string): Promise<boolean>;
   save(invitation: Invitation): Promise<Invitation>;
+  deleteById(id: string): Promise<void>;
 }

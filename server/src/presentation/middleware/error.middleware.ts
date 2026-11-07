@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import { appConfig } from "../../infrastructure/config/app.config.js";
 import { logger } from "../../infrastructure/logger/logger.js";
 import { AppError } from "../../shared/errors/index.js";
 
@@ -103,8 +102,9 @@ export const errorMiddleware = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ): void => {
+  void _next;
   const { statusCode, message, errors } = resolveErrorDetails(err);
 
   logger.error(
@@ -117,6 +117,6 @@ export const errorMiddleware = (
     message,
     ...(errors ? { errors } : {}),
     requestId: req.requestId,
-    ...(appConfig.isProduction ? {} : { stack: err.stack }),
+    ...(process.env.NODE_ENV === "production" ? {} : { stack: err.stack }),
   });
 };

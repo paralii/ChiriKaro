@@ -9,5 +9,6 @@ export interface IUserRepository {
   existsByEmail(email: string): Promise<boolean>;
   existsByRole(role: Role): Promise<boolean>;
   save(user: User): Promise<User>;
+  deleteById(id: string): Promise<void>;
   update(user: User): Promise<User>;
 }

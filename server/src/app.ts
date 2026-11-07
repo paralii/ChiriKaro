@@ -5,8 +5,14 @@ import cookieParser from "cookie-parser";
 
 import { authRouter } from "@container/auth.container.ts";
 import { superAdminRouter } from "@container/super-admin.container.ts";
+import { clinicRouter } from "@container/clinic.container.ts";
+import { superAdminClinicRouter } from "@container/super-admin-clinic.container.ts";
+import { doctorRouter } from "@container/doctor.container.ts";
+import { invitationRouter } from "@container/invitation.container.ts";
+import { roleDashboardRouter } from "@container/role-dashboard.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
+import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
 
 export class App {
   public readonly instance: Application;
@@ -42,34 +48,28 @@ export class App {
 
   private initializeHealthCheck(): void {
     this.instance.get("/health", (_req, res) => {
-      res
-        .status(200)
-        .json(
-          ApiResponse.success("Server is running and health is good", {
-            timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      res.status(200).json(
+        ApiResponse.success("Server is running and health is good", {
+          timestamp: new Date().toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
           }),
-        );
+        }),
+      );
     });
   }
 
   private initializeRoutes(): void {
     this.instance.use("/api", authRouter);
     this.instance.use("/api", superAdminRouter);
+    this.instance.use("/api", clinicRouter);
+    this.instance.use("/api", superAdminClinicRouter);
+    this.instance.use("/api", doctorRouter);
+    this.instance.use("/api", invitationRouter);
+    this.instance.use("/api", roleDashboardRouter);
   }
 
   public registerErrorHandlers(): void {
-    this.instance.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction,
-      ) => {
-        res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .json(ApiResponse.failed("Internal server error"));
-      },
-    );
+    this.instance.use(errorMiddleware);
 
     this.instance.use((_req, res) => {
       res

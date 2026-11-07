@@ -23,6 +23,26 @@ export class ClinicRepository
     return docs.map((doc) => this.toDomain(doc));
   }
 
+  async findPage(options: { skip: number; limit: number }): Promise<{
+    clinics: Clinic[];
+    totalItems: number;
+  }> {
+    const [docs, totalItems] = await Promise.all([
+      this.model
+        .find()
+        .sort({ createdAt: -1, _id: -1 })
+        .skip(options.skip)
+        .limit(options.limit)
+        .exec(),
+      this.model.countDocuments().exec(),
+    ]);
+
+    return {
+      clinics: docs.map((doc) => this.toDomain(doc)),
+      totalItems,
+    };
+  }
+
   async save(clinic: Clinic): Promise<Clinic> {
     const data = this.toPersistence(clinic);
 

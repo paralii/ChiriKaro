@@ -1,4 +1,4 @@
-import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
+import type { ISuperAdminClinicRepository } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
 import type { IListClinicsUseCase } from "@application/interfaces/use-cases/super-admin/IListClinicsUseCase.ts";
 import type {
   ClinicListQueryDTO,
@@ -21,7 +21,7 @@ const parsePositiveInteger = (value: unknown, field: string): number | undefined
 };
 
 export class ListClinicsUseCase implements IListClinicsUseCase {
-  constructor(private readonly clinicRepository: IClinicRepository) {}
+  constructor(private readonly clinicRepository: ISuperAdminClinicRepository) {}
 
   async execute(query: ClinicListQueryDTO): Promise<ClinicListResultDTO> {
     const page = parsePositiveInteger(query.page, "page");

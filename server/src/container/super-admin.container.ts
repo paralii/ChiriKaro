@@ -7,7 +7,8 @@ import type { IListClinicsUseCase } from "@application/interfaces/use-cases/supe
 import type { IGetClinicDetailsUseCase } from "@application/interfaces/use-cases/super-admin/IGetClinicDetailsUseCase.ts";
 import type { IUpdateClinicStatusUseCase } from "@application/interfaces/use-cases/super-admin/IUpdateClinicStatusUseCase.ts";
 import type { IGetSuperAdminStatisticsUseCase } from "@application/interfaces/use-cases/super-admin/IGetSuperAdminStatisticsUseCase.ts";
-import { ClinicRepository, SuperAdminStatisticsRepository } from "@infrastructure/repositories/super-admin.repository.ts";
+import { ClinicRepository } from "@infrastructure/repositories/clinic.repository.ts";
+import { SuperAdminClinicRepository, SuperAdminStatisticsRepository } from "@infrastructure/repositories/super-admin.repository.ts";
 import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
 import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts";
 import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
@@ -15,15 +16,16 @@ import { SuperAdminController } from "@presentation/controllers/super-admin.cont
 import { createSuperAdminRouter } from "@presentation/routes/super-admin.routes.ts";
 
 const clinicRepository = new ClinicRepository();
+const superAdminClinicRepository = new SuperAdminClinicRepository();
 const statisticsRepository = new SuperAdminStatisticsRepository();
 const authMiddleware = new AuthMiddleware({
   tokenService: new TokenService(),
   userRepository: new MongoUserRepository(),
   clinicRepository,
 });
-const listClinicsUseCase: IListClinicsUseCase = new ListClinicsUseCase(clinicRepository);
-const getClinicDetailsUseCase: IGetClinicDetailsUseCase = new GetClinicDetailsUseCase(clinicRepository);
-const updateClinicStatusUseCase: IUpdateClinicStatusUseCase = new UpdateClinicStatusUseCase(clinicRepository);
+const listClinicsUseCase: IListClinicsUseCase = new ListClinicsUseCase(superAdminClinicRepository);
+const getClinicDetailsUseCase: IGetClinicDetailsUseCase = new GetClinicDetailsUseCase(superAdminClinicRepository);
+const updateClinicStatusUseCase: IUpdateClinicStatusUseCase = new UpdateClinicStatusUseCase(superAdminClinicRepository);
 const getStatisticsUseCase: IGetSuperAdminStatisticsUseCase = new GetSuperAdminStatisticsUseCase(statisticsRepository);
 const controller = new SuperAdminController(
   listClinicsUseCase,

@@ -3,7 +3,7 @@ import type { IClinicDocument } from "@infrastructure/database/mongodb/models/Cl
 import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel.ts";
 import { DentistModel } from "@infrastructure/database/mongodb/models/DentistModel.ts";
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
-import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
+import type { ISuperAdminClinicRepository } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
 import type { ISuperAdminStatisticsRepository } from "@application/interfaces/repositories/ISuperAdminStatisticsRepository.ts";
 import type { SuperAdminStatisticsDTO } from "@application/dto/super-admin/statistics.dto.ts";
 import { Clinic } from "@domain/entities/clinic.entity.ts";
@@ -14,7 +14,7 @@ interface CountByStatus {
   count: number;
 }
 
-export class ClinicRepository extends BaseRepository<IClinicDocument> implements IClinicRepository {
+export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> implements ISuperAdminClinicRepository {
   constructor() { super(ClinicModel); }
 
   async findById(id: string): Promise<Clinic | null> {
@@ -35,6 +35,10 @@ export class ClinicRepository extends BaseRepository<IClinicDocument> implements
   }
 
   async save(clinic: Clinic): Promise<Clinic> {
+    if (!clinic.id) {
+      throw new Error("Clinic id is required to save a clinic");
+    }
+
     const doc = await this.model.findOneAndUpdate(
       { _id: new Types.ObjectId(clinic.id) },
       { $set: this.toPersistence(clinic) },
@@ -45,13 +49,17 @@ export class ClinicRepository extends BaseRepository<IClinicDocument> implements
 
   private toDomain(doc: IClinicDocument): Clinic {
     return Clinic.fromPersistence({
-      id: doc._id.toString(),
+      _id: doc._id.toString(),
       name: doc.name,
       address: doc.address ?? null,
       phone: doc.phone ?? null,
       contactEmail: doc.contactEmail ?? null,
       ownerAdminId: doc.ownerAdminId ? doc.ownerAdminId.toString() : null,
       status: doc.status,
+      specializations: doc.services ?? [],
+      workingHours: doc.workingHours ?? [],
+      documents: doc.documents ?? [],
+      setupStatus: doc.setupStatus,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });

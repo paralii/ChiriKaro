@@ -51,6 +51,13 @@ import { createAuthRouter } from "@presentation/routes/auth.routes.ts";
 
 import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
 import { GoogleOAuthMiddleware } from "@presentation/middleware/google-oauth.middleware.ts";
+import {
+  loginRateLimiter,
+  otpResendRateLimiter,
+  otpVerifyRateLimiter,
+  passwordResetRateLimiter,
+  registerRateLimiter,
+} from "@shared/utils/rateLimiters.ts";
 
 const userRepository = new MongoUserRepository();
 const clinicRepository = new ClinicRepository();
@@ -153,4 +160,9 @@ export const authRouter = createAuthRouter(authController, {
   authenticate: authMiddleware.authenticate,
   googleRedirect: googleOAuthMiddleware.redirect,
   googleAuthenticate: googleOAuthMiddleware.authenticate,
+  registerRateLimiter,
+  loginRateLimiter,
+  otpVerifyRateLimiter,
+  otpResendRateLimiter,
+  passwordResetRateLimiter,
 });

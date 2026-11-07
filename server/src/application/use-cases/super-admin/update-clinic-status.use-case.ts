@@ -1,5 +1,5 @@
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
-import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
+import type { ISuperAdminClinicRepository } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
 import type { IUpdateClinicStatusUseCase } from "@application/interfaces/use-cases/super-admin/IUpdateClinicStatusUseCase.ts";
 import type {
   ClinicSummaryDTO,
@@ -21,7 +21,7 @@ const ALLOWED_TRANSITIONS: Record<ClinicStatus, ClinicStatus[]> = {
 };
 
 export class UpdateClinicStatusUseCase implements IUpdateClinicStatusUseCase {
-  constructor(private readonly clinicRepository: IClinicRepository) {}
+  constructor(private readonly clinicRepository: ISuperAdminClinicRepository) {}
 
   async execute(dto: UpdateClinicStatusDTO): Promise<ClinicSummaryDTO> {
     if (!/^[a-f\d]{24}$/i.test(dto.clinicId)) {

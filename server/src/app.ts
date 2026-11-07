@@ -4,7 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import { authRouter } from "@container/auth.container.ts";
-import { superAdminClinicRouter } from "@container/super-admin-clinic.container.ts";
+import { superAdminRouter } from "@container/super-admin.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 
@@ -54,7 +54,7 @@ export class App {
 
   private initializeRoutes(): void {
     this.instance.use("/api", authRouter);
-    this.instance.use("/api", superAdminClinicRouter);
+    this.instance.use("/api", superAdminRouter);
   }
 
   public registerErrorHandlers(): void {

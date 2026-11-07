@@ -1,4 +1,11 @@
 import type { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
+import type { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
+import type { ClinicWorkingHour } from "@domain/entities/clinic.entity.ts";
+
+export interface ClinicDocumentDTO {
+  documentType: string;
+  uploadedAt: Date;
+}
 
 export interface ClinicProfileDTO {
   id: string;
@@ -12,6 +19,10 @@ export interface ClinicProfileDTO {
   registrationNumber: string | null;
   ownerAdminId: string | null;
   status: ClinicStatus;
+  specializations: string[];
+  workingHours: ClinicWorkingHour[];
+  documents: ClinicDocumentDTO[];
+  setupStatus: ClinicSetupStatus;
   createdAt: Date;
   updatedAt: Date;
 }

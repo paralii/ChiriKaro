@@ -1,5 +1,19 @@
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 import { InvalidClinicDataError } from "@domain/error/DomainError.ts";
+import { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
+
+export interface ClinicWorkingHour {
+  day: string;
+  isOpen: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+export interface ClinicDocumentData {
+  documentType: string;
+  documentKey: string;
+  uploadedAt: Date;
+}
 
 export interface ClinicProps {
   _id: string | null;
@@ -13,6 +27,10 @@ export interface ClinicProps {
   registrationNumber?: string | null;
   ownerAdminId: string | null;
   status: ClinicStatus;
+  specializations: string[];
+  workingHours: ClinicWorkingHour[];
+  documents: ClinicDocumentData[];
+  setupStatus: ClinicSetupStatus;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +49,10 @@ type NewClinicProps = Pick<ClinicProps, "name"> &
       | "registrationNumber"
       | "ownerAdminId"
       | "status"
+      | "specializations"
+      | "workingHours"
+      | "documents"
+      | "setupStatus"
     >
   >;
 
@@ -114,6 +136,10 @@ export class Clinic {
       contactEmail,
       ownerAdminId,
       status,
+      specializations: props.specializations ?? [],
+      workingHours: props.workingHours ?? [],
+      documents: props.documents ?? [],
+      setupStatus: props.setupStatus ?? ClinicSetupStatus.IN_PROGRESS,
       createdAt: now,
       updatedAt: new Date(now),
     });
@@ -203,6 +229,64 @@ export class Clinic {
     this.touch();
   }
 
+  updateSpecializations(values: string[]): void {
+    if (!Array.isArray(values) || values.length === 0) {
+      throw new InvalidClinicDataError("At least one specialization is required");
+    }
+    const normalized = values.map((value) => requireNonBlank(value, "specialization"));
+    this.props.specializations = [...new Set(normalized)];
+    this.touch();
+  }
+
+  updateWorkingHours(values: ClinicWorkingHour[]): void {
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    if (!Array.isArray(values) || values.length !== days.length) {
+      throw new InvalidClinicDataError("Working hours must include all seven days");
+    }
+    const seen = new Set<string>();
+    for (const hours of values) {
+      if (!days.includes(hours.day) || seen.has(hours.day)) {
+        throw new InvalidClinicDataError("Working hours contain an invalid or duplicate day");
+      }
+      seen.add(hours.day);
+      if (typeof hours.isOpen !== "boolean") {
+        throw new InvalidClinicDataError("Working hour isOpen must be a boolean");
+      }
+      if (hours.isOpen && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(hours.startTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(hours.endTime) || hours.startTime >= hours.endTime)) {
+        throw new InvalidClinicDataError(`Working hours for ${hours.day} are invalid`);
+      }
+    }
+    this.props.workingHours = values.map((hours) => ({ ...hours }));
+    this.touch();
+  }
+
+  addDocument(document: ClinicDocumentData): void {
+    const documentType = requireNonBlank(document.documentType, "documentType");
+    const documentKey = requireNonBlank(document.documentKey, "documentKey");
+    this.props.documents = [
+      ...this.props.documents.filter((item) => item.documentType !== documentType),
+      { documentType, documentKey, uploadedAt: new Date(document.uploadedAt) },
+    ];
+    this.touch();
+  }
+
+  submitSetup(): void {
+    if (!this.props.address || !this.props.city || !this.props.state || !this.props.pincode) {
+      throw new InvalidClinicDataError("Complete clinic location before submitting setup");
+    }
+    if (this.props.specializations.length === 0) {
+      throw new InvalidClinicDataError("Add clinic specializations before submitting setup");
+    }
+    if (this.props.workingHours.length !== 7) {
+      throw new InvalidClinicDataError("Configure working hours before submitting setup");
+    }
+    if (this.props.documents.length === 0) {
+      throw new InvalidClinicDataError("Upload at least one clinic document before submitting setup");
+    }
+    this.props.setupStatus = ClinicSetupStatus.PENDING_VERIFICATION;
+    this.touch();
+  }
+
   markPending(): void {
     this.props.status = ClinicStatus.PENDING;
     this.touch();
@@ -249,6 +333,10 @@ export class Clinic {
   get status() {
     return this.props.status;
   }
+  get specializations() { return [...this.props.specializations]; }
+  get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
+  get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
+  get setupStatus() { return this.props.setupStatus; }
   get createdAt() {
     return new Date(this.props.createdAt);
   }

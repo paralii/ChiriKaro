@@ -13,6 +13,10 @@ export const toClinicProfileDTO = (clinic: Clinic): ClinicProfileDTO => ({
   registrationNumber: clinic.registrationNumber ?? null,
   ownerAdminId: clinic.ownerAdminId,
   status: clinic.status,
+  specializations: clinic.specializations,
+  workingHours: clinic.workingHours,
+  documents: clinic.documents.map(({ documentType, uploadedAt }) => ({ documentType, uploadedAt })),
+  setupStatus: clinic.setupStatus,
   createdAt: clinic.createdAt,
   updatedAt: clinic.updatedAt,
 });

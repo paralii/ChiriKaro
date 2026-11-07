@@ -19,6 +19,15 @@ import { UpdateClinicProfileUseCase } from "@application/use-cases/clinic/update
 import type { IUpdateClinicProfileUseCase } from "@application/interfaces/use-cases/clinic/IUpdateClinicProfileUseCase.ts";
 import { GetClinicDashboardUseCase } from "@application/use-cases/clinic/get-clinic-dashboard.use-case.ts";
 import type { IGetClinicDashboardUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicDashboardUseCase.ts";
+import { UpdateClinicSetupUseCase } from "@application/use-cases/clinic/update-clinic-setup.use-case.ts";
+import { SubmitClinicSetupUseCase } from "@application/use-cases/clinic/submit-clinic-setup.use-case.ts";
+import { UploadClinicDocumentUseCase } from "@application/use-cases/clinic/upload-clinic-document.use-case.ts";
+import { GetClinicDocumentUseCase } from "@application/use-cases/clinic/get-clinic-document.use-case.ts";
+import type { IUpdateClinicSetupUseCase } from "@application/interfaces/use-cases/clinic/IUpdateClinicSetupUseCase.ts";
+import type { ISubmitClinicSetupUseCase } from "@application/interfaces/use-cases/clinic/ISubmitClinicSetupUseCase.ts";
+import type { IUploadClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IUploadClinicDocumentUseCase.ts";
+import type { IGetClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicDocumentUseCase.ts";
+import { CloudinaryClinicDocumentStorage } from "@infrastructure/services/storage/cloudinary-clinic-document.storage.ts";
 
 const clinicRepository = new ClinicRepository();
 const userRepository = new MongoUserRepository();
@@ -42,12 +51,21 @@ const updateClinicProfileUseCase: IUpdateClinicProfileUseCase =
   new UpdateClinicProfileUseCase(clinicRepository);
 const getClinicDashboardUseCase: IGetClinicDashboardUseCase =
   new GetClinicDashboardUseCase(clinicRepository, userRepository);
+const clinicDocumentStorage = new CloudinaryClinicDocumentStorage();
+const updateClinicSetupUseCase: IUpdateClinicSetupUseCase = new UpdateClinicSetupUseCase(clinicRepository);
+const submitClinicSetupUseCase: ISubmitClinicSetupUseCase = new SubmitClinicSetupUseCase(clinicRepository);
+const uploadClinicDocumentUseCase: IUploadClinicDocumentUseCase = new UploadClinicDocumentUseCase(clinicRepository, clinicDocumentStorage);
+const getClinicDocumentUseCase: IGetClinicDocumentUseCase = new GetClinicDocumentUseCase(clinicRepository, clinicDocumentStorage);
 
 export const clinicController = new ClinicController(
   registerClinicUseCase,
   getClinicProfileUseCase,
   updateClinicProfileUseCase,
   getClinicDashboardUseCase,
+  updateClinicSetupUseCase,
+  submitClinicSetupUseCase,
+  uploadClinicDocumentUseCase,
+  getClinicDocumentUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({
@@ -59,4 +77,5 @@ const authMiddleware = new AuthMiddleware({
 export const clinicRouter = ClinicRouter(clinicController, {
   authenticate: authMiddleware.authenticate,
   authorizeClinicAdmin: authMiddleware.authorize(Role.CLINIC_ADMIN),
+  authorizeSuperAdmin: authMiddleware.authorize(Role.SUPER_ADMIN),
 });

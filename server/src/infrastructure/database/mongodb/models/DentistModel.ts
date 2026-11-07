@@ -9,7 +9,7 @@ export type DentistVerificationStatus =
 
 export type DentistDocumentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
-export type DentistGender = "MALE" | "FEMALE";
+export type DentistGender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 
 export type DayOfWeek =
   | "MONDAY"
@@ -23,6 +23,12 @@ export type DayOfWeek =
 export interface IDentistWorkingHour {
   day: DayOfWeek;
   isOpen: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+export interface IDentistBreak {
+  day: DayOfWeek;
   startTime: string;
   endTime: string;
 }
@@ -58,8 +64,13 @@ export interface IDentistProfile extends Document {
   procedures: string[];
 
   workingHours: IDentistWorkingHour[];
+  breaks: IDentistBreak[];
+  slotDurationMinutes: number;
+  bufferTimeMinutes: number;
 
   verificationStatus: DentistVerificationStatus;
+  rejectionReason?: string | null;
+  consultationFee?: number | null;
   documents: IDentistDocumentMeta[];
 
   createdAt: Date;
@@ -129,6 +140,15 @@ const dentistDocumentSchema = new Schema<IDentistDocumentMeta>(
       default: null,
       trim: true,
     },
+  },
+  { _id: false },
+);
+
+const dentistBreakSchema = new Schema<IDentistBreak>(
+  {
+    day: { type: String, enum: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], required: true },
+    startTime: { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    endTime: { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
   },
   { _id: false },
 );
@@ -227,6 +247,9 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
         message: "Working hours must not contain duplicate days",
       },
     },
+    breaks: { type: [dentistBreakSchema], default: [] },
+    slotDurationMinutes: { type: Number, default: 30, min: 5, max: 240, validate: Number.isInteger },
+    bufferTimeMinutes: { type: Number, default: 0, min: 0, max: 120, validate: Number.isInteger },
 
     verificationStatus: {
       type: String,
@@ -238,6 +261,22 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
         "REJECTED",
       ],
       default: "NOT_STARTED",
+    },
+    rejectionReason: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: 1000,
+    },
+    consultationFee: {
+      type: Number,
+      default: null,
+      min: 0,
+      validate: {
+        validator: (value: number | null) =>
+          value === null || Math.abs(value * 100 - Math.round(value * 100)) <= 1e-8,
+        message: "Consultation fee must have at most two decimal places",
+      },
     },
 
     documents: {

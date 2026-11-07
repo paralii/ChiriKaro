@@ -12,6 +12,8 @@ import AdminClinicsPage from '@/pages/portal/admin/AdminClinicsPage';
 import ClinicPortalLayout from '@/pages/portal/clinic/ClinicPortalLayout';
 import ClinicDashboardPage from '@/pages/portal/clinic/ClinicDashboardPage';
 import ClinicProfilePage from '@/pages/portal/clinic/ClinicProfilePage';
+import ClinicInvitationsPage from '@/pages/portal/clinic/ClinicInvitationsPage';
+import AcceptInvitationPage from '@/pages/AcceptInvitationPage';
 
 export default function AppRouter() {
   return (
@@ -22,12 +24,15 @@ export default function AppRouter() {
       <Route path="/register/:role" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
 
       <Route element={<RequireClinicAdmin />}>
         <Route path="/clinic" element={<ClinicPortalLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<ClinicDashboardPage />} />
           <Route path="profile" element={<ClinicProfilePage />} />
+          <Route path="doctors" element={<ClinicInvitationsPage invitee="doctor" />} />
+          <Route path="staff" element={<ClinicInvitationsPage invitee="staff" />} />
         </Route>
       </Route>
 

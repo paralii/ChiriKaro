@@ -11,13 +11,6 @@ export function InviteForm({ invitee, busy, invitation, onInvite }: {
   invitee: 'doctor' | 'staff member'; busy: boolean; invitation: Invitation | null; onInvite: (email: string) => void;
 }) {
   const [email, setEmail] = useState('');
-  const [copy, setCopy] = useState('');
-
-  async function copyLink() {
-    if (!invitation) return;
-    try { await navigator.clipboard.writeText(invitation.inviteUrl); setCopy('Invitation link copied.'); }
-    catch { setCopy('Copy is unavailable in this browser. Select and copy the invitation link below.'); }
-  }
 
   return (
     <>
@@ -30,9 +23,7 @@ export function InviteForm({ invitee, busy, invitation, onInvite }: {
         <Notice tone="success" className="mx-[19px]">
           <strong>Invitation sent</strong>
           <p>An invitation to join as a {invitation.role === 'DOCTOR' ? 'doctor' : 'staff member'} was emailed to {invitation.email}.</p>
-          <FormField label="Invitation link" className="my-2"><Input value={invitation.inviteUrl} readOnly onFocus={(e) => e.currentTarget.select()} /></FormField>
-          <Button type="button" variant="secondary" onClick={() => void copyLink()}>Copy invitation link</Button>
-          {copy ? <p aria-live="polite">{copy}</p> : null}
+          <p className="mb-0">The invitation expires {new Date(invitation.expiresAt).toLocaleString()}.</p>
         </Notice>
       ) : null}
     </>

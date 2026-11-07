@@ -1,5 +1,5 @@
 import { api } from '@/shared/lib/http';
-import type { Clinic, ClinicDocument, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/shared/types';
+import type { ClinicDashboard, ClinicDocument, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/shared/types';
 
 const enc = encodeURIComponent;
 
@@ -8,11 +8,18 @@ export type RegisterClinicRequest = {
   clinic: { name: string };
 };
 
+type ApiEnvelope<T> = { data?: T };
+async function responseData<T>(request: Promise<ApiEnvelope<T>>, fallback: string): Promise<T> {
+  const response = await request;
+  if (!response.data) throw new Error(fallback);
+  return response.data;
+}
+
 export const clinicService = {
   register: (body: RegisterClinicRequest) => api.post('/clinic/register', body),
-  dashboard: () => api.get<Clinic>('/clinic/dashboard'),
-  getProfile: () => api.get<ClinicProfile>('/clinic/profile'),
-  updateProfile: (body: Partial<ClinicProfile>) => api.patch<ClinicProfile>('/clinic/profile', body),
+  dashboard: () => responseData(api.get<ApiEnvelope<ClinicDashboard>>('/clinic/dashboard'), 'Clinic dashboard data was not returned.'),
+  getProfile: () => responseData(api.get<ApiEnvelope<ClinicProfile>>('/clinic/profile'), 'Clinic profile was not returned.'),
+  updateProfile: (body: Partial<ClinicProfile>) => responseData(api.patch<ApiEnvelope<ClinicProfile>>('/clinic/profile', body), 'Updated clinic profile was not returned.'),
   saveSpecializations: (specializations: string[]) => api.put<string[]>('/clinic/specializations', { specializations }),
   saveWorkingHours: (workingHours: WorkingHour[]) => api.put<WorkingHour[]>('/clinic/working-hours', { workingHours }),
   getUploadUrl: (file: File) => api.post<{ key: string; uploadUrl: string }>('/clinic/documents/upload-url', { fileName: file.name, contentType: file.type, fileSize: file.size }),

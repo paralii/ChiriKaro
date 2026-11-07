@@ -21,5 +21,15 @@ export function RequireRole({ roles }: { roles: Role[] }) {
 export function RequireSuperAdmin() {
   const user = useAppSelector((s) => s.auth.user);
   if (!user) return <Navigate to="/superadmin" replace />;
-  return user.role === "SUPER_ADMIN" ? <Outlet /> : <Navigate to="/" replace />;
+  if (user.role === "SUPER_ADMIN") return <Outlet />;
+  if (user.role === "CLINIC_ADMIN") return <Navigate to="/clinic/dashboard" replace />;
+  return <Navigate to="/" replace />;
+}
+
+export function RequireClinicAdmin() {
+  const user = useAppSelector((s) => s.auth.user);
+  if (!user) return <Navigate to="/login/clinic" replace />;
+  if (user.role === "CLINIC_ADMIN") return <Outlet />;
+  if (user.role === "SUPER_ADMIN") return <Navigate to="/app/dashboard" replace />;
+  return <Navigate to="/" replace />;
 }

@@ -45,6 +45,31 @@ export type DoctorProfile = {
   slotDuration: number; bufferMinutes: number; verificationStatus: string; onboardingProgress: number;
   documents: DoctorDocument[]; rejectionReason: string | null;
 };
+export type DoctorDayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+export type DoctorGender = 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+export type DoctorOnboardingStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED';
+export type DoctorOnboardingStep = 'basic' | 'professional' | 'practice';
+export type DoctorOnboardingProfile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  gender: DoctorGender | null;
+  dateOfBirth: string | null;
+  professionalTitle: string | null;
+  qualifications: string[];
+  yearsOfExperience: number | null;
+  registrationNumber: string | null;
+  registrationAuthority: string | null;
+  specializations: string[];
+  procedures: string[];
+  workingHours: Array<{ day: DoctorDayOfWeek; isOpen: boolean; startTime: string; endTime: string }>;
+  documents: Array<{ documentType: string; status: string; uploadedAt: string; verifiedAt: string | null; rejectionReason: string | null }>;
+  onboardingStatus: DoctorOnboardingStatus;
+  rejectionReason: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+export type DoctorOnboardingDTO = { onboardingStatus: DoctorOnboardingStatus; profile: DoctorOnboardingProfile | null };
 export type SlotConfig = { slotDuration: number; bufferMinutes: number; consultationFee: number | null };
 export type Slot = { day: string; startTime: string; endTime: string };
 export type DoctorSummary = {

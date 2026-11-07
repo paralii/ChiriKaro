@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { DetailList } from '@/components/molecules/DetailList';
 import { Notices } from '@/components/molecules/Notices';
@@ -29,7 +31,8 @@ export default function TeamAccessPage() {
   return (
     <>
       <Notices error={error} />
-      <WelcomeBand pill="ACCOUNT ACTIVE" title={`Welcome, ${dashboard?.user.name ?? user.name}.`} description={`Your ${roleLabels[user.role].toLowerCase()} workspace is ready.`} />
+      <WelcomeBand pill="ACCOUNT ACTIVE" title={`Welcome, ${dashboard?.user.name ?? user.name}.`} description={`Your ${roleLabels[user.role].toLowerCase()} workspace is ready.`}
+        action={user.role === 'DOCTOR' ? <Link to="/doctor/dashboard"><Button variant="secondary" tabIndex={-1}>Continue onboarding</Button></Link> : undefined} />
       <Card>
         <SectionHeading title="Workspace details" description={busy ? 'Loading your clinic association...' : 'Information associated with your account'} />
         <DetailList items={[

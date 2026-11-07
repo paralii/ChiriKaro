@@ -33,6 +33,12 @@ import { GetDoctorConsultationFeeUseCase } from "@application/use-cases/doctor/g
 import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorConsultationFeeUseCase.ts";
 import { UpdateDoctorConsultationFeeUseCase } from "@application/use-cases/doctor/update-doctor-consultation-fee.use-case.ts";
 import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
+import { GetDoctorAvailabilityUseCase } from "@application/use-cases/doctor/get-doctor-availability.use-case.ts";
+import type { IGetDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorAvailabilityUseCase.ts";
+import { ConfigureDoctorAvailabilityUseCase } from "@application/use-cases/doctor/configure-doctor-availability.use-case.ts";
+import type { IConfigureDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IConfigureDoctorAvailabilityUseCase.ts";
+import { GenerateDoctorAvailabilitySlotsUseCase } from "@application/use-cases/doctor/generate-doctor-availability-slots.use-case.ts";
+import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
 
 const doctorRepository = new DoctorRepository();
 const clinicRepository = new ClinicRepository();
@@ -63,6 +69,12 @@ const getDoctorConsultationFeeUseCase: IGetDoctorConsultationFeeUseCase =
   new GetDoctorConsultationFeeUseCase(doctorRepository);
 const updateDoctorConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase =
   new UpdateDoctorConsultationFeeUseCase(doctorRepository);
+const getDoctorAvailabilityUseCase: IGetDoctorAvailabilityUseCase =
+  new GetDoctorAvailabilityUseCase(doctorRepository);
+const configureDoctorAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase =
+  new ConfigureDoctorAvailabilityUseCase(doctorRepository, clinicRepository);
+const generateDoctorAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase =
+  new GenerateDoctorAvailabilitySlotsUseCase(doctorRepository);
 
 const controller = new DoctorController(
   getDoctorOnboardingUseCase,
@@ -77,6 +89,9 @@ const controller = new DoctorController(
   getClinicDoctorDocumentUseCase,
   getDoctorConsultationFeeUseCase,
   updateDoctorConsultationFeeUseCase,
+  getDoctorAvailabilityUseCase,
+  configureDoctorAvailabilityUseCase,
+  generateDoctorAvailabilitySlotsUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({

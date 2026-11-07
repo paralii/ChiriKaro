@@ -34,6 +34,9 @@ export function DoctorRouter(
   router.get("/doctor/verification", authenticate, authorizeDoctor, controller.getVerification);
   router.post("/doctor/verification/submit", authenticate, authorizeDoctor, controller.submitVerification);
   router.get("/doctor/consultation-fee", authenticate, authorizeDoctor, controller.getConsultationFee);
+  router.get("/doctor/availability", authenticate, authorizeDoctor, controller.getAvailability);
+  router.put("/doctor/availability", authenticate, authorizeDoctor, controller.configureAvailability);
+  router.post("/doctor/availability/slots", authenticate, authorizeDoctor, controller.generateAvailabilitySlots);
 
   router.get(
     "/clinic/doctors/pending-verification",

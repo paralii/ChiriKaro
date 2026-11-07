@@ -11,6 +11,9 @@ import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/u
 import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorConsultationFeeUseCase.ts";
 import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
+import type { IGetDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorAvailabilityUseCase.ts";
+import type { IConfigureDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IConfigureDoctorAvailabilityUseCase.ts";
+import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
 import type { DoctorOnboardingStep } from "@application/dto/doctor/doctor-onboarding.dto.ts";
 import { ValidationError } from "@shared/errors/index.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
@@ -30,6 +33,9 @@ export class DoctorController {
     private readonly _getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase,
     private readonly _getConsultationFeeUseCase: IGetDoctorConsultationFeeUseCase,
     private readonly _updateConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase,
+    private readonly _getAvailabilityUseCase: IGetDoctorAvailabilityUseCase,
+    private readonly _configureAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase,
+    private readonly _generateAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase,
   ) {}
 
   getOnboarding = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -164,6 +170,31 @@ export class DoctorController {
         consultationFee: req.body?.consultationFee,
       });
       res.status(HttpStatus.OK).json(ApiResponse.success("Doctor consultation fee updated", result));
+    } catch (error) { next(error); }
+  };
+
+  getAvailability = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._getAvailabilityUseCase.execute(req.user!.sub, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor availability retrieved", result));
+    } catch (error) { next(error); }
+  };
+
+  configureAvailability = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._configureAvailabilityUseCase.execute({
+        userId: req.user!.sub,
+        clinicId: req.user!.clinicId!,
+        updates: req.body,
+      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor availability updated", result));
+    } catch (error) { next(error); }
+  };
+
+  generateAvailabilitySlots = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._generateAvailabilitySlotsUseCase.execute(req.user!.sub, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor availability slots generated", result));
     } catch (error) { next(error); }
   };
 }

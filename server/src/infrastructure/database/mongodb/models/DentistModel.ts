@@ -27,6 +27,12 @@ export interface IDentistWorkingHour {
   endTime: string;
 }
 
+export interface IDentistBreak {
+  day: DayOfWeek;
+  startTime: string;
+  endTime: string;
+}
+
 export interface IDentistDocumentMeta {
   documentType: string;
   documentUrl: string;
@@ -58,6 +64,9 @@ export interface IDentistProfile extends Document {
   procedures: string[];
 
   workingHours: IDentistWorkingHour[];
+  breaks: IDentistBreak[];
+  slotDurationMinutes: number;
+  bufferTimeMinutes: number;
 
   verificationStatus: DentistVerificationStatus;
   rejectionReason?: string | null;
@@ -131,6 +140,15 @@ const dentistDocumentSchema = new Schema<IDentistDocumentMeta>(
       default: null,
       trim: true,
     },
+  },
+  { _id: false },
+);
+
+const dentistBreakSchema = new Schema<IDentistBreak>(
+  {
+    day: { type: String, enum: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], required: true },
+    startTime: { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    endTime: { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
   },
   { _id: false },
 );
@@ -229,6 +247,9 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
         message: "Working hours must not contain duplicate days",
       },
     },
+    breaks: { type: [dentistBreakSchema], default: [] },
+    slotDurationMinutes: { type: Number, default: 30, min: 5, max: 240, validate: Number.isInteger },
+    bufferTimeMinutes: { type: Number, default: 0, min: 0, max: 120, validate: Number.isInteger },
 
     verificationStatus: {
       type: String,

@@ -23,6 +23,18 @@ export interface DoctorWorkingHour {
   endTime: string;
 }
 
+export interface DoctorBreak {
+  day: DoctorDayOfWeek;
+  startTime: string;
+  endTime: string;
+}
+
+export interface DoctorAvailabilitySlot {
+  day: DoctorDayOfWeek;
+  startTime: string;
+  endTime: string;
+}
+
 export interface DoctorDocumentData {
   documentType: string;
   documentKey: string;
@@ -48,6 +60,9 @@ export interface DoctorProps {
   specializations: string[];
   procedures: string[];
   workingHours: DoctorWorkingHour[];
+  breaks: DoctorBreak[];
+  slotDurationMinutes: number;
+  bufferTimeMinutes: number;
   verificationStatus: DoctorVerificationStatus;
   rejectionReason: string | null;
   consultationFee: number | null;
@@ -102,6 +117,9 @@ export class Doctor {
       specializations: props.specializations ?? [],
       procedures: props.procedures ?? [],
       workingHours: props.workingHours ?? [],
+      breaks: props.breaks ?? [],
+      slotDurationMinutes: props.slotDurationMinutes ?? 30,
+      bufferTimeMinutes: props.bufferTimeMinutes ?? 0,
       verificationStatus: props.verificationStatus ?? "NOT_STARTED",
       rejectionReason: props.rejectionReason ?? null,
       consultationFee: props.consultationFee ?? null,
@@ -168,6 +186,68 @@ export class Doctor {
     if (updates.procedures !== undefined) this.props.procedures = normalizedList(updates.procedures, "procedure");
     if (updates.workingHours !== undefined) this.props.workingHours = this.normalizeWorkingHours(updates.workingHours);
     this.markInProgress();
+  }
+
+  configureAvailability(updates: {
+    workingHours: DoctorWorkingHour[];
+    breaks: DoctorBreak[];
+    slotDurationMinutes: number;
+    bufferTimeMinutes: number;
+  }): void {
+    if (!Number.isInteger(updates.slotDurationMinutes) || updates.slotDurationMinutes < 5 || updates.slotDurationMinutes > 240) {
+      throw new InvalidDoctorDataError("slotDurationMinutes must be an integer from 5 to 240");
+    }
+    if (!Number.isInteger(updates.bufferTimeMinutes) || updates.bufferTimeMinutes < 0 || updates.bufferTimeMinutes > 120) {
+      throw new InvalidDoctorDataError("bufferTimeMinutes must be an integer from 0 to 120");
+    }
+    const workingHours = this.normalizeWorkingHours(updates.workingHours);
+    const openHours = new Map(workingHours.filter((hours) => hours.isOpen).map((hours) => [hours.day, hours]));
+    if (!Array.isArray(updates.breaks)) throw new InvalidDoctorDataError("breaks must be a list");
+    const breaks = updates.breaks.map((item) => {
+      if (!DAYS.includes(item.day) || !TIME_PATTERN.test(item.startTime) || !TIME_PATTERN.test(item.endTime) || item.startTime >= item.endTime) {
+        throw new InvalidDoctorDataError("Break has an invalid day or time range");
+      }
+      const hours = openHours.get(item.day);
+      if (!hours || item.startTime < hours.startTime || item.endTime > hours.endTime) {
+        throw new InvalidDoctorDataError(`Break for ${item.day} must be within doctor working hours`);
+      }
+      return { ...item };
+    }).sort((a, b) => a.day.localeCompare(b.day) || a.startTime.localeCompare(b.startTime));
+    for (let index = 1; index < breaks.length; index++) {
+      if (breaks[index - 1]!.day === breaks[index]!.day && breaks[index - 1]!.endTime > breaks[index]!.startTime) {
+        throw new InvalidDoctorDataError("Breaks on the same day must not overlap");
+      }
+    }
+    this.props.workingHours = workingHours;
+    this.props.breaks = breaks;
+    this.props.slotDurationMinutes = updates.slotDurationMinutes;
+    this.props.bufferTimeMinutes = updates.bufferTimeMinutes;
+    this.props.updatedAt = new Date();
+  }
+
+  generateAvailabilitySlots(): DoctorAvailabilitySlot[] {
+    const slots: DoctorAvailabilitySlot[] = [];
+    const step = this.props.slotDurationMinutes + this.props.bufferTimeMinutes;
+    for (const hours of this.props.workingHours.filter((item) => item.isOpen)) {
+      const pauses = this.props.breaks.filter((item) => item.day === hours.day).sort((a, b) => a.startTime.localeCompare(b.startTime));
+      const segments: Array<{ startTime: string; endTime: string }> = [];
+      let cursor = minutes(hours.startTime);
+      for (const pause of pauses) {
+        const pauseStart = minutes(pause.startTime);
+        if (pauseStart > cursor) segments.push({ startTime: time(cursor), endTime: time(pauseStart) });
+        cursor = minutes(pause.endTime);
+      }
+      const closing = minutes(hours.endTime);
+      if (cursor < closing) segments.push({ startTime: time(cursor), endTime: time(closing) });
+      for (const segment of segments) {
+        const segmentStart = minutes(segment.startTime);
+        const segmentEnd = minutes(segment.endTime);
+        for (let start = segmentStart; start + this.props.slotDurationMinutes <= segmentEnd; start += step) {
+          slots.push({ day: hours.day, startTime: time(start), endTime: time(start + this.props.slotDurationMinutes) });
+        }
+      }
+    }
+    return slots;
   }
 
   addDocument(document: DoctorDocumentData): void {
@@ -286,10 +366,22 @@ export class Doctor {
   get specializations() { return [...this.props.specializations]; }
   get procedures() { return [...this.props.procedures]; }
   get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
+  get breaks() { return this.props.breaks.map((item) => ({ ...item })); }
+  get slotDurationMinutes() { return this.props.slotDurationMinutes; }
+  get bufferTimeMinutes() { return this.props.bufferTimeMinutes; }
   get verificationStatus() { return this.props.verificationStatus; }
   get rejectionReason() { return this.props.rejectionReason; }
   get consultationFee() { return this.props.consultationFee; }
   get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
   get createdAt() { return new Date(this.props.createdAt); }
   get updatedAt() { return new Date(this.props.updatedAt); }
+}
+
+function minutes(value: string): number {
+  const [hours, mins] = value.split(":").map(Number);
+  return hours! * 60 + mins!;
+}
+
+function time(value: number): string {
+  return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
 }

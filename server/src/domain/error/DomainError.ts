@@ -17,6 +17,8 @@ export class InvalidUserDataError extends DomainError {}
 
 export class InvalidClinicDataError extends DomainError {}
 
+export class InvalidDoctorDataError extends DomainError {}
+
 export class InvalidInvitationDataError extends DomainError {}
 
 export class InvitationExpiredError extends DomainError {

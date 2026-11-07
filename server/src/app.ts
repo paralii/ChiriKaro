@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { authRouter } from "@container/auth.container.ts";
 import { clinicRouter } from "@container/clinic.container.ts";
 import { superAdminClinicRouter } from "@container/super-admin-clinic.container.ts";
+import { doctorRouter } from "@container/doctor.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
@@ -58,6 +59,7 @@ export class App {
     this.instance.use("/api", authRouter);
     this.instance.use("/api", clinicRouter);
     this.instance.use("/api", superAdminClinicRouter);
+    this.instance.use("/api", doctorRouter);
   }
 
   public registerErrorHandlers(): void {

@@ -1,10 +1,5 @@
-export interface StoredClinicDocument {
-  key: string;
-  contentType: string;
-  content: Buffer;
-}
+import type { IDocumentStorage, StoredDocument } from "@application/interfaces/services/IDocumentStorage.ts";
 
-export interface IClinicDocumentStorage {
-  save(content: Buffer, contentType: string): Promise<string>;
-  read(key: string): Promise<StoredClinicDocument>;
-}
+export type StoredClinicDocument = StoredDocument;
+
+export type IClinicDocumentStorage = IDocumentStorage;

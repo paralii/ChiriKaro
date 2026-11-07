@@ -9,7 +9,7 @@ export type DentistVerificationStatus =
 
 export type DentistDocumentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
-export type DentistGender = "MALE" | "FEMALE";
+export type DentistGender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 
 export type DayOfWeek =
   | "MONDAY"

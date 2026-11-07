@@ -11,6 +11,7 @@ import {
 export interface InvitationProps {
   id: string;
   email: string;
+  tokenHash: string;
   role: Role;
   clinicId: string;
   invitedBy: string;
@@ -37,21 +38,23 @@ export class Invitation {
   private constructor(private props: InvitationProps) {}
 
   static create(props: {
-    id: string;
+    id?: string;
     email: string;
+    tokenHash: string;
     role: Role;
     clinicId: string;
     invitedBy: string;
     ttl?: number;
   }): Invitation {
-    const id = requireNonBlank(props.id, "id");
-    const email = requireNonBlank(props.email, "email");
+    const id = props.id?.trim() ?? "";
+    const email = requireNonBlank(props.email, "email").toLowerCase();
     if (!EMAIL_PATTERN.test(email)) {
       throw new InvalidInvitationDataError(
         "Invitation email is not a valid email address",
       );
     }
     const invitedBy = requireNonBlank(props.invitedBy, "invitedBy");
+    const tokenHash = requireNonBlank(props.tokenHash, "tokenHash");
 
     const needsClinicId = isClinicScopedRole(props.role);
     const clinicId = props.clinicId?.trim() ?? "";
@@ -73,6 +76,7 @@ export class Invitation {
     return new Invitation({
       id,
       email,
+      tokenHash,
       role: props.role,
       clinicId,
       invitedBy,
@@ -109,6 +113,15 @@ export class Invitation {
   accept(): void {
     this.assertUsable();
     this.props.status = InvitationStatus.ACCEPTED;
+    this.touch();
+  }
+
+  resend(tokenHash: string): void {
+    this.assertUsable();
+    this.props.tokenHash = requireNonBlank(tokenHash, "tokenHash");
+    this.props.expiresAt = new Date(
+      Date.now() + DEFAULT_TTL_HOURS * 60 * 60 * 1000,
+    );
     this.touch();
   }
 
@@ -154,6 +167,9 @@ export class Invitation {
   }
   get email() {
     return this.props.email;
+  }
+  get tokenHash() {
+    return this.props.tokenHash;
   }
   get role() {
     return this.props.role;

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import express from "express";
 import type { RequestHandler } from "express";
 
 import type { ClinicController } from "@presentation/controllers/clinic.controller.ts";
@@ -8,11 +9,11 @@ export interface ClinicRouterMiddlewares {
   authorizeClinicAdmin: RequestHandler;
 }
 
-// export interface ClinicRouterMiddlewares {
-//   authenticate: RequestHandler;
-//   authorizeClinicAdmin: RequestHandler;
-//   authorizeSuperAdmin: RequestHandler;
-// }
+export interface ClinicRouterMiddlewares {
+  authenticate: RequestHandler;
+  authorizeClinicAdmin: RequestHandler;
+  authorizeSuperAdmin: RequestHandler;
+}
 
 export function ClinicRouter(
   clinicController: ClinicController,
@@ -30,6 +31,32 @@ export function ClinicRouter(
     authenticate,
     authorizeClinicAdmin,
     clinicController.getProfile,
+  );
+
+  router.patch(
+    "/clinic/setup",
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.updateSetup,
+  );
+  router.post(
+    "/clinic/setup/documents",
+    authenticate,
+    authorizeClinicAdmin,
+    express.raw({ type: ["application/pdf", "image/jpeg", "image/png"], limit: "10mb" }),
+    clinicController.uploadDocument,
+  );
+  router.get(
+    "/clinic/setup/documents/:documentType",
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.getDocument,
+  );
+  router.post(
+    "/clinic/setup/submit",
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.submitSetup,
   );
 
   router.patch(

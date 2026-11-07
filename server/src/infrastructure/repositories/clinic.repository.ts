@@ -79,6 +79,10 @@ export class ClinicRepository
       registrationNumber: doc.registrationNumber ?? null,
       ownerAdminId: doc.ownerAdminId ? doc.ownerAdminId.toString() : null,
       status: doc.status,
+      specializations: doc.services ?? [],
+      workingHours: doc.workingHours ?? [],
+      documents: doc.documents ?? [],
+      setupStatus: doc.setupStatus,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
@@ -98,6 +102,10 @@ export class ClinicRepository
         : null,
       registrationNumber: clinic.registrationNumber ?? null,
       status: clinic.status,
+      services: clinic.specializations,
+      workingHours: clinic.workingHours,
+      documents: clinic.documents,
+      setupStatus: clinic.setupStatus,
     };
   }
 }

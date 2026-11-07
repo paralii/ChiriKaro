@@ -30,9 +30,10 @@ interface EnvVars {
   SMTP_FROM_NAME: string;
   SMTP_FROM_EMAIL: string;
 
-  CLIENT_URL: string;
-  AWS_REGION: string;
-  S3_BUCKET?: string;
+  CLIENT_URL: string,
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
 
   LOG_LEVEL: string;
 }
@@ -66,8 +67,10 @@ const envSchema = Joi.object({
   SMTP_FROM_EMAIL: Joi.string().email().required(),
 
   CLIENT_URL: Joi.string().uri().required(),
-  AWS_REGION: Joi.string().default("us-east-1"),
-  S3_BUCKET: Joi.string().optional(),
+
+  CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
 
   LOG_LEVEL: Joi.string()
     .valid("error", "warn", "info", "http", "verbose", "debug", "silly")
@@ -107,8 +110,10 @@ export const env: EnvVars = {
   SMTP_FROM_EMAIL: value.SMTP_FROM_EMAIL,
 
   CLIENT_URL: value.CLIENT_URL,
-  AWS_REGION: value.AWS_REGION,
-  S3_BUCKET: value.S3_BUCKET,
+  
+  CLOUDINARY_CLOUD_NAME: value.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: value.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: value.CLOUDINARY_API_SECRET,
 
   LOG_LEVEL: value.LOG_LEVEL,
 };

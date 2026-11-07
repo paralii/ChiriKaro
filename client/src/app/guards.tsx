@@ -4,20 +4,22 @@ import type { Role } from "@/features/auth/store/authSlice";
 
 export function RequireAuth() {
   const user = useAppSelector((s) => s.auth.user);
-
   return user ? <Outlet /> : <Navigate to="/login/patient" replace />;
 }
 
 export function RequireRole({ roles }: { roles: Role[] }) {
   const user = useAppSelector((s) => s.auth.user);
-
   if (!user) {
     return <Navigate to="/login/patient" replace />;
   }
-
   if (!roles.includes(user.role)) {
     return <Navigate to="/app/dashboard" replace />;
   }
-
   return <Outlet />;
+}
+
+export function RequireSuperAdmin() {
+  const user = useAppSelector((s) => s.auth.user);
+  if (!user) return <Navigate to="/superadmin" replace />;
+  return user.role === "SUPER_ADMIN" ? <Outlet /> : <Navigate to="/" replace />;
 }

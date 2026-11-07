@@ -1,10 +1,14 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { RequireSuperAdmin } from '@/app/guards';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import SuperAdminLoginPage from '@/pages/auth/SuperAdminLoginPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
+import AdminPortalLayout from '@/pages/portal/admin/AdminPortalLayout';
+import AdminDashboardPage from '@/pages/portal/admin/AdminDashboardPage';
+import AdminClinicsPage from '@/pages/portal/admin/AdminClinicsPage';
 
 export default function AppRouter() {
   return (
@@ -15,6 +19,15 @@ export default function AppRouter() {
       <Route path="/register/:role" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      <Route element={<RequireSuperAdmin />}>
+        <Route path="/app" element={<AdminPortalLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="clinics" element={<AdminClinicsPage />} />
+          <Route path="pending" element={<AdminClinicsPage pendingOnly />} />
+        </Route>
+      </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

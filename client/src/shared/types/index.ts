@@ -16,7 +16,7 @@ export type RegisterResult = {
 };
 
 export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
-export type Clinic = { id: string; name: string; address?: string | null; phone?: string | null; ownerName?: string; contactEmail?: string; status: string; isActive: boolean };
+export type Clinic = { id: string; name: string; address?: string | null; phone?: string | null; ownerName?: string; ownerAdminId?: string | null; contactEmail?: string | null; status: string; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
 export type Invitation = { email: string; role: 'DOCTOR' | 'STAFF'; inviteUrl: string };
 export type WorkingHour = { day: string; isOpen: boolean; startTime: string; endTime: string };

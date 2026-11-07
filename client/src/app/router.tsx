@@ -12,6 +12,7 @@ import AdminClinicsPage from '@/pages/portal/admin/AdminClinicsPage';
 import ClinicPortalLayout from '@/pages/portal/clinic/ClinicPortalLayout';
 import ClinicDashboardPage from '@/pages/portal/clinic/ClinicDashboardPage';
 import ClinicProfilePage from '@/pages/portal/clinic/ClinicProfilePage';
+import ClinicSetupPage from '@/pages/portal/clinic/ClinicSetupPage';
 import ClinicInvitationsPage from '@/pages/portal/clinic/ClinicInvitationsPage';
 import AcceptInvitationPage from '@/pages/AcceptInvitationPage';
 import TeamAccessPage from '@/pages/portal/TeamAccessPage';
@@ -50,6 +51,7 @@ export default function AppRouter() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<ClinicDashboardPage />} />
           <Route path="profile" element={<ClinicProfilePage />} />
+          <Route path="setup" element={<ClinicSetupPage />} />
           <Route path="doctors" element={<ClinicInvitationsPage invitee="doctor" />} />
           <Route path="staff" element={<ClinicInvitationsPage invitee="staff" />} />
         </Route>

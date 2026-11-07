@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 const items = [
   { path: '/clinic/dashboard', label: 'Overview' },
   { path: '/clinic/profile', label: 'Clinic profile' },
+  { path: '/clinic/setup', label: 'Clinic setup' },
   { path: '/clinic/doctors', label: 'Doctor invitations' },
   { path: '/clinic/staff', label: 'Staff invitations' },
 ];
@@ -22,7 +23,7 @@ export default function ClinicPortalLayout() {
   const clinic = useAppSelector((state) => state.clinic.current);
   const { pathname } = useLocation();
   const section = pathname.split('/')[2] ?? 'dashboard';
-  const title = section === 'profile' ? 'Clinic profile' : section === 'doctors' ? 'Doctor invitations' : section === 'staff' ? 'Staff invitations' : 'Overview';
+  const title = section === 'profile' ? 'Clinic profile' : section === 'setup' ? 'Clinic setup' : section === 'doctors' ? 'Doctor invitations' : section === 'staff' ? 'Staff invitations' : 'Overview';
   const logout = useLogout();
 
   useEffect(() => { void dispatch(loadClinic()); }, [dispatch]);

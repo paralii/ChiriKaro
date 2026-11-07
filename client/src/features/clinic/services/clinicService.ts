@@ -1,5 +1,5 @@
-import { api } from '@/shared/lib/http';
-import type { ClinicDashboard, ClinicDocument, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/shared/types';
+import { api, http } from '@/shared/lib/http';
+import type { ClinicDashboard, ClinicProfile, DoctorDetail, DoctorSummary, Invitation, WorkingHour } from '@/shared/types';
 
 const enc = encodeURIComponent;
 
@@ -20,11 +20,21 @@ export const clinicService = {
   dashboard: () => responseData(api.get<ApiEnvelope<ClinicDashboard>>('/clinic/dashboard'), 'Clinic dashboard data was not returned.'),
   getProfile: () => responseData(api.get<ApiEnvelope<ClinicProfile>>('/clinic/profile'), 'Clinic profile was not returned.'),
   updateProfile: (body: Partial<ClinicProfile>) => responseData(api.patch<ApiEnvelope<ClinicProfile>>('/clinic/profile', body), 'Updated clinic profile was not returned.'),
-  saveSpecializations: (specializations: string[]) => api.put<string[]>('/clinic/specializations', { specializations }),
-  saveWorkingHours: (workingHours: WorkingHour[]) => api.put<WorkingHour[]>('/clinic/working-hours', { workingHours }),
-  getUploadUrl: (file: File) => api.post<{ key: string; uploadUrl: string }>('/clinic/documents/upload-url', { fileName: file.name, contentType: file.type, fileSize: file.size }),
-  addDocument: (documentType: string, documentKey: string) => api.post<ClinicDocument[]>('/clinic/documents', { documentType, documentKey }),
-  getDocumentUrl: (type: string) => api.get<{ url: string }>(`/clinic/documents/${enc(type)}/download-url`),
+  updateSetup: (body: { location?: Pick<ClinicProfile, 'address' | 'city' | 'state' | 'pincode'>; specializations?: string[]; workingHours?: WorkingHour[] }) =>
+    responseData(api.patch<ApiEnvelope<ClinicProfile>>('/clinic/setup', body), 'Clinic setup was not returned.'),
+  submitSetup: () => responseData(api.post<ApiEnvelope<ClinicProfile>>('/clinic/setup/submit'), 'Clinic setup submission was not returned.'),
+  uploadDocument: async (documentType: string, file: File) => {
+    const safeType = documentType.trim().replace(/\s+/g, '_');
+    const response = await http.post<ApiEnvelope<ClinicProfile>>(`/clinic/setup/documents?documentType=${enc(safeType)}`, file, {
+      headers: { 'Content-Type': file.type },
+    });
+    if (!response.data.data) throw new Error('Updated clinic documents were not returned.');
+    return response.data.data;
+  },
+  getDocument: async (type: string) => {
+    const safeType = type.trim().replace(/\s+/g, '_');
+    return (await http.get<Blob>(`/clinic/setup/documents/${enc(safeType)}`, { responseType: 'blob' })).data;
+  },
   invite: (body: { email: string; role: 'DOCTOR' | 'STAFF' }) => responseData(api.post<ApiEnvelope<Invitation>>('/clinic/invitations', body), 'Invitation details were not returned.'),
   listPendingInvitations: () => responseData(api.get<ApiEnvelope<Invitation[]>>('/clinic/invitations/pending'), 'Pending invitations were not returned.'),
   resendInvitation: (id: string) => responseData(api.post<ApiEnvelope<Invitation>>(`/clinic/invitations/${enc(id)}/resend`), 'Updated invitation details were not returned.'),

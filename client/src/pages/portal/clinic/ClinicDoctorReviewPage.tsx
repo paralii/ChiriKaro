@@ -28,6 +28,11 @@ export default function ClinicDoctorReviewPage() {
     await refresh();
   }, { success, fallback: 'The doctor verification update could not be saved.' });
 
+  const saveFee = (doctorId: string, name: string, fee: number) => void run(async () => {
+    const result = await clinicService.setDoctorFee(doctorId, fee);
+    setDoctors((current) => current.map((doctor) => doctor.doctorId === doctorId ? { ...doctor, consultationFee: result.consultationFee } : doctor));
+  }, { success: `Consultation fee saved for ${name}.`, fallback: 'Could not save the consultation fee.' });
+
   const openDocument = (doctorId: string, type: string) => void run(async () => {
     const content = await clinicService.getDoctorVerificationDocument(doctorId, type);
     const url = URL.createObjectURL(content);
@@ -40,7 +45,7 @@ export default function ClinicDoctorReviewPage() {
       <SectionHeading title="Doctor verification" description="Review submitted profiles and either approve them or request corrections." />
       <div className="px-[18px] pt-4"><Notices error={error} message={message} /></div>
       {busy && !doctors.length ? <div className="px-[18px] py-5 text-sm text-[#777c8a]">Loading pending doctor verifications...</div> : !doctors.length ? <EmptyState>No doctor profiles are awaiting verification.</EmptyState> : (
-        <DataTable headers={['DOCTOR', 'STATUS', 'UPDATED', 'ACTIONS']}>
+        <DataTable headers={['DOCTOR', 'STATUS', 'CONSULTATION FEE', 'UPDATED', 'ACTIONS']}>
           {doctors.map((doctor) => {
             const name = `${doctor.firstName} ${doctor.lastName}`.trim();
             return (
@@ -51,7 +56,8 @@ export default function ClinicDoctorReviewPage() {
                   setSelected({ id: doctor.doctorId, profile: result.profile });
                 }, { fallback: 'Could not load this doctor profile.' })}
                 onApprove={() => act(() => clinicService.approveDoctorVerification(doctor.doctorId), `${name}'s profile was approved.`)}
-                onReject={(reason) => act(() => clinicService.rejectDoctorVerification(doctor.doctorId, reason), `Corrections were requested from ${name}.`)} />
+                onReject={(reason) => act(() => clinicService.rejectDoctorVerification(doctor.doctorId, reason), `Corrections were requested from ${name}.`)}
+                onSaveFee={(fee) => saveFee(doctor.doctorId, name, fee)} />
             );
           })}
         </DataTable>

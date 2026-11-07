@@ -77,7 +77,9 @@ export type DoctorVerificationSummary = {
   professionalTitle: string | null;
   verificationStatus: DoctorOnboardingStatus;
   updatedAt: string;
+  consultationFee?: number | null;
 };
+export type DoctorConsultationFee = { doctorId: string; consultationFee: number | null; updatedAt: string };
 export type SlotConfig = { slotDuration: number; bufferMinutes: number; consultationFee: number | null };
 export type Slot = { day: string; startTime: string; endTime: string };
 export type DoctorSummary = {

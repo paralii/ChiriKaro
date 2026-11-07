@@ -1,5 +1,5 @@
 import { api, http } from '@/shared/lib/http';
-import type { ClinicDashboard, ClinicProfile, DoctorDetail, DoctorOnboardingDTO, DoctorSummary, DoctorVerificationSummary, Invitation, WorkingHour } from '@/shared/types';
+import type { ClinicDashboard, ClinicProfile, DoctorConsultationFee, DoctorDetail, DoctorOnboardingDTO, DoctorSummary, DoctorVerificationSummary, Invitation, WorkingHour } from '@/shared/types';
 
 const enc = encodeURIComponent;
 
@@ -43,10 +43,13 @@ export const clinicService = {
   approveDoctorVerification: (id: string) => responseData(api.post<ApiEnvelope<DoctorOnboardingDTO>>(`/clinic/doctors/${enc(id)}/verification/approve`), 'Doctor approval was not returned.'),
   rejectDoctorVerification: (id: string, reason: string) => responseData(api.post<ApiEnvelope<DoctorOnboardingDTO>>(`/clinic/doctors/${enc(id)}/verification/reject`, { reason }), 'Doctor rejection was not returned.'),
   getDoctorVerificationDocument: async (id: string, type: string) => (await http.get<Blob>(`/clinic/doctors/${enc(id)}/verification/documents/${enc(type.trim().replace(/\s+/g, '_'))}`, { responseType: 'blob' })).data,
+  setDoctorFee: (id: string, consultationFee: number) => responseData(
+    api.patch<ApiEnvelope<DoctorConsultationFee>>(`/clinic/doctors/${enc(id)}/consultation-fee`, { consultationFee }),
+    'Updated consultation fee was not returned.',
+  ),
   listDoctors: () => api.get<DoctorSummary[]>('/clinic/doctors'),
   getDoctor: (id: string) => api.get<DoctorDetail>(`/clinic/doctors/${id}`),
   approveDoctor: (id: string) => api.post(`/clinic/doctors/${id}/approve`),
   rejectDoctor: (id: string, reason: string) => api.post(`/clinic/doctors/${id}/reject`, { reason }),
-  setDoctorFee: (id: string, fee: number) => api.patch(`/clinic/doctors/${id}/fee`, { fee }),
   getDoctorDocumentUrl: (id: string, type: string) => api.get<{ url: string }>(`/clinic/doctors/${id}/documents/${enc(type)}/download-url`),
 };

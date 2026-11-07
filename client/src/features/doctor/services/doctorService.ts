@@ -1,5 +1,5 @@
 import { api, http } from '@/shared/lib/http';
-import type { DoctorOnboardingDTO, DoctorOnboardingStep, DoctorProfile, Slot, SlotConfig, WorkingHour } from '@/shared/types';
+import type { DoctorConsultationFee, DoctorOnboardingDTO, DoctorOnboardingStep, DoctorProfile, Slot, SlotConfig, WorkingHour } from '@/shared/types';
 
 type ApiEnvelope<T> = { data?: T };
 
@@ -25,6 +25,7 @@ export const doctorService = {
     const safeType = documentType.trim().replace(/\s+/g, '_');
     return (await http.get<Blob>(`/doctor/onboarding/documents/${encodeURIComponent(safeType)}`, { responseType: 'blob' })).data;
   },
+  getConsultationFee: () => responseData(api.get<ApiEnvelope<DoctorConsultationFee>>('/doctor/consultation-fee'), 'Consultation fee was not returned.'),
   getProfile: () => api.get<DoctorProfile>('/doctor/profile'),
   patchProfile: (body: unknown) => api.patch<DoctorProfile>('/doctor/profile', body),
   saveAvailability: (workingHours: WorkingHour[]) => api.put<DoctorProfile>('/doctor/availability', { workingHours }),

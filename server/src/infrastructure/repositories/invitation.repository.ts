@@ -14,32 +14,71 @@ export class InvitationRepository
     super(InvitationModel);
   }
 
-  async findPendingByEmail(email: string): Promise<Invitation | null> {
+  async findPendingByEmail(email: string, clinicId: string): Promise<Invitation | null> {
     const doc = await this.model
       .findOne({
         email: email.toLowerCase(),
+        clinicId: new Types.ObjectId(clinicId),
         status: InvitationStatus.PENDING,
         expiresAt: { $gt: new Date() },
       })
+      .select("+tokenHash")
       .exec();
     return doc ? this.toDomain(doc) : null;
   }
 
+  async findPendingById(id: string, clinicId: string): Promise<Invitation | null> {
+    const doc = await this.model
+      .findOne({
+        _id: new Types.ObjectId(id),
+        clinicId: new Types.ObjectId(clinicId),
+        status: InvitationStatus.PENDING,
+        expiresAt: { $gt: new Date() },
+      })
+      .select("+tokenHash")
+      .exec();
+    return doc ? this.toDomain(doc) : null;
+  }
+
+  async findPendingByClinic(clinicId: string): Promise<Invitation[]> {
+    const docs = await this.model
+      .find({
+        clinicId: new Types.ObjectId(clinicId),
+        status: InvitationStatus.PENDING,
+        expiresAt: { $gt: new Date() },
+      })
+      .sort({ createdAt: -1 })
+      .select("+tokenHash")
+      .exec();
+    return docs.map((doc) => this.toDomain(doc));
+  }
+
   async save(invitation: Invitation): Promise<Invitation> {
+    if (!invitation.id) {
+      const doc = await this.model.create(this.toPersistence(invitation));
+      return this.toDomain(doc);
+    }
+
     const doc = await this.model
       .findOneAndUpdate(
         { _id: new Types.ObjectId(invitation.id) },
         { $set: this.toPersistence(invitation) },
         { upsert: true, new: true, setDefaultsOnInsert: true },
       )
+      .select("+tokenHash")
       .exec();
     return this.toDomain(doc!);
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await this.model.findByIdAndDelete(id).exec();
   }
 
   private toDomain(doc: IInvitationDocument): Invitation {
     return Invitation.fromPersistence({
       id: doc._id.toString(),
       email: doc.email,
+      tokenHash: doc.tokenHash,
       role: doc.role,
       clinicId: doc.clinicId.toString(),
       invitedBy: doc.invitedBy.toString(),
@@ -53,6 +92,7 @@ export class InvitationRepository
   private toPersistence(invitation: Invitation) {
     return {
       email: invitation.email,
+      tokenHash: invitation.tokenHash,
       role: invitation.role,
       clinicId: new Types.ObjectId(invitation.clinicId as string),
       invitedBy: new Types.ObjectId(invitation.invitedBy),

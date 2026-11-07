@@ -5,6 +5,7 @@ export type AuthResult = {
   accessToken: string;
   refreshToken: string;
 };
+export type LoginResponse = { success: boolean; message: string; data?: AuthResult['user'] };
 export type RegisterResult = {
   user: {
     id: string;

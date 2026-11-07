@@ -23,11 +23,18 @@ export function useLogin() {
           email: normalizeEmail(email),
           password,
         });
-        
-        dispatch(
-          setUser(result.user),
-        );
-        navigate("/app/dashboard", { replace: true });
+
+        if (!result.data) throw new Error('The signed-in user was not returned.');
+        dispatch(setUser(result.data));
+
+        const destination = {
+          SUPER_ADMIN: '/app/dashboard',
+          CLINIC_ADMIN: '/clinic/dashboard',
+          DOCTOR: '/doctor/dashboard',
+          STAFF: '/staff/dashboard',
+          PATIENT: '/app/dashboard',
+        }[result.data.role];
+        navigate(destination, { replace: true });
       },
       { fallback: "We could not complete that request. Please try again." },
     );

@@ -33,3 +33,15 @@ export function RequireClinicAdmin() {
   if (user.role === "SUPER_ADMIN") return <Navigate to="/app/dashboard" replace />;
   return <Navigate to="/" replace />;
 }
+
+export function RequireDoctor() {
+  const user = useAppSelector((s) => s.auth.user);
+  if (!user) return <Navigate to="/login/doctor" replace />;
+  return user.role === "DOCTOR" ? <Outlet /> : <Navigate to="/" replace />;
+}
+
+export function RequireStaff() {
+  const user = useAppSelector((s) => s.auth.user);
+  if (!user) return <Navigate to="/login/staff" replace />;
+  return user.role === "STAFF" ? <Outlet /> : <Navigate to="/" replace />;
+}

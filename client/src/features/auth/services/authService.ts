@@ -1,9 +1,9 @@
 import { api } from '@/shared/lib/http';
-import type { AuthResult, RegisterResult } from '@/shared/types';
+import type { LoginResponse, RegisterResult } from '@/shared/types';
 import type { Role } from '@/features/auth/store/authSlice';
 
 export const authService = {
-  login: (body: { email: string; password: string; }) => api.post<AuthResult>('/auth/login', body),
+  login: (body: { email: string; password: string; }) => api.post<LoginResponse>('/auth/login', body),
   register: (body: { name: string; email: string; password: string; role: Role }) => api.post<RegisterResult>('/auth/register', body),
   verifyOtp: (email: string, code: string) => api.post('/auth/verify-otp', { email, code }),
   resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),

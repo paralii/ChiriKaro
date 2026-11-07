@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { RequireClinicAdmin, RequireSuperAdmin } from '@/app/guards';
+import { RequireClinicAdmin, RequireDoctor, RequireStaff, RequireSuperAdmin } from '@/app/guards';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
@@ -14,6 +14,7 @@ import ClinicDashboardPage from '@/pages/portal/clinic/ClinicDashboardPage';
 import ClinicProfilePage from '@/pages/portal/clinic/ClinicProfilePage';
 import ClinicInvitationsPage from '@/pages/portal/clinic/ClinicInvitationsPage';
 import AcceptInvitationPage from '@/pages/AcceptInvitationPage';
+import TeamAccessPage from '@/pages/portal/TeamAccessPage';
 
 export default function AppRouter() {
   return (
@@ -25,6 +26,13 @@ export default function AppRouter() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
+
+      <Route element={<RequireDoctor />}>
+        <Route path="/doctor/dashboard" element={<TeamAccessPage />} />
+      </Route>
+      <Route element={<RequireStaff />}>
+        <Route path="/staff/dashboard" element={<TeamAccessPage />} />
+      </Route>
 
       <Route element={<RequireClinicAdmin />}>
         <Route path="/clinic" element={<ClinicPortalLayout />}>

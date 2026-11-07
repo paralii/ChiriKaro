@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import { authRouter } from "@container/auth.container.ts";
+import { superAdminRouter } from "@container/super-admin.container.ts";
 import { clinicRouter } from "@container/clinic.container.ts";
 import { superAdminClinicRouter } from "@container/super-admin-clinic.container.ts";
 import { doctorRouter } from "@container/doctor.container.ts";
@@ -59,6 +60,7 @@ export class App {
 
   private initializeRoutes(): void {
     this.instance.use("/api", authRouter);
+    this.instance.use("/api", superAdminRouter);
     this.instance.use("/api", clinicRouter);
     this.instance.use("/api", superAdminClinicRouter);
     this.instance.use("/api", doctorRouter);

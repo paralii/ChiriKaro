@@ -5,6 +5,7 @@ import type { DoctorController } from "@presentation/controllers/doctor.controll
 export interface DoctorRouterMiddlewares {
   authenticate: RequestHandler;
   authorizeDoctor: RequestHandler;
+  authorizeClinicAdmin: RequestHandler;
 }
 
 export function DoctorRouter(
@@ -12,7 +13,7 @@ export function DoctorRouter(
   middlewares: DoctorRouterMiddlewares,
 ): Router {
   const router = Router();
-  const { authenticate, authorizeDoctor } = middlewares;
+  const { authenticate, authorizeDoctor, authorizeClinicAdmin } = middlewares;
 
   router.get("/doctor/onboarding", authenticate, authorizeDoctor, controller.getOnboarding);
   router.patch("/doctor/onboarding/:step", authenticate, authorizeDoctor, controller.updateOnboarding);
@@ -28,6 +29,40 @@ export function DoctorRouter(
     authenticate,
     authorizeDoctor,
     controller.getDocument,
+  );
+
+  router.get("/doctor/verification", authenticate, authorizeDoctor, controller.getVerification);
+  router.post("/doctor/verification/submit", authenticate, authorizeDoctor, controller.submitVerification);
+
+  router.get(
+    "/clinic/doctors/pending-verification",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.listPendingVerifications,
+  );
+  router.get(
+    "/clinic/doctors/:doctorId/verification",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.getVerificationDetails,
+  );
+  router.get(
+    "/clinic/doctors/:doctorId/verification/documents/:documentType",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.getClinicDoctorDocument,
+  );
+  router.post(
+    "/clinic/doctors/:doctorId/verification/approve",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.approveVerification,
+  );
+  router.post(
+    "/clinic/doctors/:doctorId/verification/reject",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.rejectVerification,
   );
   return router;
 }

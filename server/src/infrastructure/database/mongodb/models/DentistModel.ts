@@ -60,6 +60,7 @@ export interface IDentistProfile extends Document {
   workingHours: IDentistWorkingHour[];
 
   verificationStatus: DentistVerificationStatus;
+  rejectionReason?: string | null;
   documents: IDentistDocumentMeta[];
 
   createdAt: Date;
@@ -238,6 +239,12 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
         "REJECTED",
       ],
       default: "NOT_STARTED",
+    },
+    rejectionReason: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: 1000,
     },
 
     documents: {

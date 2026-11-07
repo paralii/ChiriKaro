@@ -19,14 +19,28 @@ export function toDoctorOnboardingDTO(doctor: Doctor | null): DoctorOnboardingDT
       specializations: doctor.specializations,
       procedures: doctor.procedures,
       workingHours: doctor.workingHours,
-      documents: doctor.documents.map(({ documentType, status, uploadedAt }) => ({
+      documents: doctor.documents.map(({ documentType, status, uploadedAt, verifiedAt, rejectionReason }) => ({
         documentType,
         status,
         uploadedAt,
+        verifiedAt,
+        rejectionReason,
       })),
       onboardingStatus: doctor.verificationStatus,
+      rejectionReason: doctor.rejectionReason,
       createdAt: doctor.createdAt,
       updatedAt: doctor.updatedAt,
     },
+  };
+}
+
+export function toDoctorVerificationSummaryDTO(doctor: Doctor) {
+  return {
+    doctorId: doctor.id!,
+    firstName: doctor.firstName,
+    lastName: doctor.lastName,
+    professionalTitle: doctor.professionalTitle,
+    verificationStatus: doctor.verificationStatus,
+    updatedAt: doctor.updatedAt,
   };
 }

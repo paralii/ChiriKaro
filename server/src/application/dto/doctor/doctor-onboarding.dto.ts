@@ -25,8 +25,15 @@ export interface DoctorOnboardingProfileDTO {
     startTime: string;
     endTime: string;
   }>;
-  documents: Array<{ documentType: string; status: string; uploadedAt: Date }>;
+  documents: Array<{
+    documentType: string;
+    status: string;
+    uploadedAt: Date;
+    verifiedAt: Date | null;
+    rejectionReason: string | null;
+  }>;
   onboardingStatus: DoctorVerificationStatus;
+  rejectionReason: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,4 +48,13 @@ export interface UpdateDoctorOnboardingDTO {
   clinicId: string;
   step: DoctorOnboardingStep;
   updates: unknown;
+}
+
+export interface DoctorVerificationSummaryDTO {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  professionalTitle: string | null;
+  verificationStatus: DoctorVerificationStatus;
+  updatedAt: Date;
 }

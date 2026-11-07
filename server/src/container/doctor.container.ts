@@ -17,6 +17,18 @@ import type { IUploadDoctorDocumentUseCase } from "@application/interfaces/use-c
 import { GetDoctorDocumentUseCase } from "@application/use-cases/doctor/get-doctor-document.use-case.ts";
 import type { IGetDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorDocumentUseCase.ts";
 import type { IDoctorDocumentStorage } from "@application/interfaces/services/IDoctorDocumentStorage.ts";
+import { SubmitDoctorVerificationUseCase } from "@application/use-cases/doctor/submit-doctor-verification.use-case.ts";
+import type { ISubmitDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/ISubmitDoctorVerificationUseCase.ts";
+import { ListPendingDoctorVerificationsUseCase } from "@application/use-cases/doctor/list-pending-doctor-verifications.use-case.ts";
+import type { IListPendingDoctorVerificationsUseCase } from "@application/interfaces/use-cases/doctor/IListPendingDoctorVerificationsUseCase.ts";
+import { GetDoctorVerificationDetailsUseCase } from "@application/use-cases/doctor/get-doctor-verification-details.use-case.ts";
+import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorVerificationDetailsUseCase.ts";
+import { ApproveDoctorVerificationUseCase } from "@application/use-cases/doctor/approve-doctor-verification.use-case.ts";
+import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
+import { RejectDoctorVerificationUseCase } from "@application/use-cases/doctor/reject-doctor-verification.use-case.ts";
+import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
+import { GetClinicDoctorDocumentUseCase } from "@application/use-cases/doctor/get-clinic-doctor-document.use-case.ts";
+import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 
 const doctorRepository = new DoctorRepository();
 const clinicRepository = new ClinicRepository();
@@ -31,12 +43,30 @@ const uploadDoctorDocumentUseCase: IUploadDoctorDocumentUseCase =
   new UploadDoctorDocumentUseCase(doctorRepository, documentStorage);
 const getDoctorDocumentUseCase: IGetDoctorDocumentUseCase =
   new GetDoctorDocumentUseCase(doctorRepository, documentStorage);
+const submitDoctorVerificationUseCase: ISubmitDoctorVerificationUseCase =
+  new SubmitDoctorVerificationUseCase(doctorRepository);
+const listPendingDoctorVerificationsUseCase: IListPendingDoctorVerificationsUseCase =
+  new ListPendingDoctorVerificationsUseCase(doctorRepository);
+const getDoctorVerificationDetailsUseCase: IGetDoctorVerificationDetailsUseCase =
+  new GetDoctorVerificationDetailsUseCase(doctorRepository);
+const approveDoctorVerificationUseCase: IApproveDoctorVerificationUseCase =
+  new ApproveDoctorVerificationUseCase(doctorRepository);
+const rejectDoctorVerificationUseCase: IRejectDoctorVerificationUseCase =
+  new RejectDoctorVerificationUseCase(doctorRepository);
+const getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase =
+  new GetClinicDoctorDocumentUseCase(doctorRepository, documentStorage);
 
 const controller = new DoctorController(
   getDoctorOnboardingUseCase,
   updateDoctorOnboardingUseCase,
   uploadDoctorDocumentUseCase,
   getDoctorDocumentUseCase,
+  submitDoctorVerificationUseCase,
+  listPendingDoctorVerificationsUseCase,
+  getDoctorVerificationDetailsUseCase,
+  approveDoctorVerificationUseCase,
+  rejectDoctorVerificationUseCase,
+  getClinicDoctorDocumentUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({
@@ -48,4 +78,5 @@ const authMiddleware = new AuthMiddleware({
 export const doctorRouter = DoctorRouter(controller, {
   authenticate: authMiddleware.authenticate,
   authorizeDoctor: authMiddleware.authorize(Role.DOCTOR),
+  authorizeClinicAdmin: authMiddleware.authorize(Role.CLINIC_ADMIN),
 });

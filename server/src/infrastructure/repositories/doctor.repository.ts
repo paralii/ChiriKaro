@@ -4,11 +4,28 @@ import type { IDentistProfile } from "@infrastructure/database/mongodb/models/De
 import type { IDoctorRepository } from "@application/interfaces/repositories/IDoctorRepository.ts";
 import { Doctor } from "@domain/entities/doctor.entity.ts";
 import { InternalServerError } from "@shared/errors/index.ts";
+import type { DoctorVerificationStatus } from "@domain/entities/doctor.entity.ts";
 
 export class DoctorRepository implements IDoctorRepository {
   async findByUserId(userId: string): Promise<Doctor | null> {
     const document = await DentistModel.findOne({ userId: new Types.ObjectId(userId) }).exec();
     return document ? this.toDomain(document) : null;
+  }
+
+  async findByIdAndClinic(doctorId: string, clinicId: string): Promise<Doctor | null> {
+    const document = await DentistModel.findOne({
+      _id: new Types.ObjectId(doctorId),
+      clinicId: new Types.ObjectId(clinicId),
+    }).exec();
+    return document ? this.toDomain(document) : null;
+  }
+
+  async findByClinicAndStatus(clinicId: string, status: DoctorVerificationStatus): Promise<Doctor[]> {
+    const documents = await DentistModel.find({
+      clinicId: new Types.ObjectId(clinicId),
+      verificationStatus: status,
+    }).sort({ updatedAt: 1, _id: 1 }).exec();
+    return documents.map((document) => this.toDomain(document));
   }
 
   async save(doctor: Doctor): Promise<Doctor> {
@@ -39,6 +56,7 @@ export class DoctorRepository implements IDoctorRepository {
       procedures: document.procedures ?? [],
       workingHours: document.workingHours ?? [],
       verificationStatus: document.verificationStatus,
+      rejectionReason: document.rejectionReason ?? null,
       documents: (document.documents ?? []).map((item) => ({
         documentType: item.documentType,
         documentKey: item.documentUrl,
@@ -68,6 +86,7 @@ export class DoctorRepository implements IDoctorRepository {
       procedures: doctor.procedures,
       workingHours: doctor.workingHours,
       verificationStatus: doctor.verificationStatus,
+      rejectionReason: doctor.rejectionReason,
       documents: doctor.documents.map((item) => ({
         documentType: item.documentType,
         documentUrl: item.documentKey,

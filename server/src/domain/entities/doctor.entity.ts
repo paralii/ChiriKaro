@@ -49,6 +49,7 @@ export interface DoctorProps {
   procedures: string[];
   workingHours: DoctorWorkingHour[];
   verificationStatus: DoctorVerificationStatus;
+  rejectionReason: string | null;
   documents: DoctorDocumentData[];
   createdAt: Date;
   updatedAt: Date;
@@ -101,6 +102,7 @@ export class Doctor {
       procedures: props.procedures ?? [],
       workingHours: props.workingHours ?? [],
       verificationStatus: props.verificationStatus ?? "NOT_STARTED",
+      rejectionReason: props.rejectionReason ?? null,
       documents: (props.documents ?? []).map((document) => ({ ...document })),
       createdAt: props.createdAt ? new Date(props.createdAt) : now,
       updatedAt: props.updatedAt ? new Date(props.updatedAt) : new Date(now),
@@ -177,6 +179,52 @@ export class Doctor {
     this.markInProgress();
   }
 
+  submitForVerification(): void {
+    if (this.props.verificationStatus !== "IN_PROGRESS") {
+      throw new InvalidDoctorDataError("Doctor onboarding must be updated before submission");
+    }
+    if (!this.props.professionalTitle || this.props.qualifications.length === 0 ||
+      this.props.yearsOfExperience === null || !this.props.registrationNumber ||
+      !this.props.registrationAuthority || this.props.specializations.length === 0 ||
+      this.props.workingHours.length === 0 || this.props.documents.length === 0) {
+      throw new InvalidDoctorDataError("Complete all professional details and upload documents before submission");
+    }
+    this.props.verificationStatus = "PENDING_VERIFICATION";
+    this.props.rejectionReason = null;
+    this.props.documents = this.props.documents.map((document) => ({
+      ...document,
+      status: "PENDING",
+      verifiedAt: null,
+      rejectionReason: null,
+    }));
+    this.props.updatedAt = new Date();
+  }
+
+  approveVerification(): void {
+    if (this.props.verificationStatus !== "PENDING_VERIFICATION") {
+      throw new InvalidDoctorDataError("Only pending doctor profiles can be approved");
+    }
+    const verifiedAt = new Date();
+    this.props.verificationStatus = "VERIFIED";
+    this.props.rejectionReason = null;
+    this.props.documents = this.props.documents.map((document) => ({
+      ...document,
+      status: "APPROVED",
+      verifiedAt,
+      rejectionReason: null,
+    }));
+    this.props.updatedAt = verifiedAt;
+  }
+
+  rejectVerification(reason: string): void {
+    if (this.props.verificationStatus !== "PENDING_VERIFICATION") {
+      throw new InvalidDoctorDataError("Only pending doctor profiles can be rejected");
+    }
+    this.props.verificationStatus = "REJECTED";
+    this.props.rejectionReason = requiredText(reason, "rejectionReason");
+    this.props.updatedAt = new Date();
+  }
+
   private normalizeWorkingHours(values: DoctorWorkingHour[]): DoctorWorkingHour[] {
     if (!Array.isArray(values)) throw new InvalidDoctorDataError("workingHours must be a list");
     const seen = new Set<string>();
@@ -202,13 +250,14 @@ export class Doctor {
   }
 
   private ensureEditable(): void {
-    if (this.props.verificationStatus !== "NOT_STARTED" && this.props.verificationStatus !== "IN_PROGRESS") {
+    if (this.props.verificationStatus !== "NOT_STARTED" && this.props.verificationStatus !== "IN_PROGRESS" && this.props.verificationStatus !== "REJECTED") {
       throw new InvalidDoctorDataError("Doctor onboarding cannot be edited in its current status");
     }
   }
 
   private markInProgress(): void {
     this.props.verificationStatus = "IN_PROGRESS";
+    this.props.rejectionReason = null;
     this.props.updatedAt = new Date();
   }
 
@@ -228,6 +277,7 @@ export class Doctor {
   get procedures() { return [...this.props.procedures]; }
   get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
   get verificationStatus() { return this.props.verificationStatus; }
+  get rejectionReason() { return this.props.rejectionReason; }
   get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
   get createdAt() { return new Date(this.props.createdAt); }
   get updatedAt() { return new Date(this.props.updatedAt); }

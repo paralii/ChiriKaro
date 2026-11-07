@@ -3,6 +3,12 @@ import type { IGetDoctorOnboardingUseCase } from "@application/interfaces/use-ca
 import type { IUpdateDoctorOnboardingUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorOnboardingUseCase.ts";
 import type { IUploadDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IUploadDoctorDocumentUseCase.ts";
 import type { IGetDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorDocumentUseCase.ts";
+import type { ISubmitDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/ISubmitDoctorVerificationUseCase.ts";
+import type { IListPendingDoctorVerificationsUseCase } from "@application/interfaces/use-cases/doctor/IListPendingDoctorVerificationsUseCase.ts";
+import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorVerificationDetailsUseCase.ts";
+import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
+import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
+import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 import type { DoctorOnboardingStep } from "@application/dto/doctor/doctor-onboarding.dto.ts";
 import { ValidationError } from "@shared/errors/index.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
@@ -14,6 +20,12 @@ export class DoctorController {
     private readonly _updateOnboardingUseCase: IUpdateDoctorOnboardingUseCase,
     private readonly _uploadDocumentUseCase: IUploadDoctorDocumentUseCase,
     private readonly _getDocumentUseCase: IGetDoctorDocumentUseCase,
+    private readonly _submitVerificationUseCase: ISubmitDoctorVerificationUseCase,
+    private readonly _listPendingVerificationsUseCase: IListPendingDoctorVerificationsUseCase,
+    private readonly _getVerificationDetailsUseCase: IGetDoctorVerificationDetailsUseCase,
+    private readonly _approveVerificationUseCase: IApproveDoctorVerificationUseCase,
+    private readonly _rejectVerificationUseCase: IRejectDoctorVerificationUseCase,
+    private readonly _getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase,
   ) {}
 
   getOnboarding = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -60,6 +72,73 @@ export class DoctorController {
       const documentType = req.params.documentType;
       if (typeof documentType !== "string") throw new ValidationError("Document type is required");
       const result = await this._getDocumentUseCase.execute(req.user!.sub, documentType);
+      res.status(HttpStatus.OK).type(result.contentType).send(result.content);
+    } catch (error) { next(error); }
+  };
+
+  getVerification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._getOnboardingUseCase.execute(req.user!.sub, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor verification status retrieved", result));
+    } catch (error) { next(error); }
+  };
+
+  submitVerification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._submitVerificationUseCase.execute(req.user!.sub, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor profile submitted for verification", result));
+    } catch (error) { next(error); }
+  };
+
+  listPendingVerifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._listPendingVerificationsUseCase.execute(req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Pending doctor verifications retrieved", result));
+    } catch (error) { next(error); }
+  };
+
+  getVerificationDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      const result = await this._getVerificationDetailsUseCase.execute(doctorId, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor verification details retrieved", result));
+    } catch (error) { next(error); }
+  };
+
+  approveVerification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      const result = await this._approveVerificationUseCase.execute(doctorId, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor profile approved", result));
+    } catch (error) { next(error); }
+  };
+
+  rejectVerification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      const result = await this._rejectVerificationUseCase.execute(
+        doctorId,
+        req.user!.clinicId!,
+        req.body?.reason,
+      );
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor profile rejected", result));
+    } catch (error) { next(error); }
+  };
+
+  getClinicDoctorDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { doctorId, documentType } = req.params;
+      if (typeof doctorId !== "string" || typeof documentType !== "string") {
+        throw new ValidationError("Doctor id and document type are required");
+      }
+      const result = await this._getClinicDoctorDocumentUseCase.execute(
+        doctorId,
+        req.user!.clinicId!,
+        documentType,
+      );
       res.status(HttpStatus.OK).type(result.contentType).send(result.content);
     } catch (error) { next(error); }
   };

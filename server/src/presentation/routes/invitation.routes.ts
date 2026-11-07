@@ -9,6 +9,9 @@ export function createInvitationRouter(
   const router = Router();
   const { authenticate, authorizeClinicAdmin } = middleware;
 
+  router.post("/invitation/validate", controller.validate);
+  router.post("/invitation/accept", controller.accept);
+
   router.post(
     "/clinic/invitations",
     authenticate,

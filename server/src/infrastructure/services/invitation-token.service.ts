@@ -7,7 +7,11 @@ import type {
 export class InvitationTokenService implements IInvitationTokenService {
   generate(): GeneratedInvitationToken {
     const token = randomBytes(32).toString("hex");
-    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const tokenHash = this.hash(token);
     return { token, tokenHash };
+  }
+
+  hash(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
   }
 }

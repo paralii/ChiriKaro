@@ -118,6 +118,14 @@ export class User {
     this.touch();
   }
 
+  updateAvatar(avatar: string | null): void {
+    if (avatar !== null && !avatar.trim()) {
+      throw new InvalidUserDataError("User avatar must not be blank");
+    }
+    this.props.avatar = avatar?.trim() ?? null;
+    this.touch();
+  }
+
   verifyEmail(): void {
     if (!this.props.isEmailVerified) {
       this.props.isEmailVerified = true;

@@ -50,6 +50,7 @@ export interface DoctorProps {
   workingHours: DoctorWorkingHour[];
   verificationStatus: DoctorVerificationStatus;
   rejectionReason: string | null;
+  consultationFee: number | null;
   documents: DoctorDocumentData[];
   createdAt: Date;
   updatedAt: Date;
@@ -103,6 +104,7 @@ export class Doctor {
       workingHours: props.workingHours ?? [],
       verificationStatus: props.verificationStatus ?? "NOT_STARTED",
       rejectionReason: props.rejectionReason ?? null,
+      consultationFee: props.consultationFee ?? null,
       documents: (props.documents ?? []).map((document) => ({ ...document })),
       createdAt: props.createdAt ? new Date(props.createdAt) : now,
       updatedAt: props.updatedAt ? new Date(props.updatedAt) : new Date(now),
@@ -225,6 +227,14 @@ export class Doctor {
     this.props.updatedAt = new Date();
   }
 
+  updateConsultationFee(fee: number): void {
+    if (!Number.isFinite(fee) || fee < 0 || Math.abs(fee * 100 - Math.round(fee * 100)) > 1e-8) {
+      throw new InvalidDoctorDataError("Consultation fee must be a non-negative amount with at most two decimal places");
+    }
+    this.props.consultationFee = Number(fee.toFixed(2));
+    this.props.updatedAt = new Date();
+  }
+
   private normalizeWorkingHours(values: DoctorWorkingHour[]): DoctorWorkingHour[] {
     if (!Array.isArray(values)) throw new InvalidDoctorDataError("workingHours must be a list");
     const seen = new Set<string>();
@@ -278,6 +288,7 @@ export class Doctor {
   get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
   get verificationStatus() { return this.props.verificationStatus; }
   get rejectionReason() { return this.props.rejectionReason; }
+  get consultationFee() { return this.props.consultationFee; }
   get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
   get createdAt() { return new Date(this.props.createdAt); }
   get updatedAt() { return new Date(this.props.updatedAt); }

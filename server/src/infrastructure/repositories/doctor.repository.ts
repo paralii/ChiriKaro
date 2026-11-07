@@ -57,6 +57,7 @@ export class DoctorRepository implements IDoctorRepository {
       workingHours: document.workingHours ?? [],
       verificationStatus: document.verificationStatus,
       rejectionReason: document.rejectionReason ?? null,
+      consultationFee: document.consultationFee ?? null,
       documents: (document.documents ?? []).map((item) => ({
         documentType: item.documentType,
         documentKey: item.documentUrl,
@@ -87,6 +88,7 @@ export class DoctorRepository implements IDoctorRepository {
       workingHours: doctor.workingHours,
       verificationStatus: doctor.verificationStatus,
       rejectionReason: doctor.rejectionReason,
+      consultationFee: doctor.consultationFee,
       documents: doctor.documents.map((item) => ({
         documentType: item.documentType,
         documentUrl: item.documentKey,

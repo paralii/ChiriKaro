@@ -33,6 +33,7 @@ export function DoctorRouter(
 
   router.get("/doctor/verification", authenticate, authorizeDoctor, controller.getVerification);
   router.post("/doctor/verification/submit", authenticate, authorizeDoctor, controller.submitVerification);
+  router.get("/doctor/consultation-fee", authenticate, authorizeDoctor, controller.getConsultationFee);
 
   router.get(
     "/clinic/doctors/pending-verification",
@@ -45,6 +46,12 @@ export function DoctorRouter(
     authenticate,
     authorizeClinicAdmin,
     controller.getVerificationDetails,
+  );
+  router.patch(
+    "/clinic/doctors/:doctorId/consultation-fee",
+    authenticate,
+    authorizeClinicAdmin,
+    controller.updateConsultationFee,
   );
   router.get(
     "/clinic/doctors/:doctorId/verification/documents/:documentType",

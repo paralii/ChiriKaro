@@ -61,6 +61,7 @@ export interface IDentistProfile extends Document {
 
   verificationStatus: DentistVerificationStatus;
   rejectionReason?: string | null;
+  consultationFee?: number | null;
   documents: IDentistDocumentMeta[];
 
   createdAt: Date;
@@ -245,6 +246,16 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
       default: null,
       trim: true,
       maxlength: 1000,
+    },
+    consultationFee: {
+      type: Number,
+      default: null,
+      min: 0,
+      validate: {
+        validator: (value: number | null) =>
+          value === null || Math.abs(value * 100 - Math.round(value * 100)) <= 1e-8,
+        message: "Consultation fee must have at most two decimal places",
+      },
     },
 
     documents: {

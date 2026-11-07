@@ -29,6 +29,10 @@ import { RejectDoctorVerificationUseCase } from "@application/use-cases/doctor/r
 import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
 import { GetClinicDoctorDocumentUseCase } from "@application/use-cases/doctor/get-clinic-doctor-document.use-case.ts";
 import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
+import { GetDoctorConsultationFeeUseCase } from "@application/use-cases/doctor/get-doctor-consultation-fee.use-case.ts";
+import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorConsultationFeeUseCase.ts";
+import { UpdateDoctorConsultationFeeUseCase } from "@application/use-cases/doctor/update-doctor-consultation-fee.use-case.ts";
+import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
 
 const doctorRepository = new DoctorRepository();
 const clinicRepository = new ClinicRepository();
@@ -55,6 +59,10 @@ const rejectDoctorVerificationUseCase: IRejectDoctorVerificationUseCase =
   new RejectDoctorVerificationUseCase(doctorRepository);
 const getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase =
   new GetClinicDoctorDocumentUseCase(doctorRepository, documentStorage);
+const getDoctorConsultationFeeUseCase: IGetDoctorConsultationFeeUseCase =
+  new GetDoctorConsultationFeeUseCase(doctorRepository);
+const updateDoctorConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase =
+  new UpdateDoctorConsultationFeeUseCase(doctorRepository);
 
 const controller = new DoctorController(
   getDoctorOnboardingUseCase,
@@ -67,6 +75,8 @@ const controller = new DoctorController(
   approveDoctorVerificationUseCase,
   rejectDoctorVerificationUseCase,
   getClinicDoctorDocumentUseCase,
+  getDoctorConsultationFeeUseCase,
+  updateDoctorConsultationFeeUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({

@@ -9,6 +9,8 @@ import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfac
 import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
 import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
 import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
+import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorConsultationFeeUseCase.ts";
+import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
 import type { DoctorOnboardingStep } from "@application/dto/doctor/doctor-onboarding.dto.ts";
 import { ValidationError } from "@shared/errors/index.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
@@ -26,6 +28,8 @@ export class DoctorController {
     private readonly _approveVerificationUseCase: IApproveDoctorVerificationUseCase,
     private readonly _rejectVerificationUseCase: IRejectDoctorVerificationUseCase,
     private readonly _getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase,
+    private readonly _getConsultationFeeUseCase: IGetDoctorConsultationFeeUseCase,
+    private readonly _updateConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase,
   ) {}
 
   getOnboarding = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -140,6 +144,26 @@ export class DoctorController {
         documentType,
       );
       res.status(HttpStatus.OK).type(result.contentType).send(result.content);
+    } catch (error) { next(error); }
+  };
+
+  getConsultationFee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._getConsultationFeeUseCase.execute(req.user!.sub, req.user!.clinicId!);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor consultation fee retrieved", result));
+    } catch (error) { next(error); }
+  };
+
+  updateConsultationFee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      const result = await this._updateConsultationFeeUseCase.execute({
+        doctorId,
+        clinicId: req.user!.clinicId!,
+        consultationFee: req.body?.consultationFee,
+      });
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor consultation fee updated", result));
     } catch (error) { next(error); }
   };
 }

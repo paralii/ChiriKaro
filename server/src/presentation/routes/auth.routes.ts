@@ -7,7 +7,11 @@ export interface AuthRouterMiddlewares {
   authenticate: RequestHandler;
   googleRedirect?: RequestHandler;
   googleAuthenticate?: RequestHandler;
-  sensitiveRateLimiter?: RequestHandler;
+  registerRateLimiter?: RequestHandler;
+  loginRateLimiter?: RequestHandler;
+  otpVerifyRateLimiter?: RequestHandler;
+  otpResendRateLimiter?: RequestHandler;
+  passwordResetRateLimiter?: RequestHandler;
 }
 
 export function createAuthRouter(
@@ -20,16 +24,24 @@ export function createAuthRouter(
     authenticate,
     googleRedirect,
     googleAuthenticate,
-    sensitiveRateLimiter,
+    registerRateLimiter,
+    loginRateLimiter,
+    otpVerifyRateLimiter,
+    otpResendRateLimiter,
+    passwordResetRateLimiter,
   } = middlewares;
 
-  const sensitive: RequestHandler[] = sensitiveRateLimiter
-    ? [sensitiveRateLimiter]
-    : [];
-
   //Registration
-  router.post("/auth/register", authController.register);
-  router.post("/auth/login", authController.login);
+  router.post(
+    "/auth/register",
+    ...(registerRateLimiter ? [registerRateLimiter] : []),
+    authController.register,
+  );
+  router.post(
+    "/auth/login",
+    ...(loginRateLimiter ? [loginRateLimiter] : []),
+    authController.login,
+  );
   router.post("/auth/refresh-token", authController.refreshToken);
   router.post("/auth/logout", authenticate, authController.logout);
 
@@ -37,18 +49,26 @@ export function createAuthRouter(
   router.get("/auth/profile", authenticate, authController.getProfile);
 
   //Email verification (OTP)
-  router.post("/auth/verify-otp", authController.verifyOtp);
-  router.post("/auth/resend-otp", ...sensitive, authController.resendOtp);
+  router.post(
+    "/auth/verify-otp",
+    ...(otpVerifyRateLimiter ? [otpVerifyRateLimiter] : []),
+    authController.verifyOtp,
+  );
+  router.post(
+    "/auth/resend-otp",
+    ...(otpResendRateLimiter ? [otpResendRateLimiter] : []),
+    authController.resendOtp,
+  );
 
   //Password recovery
   router.post(
     "/auth/forgot-password",
-    ...sensitive,
+    ...(passwordResetRateLimiter ? [passwordResetRateLimiter] : []),
     authController.forgotPassword,
   );
   router.post(
     "/auth/reset-password",
-    ...sensitive,
+    ...(passwordResetRateLimiter ? [passwordResetRateLimiter] : []),
     authController.resetPassword,
   );
   router.post(

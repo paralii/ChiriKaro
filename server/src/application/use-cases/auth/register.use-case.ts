@@ -61,16 +61,16 @@ export class RegisterUseCase implements IRegisterUseCase {
       Math.floor((expiresAt.getTime() - Date.now()) / 1000),
     );
 
-    await this._otpRepository.save(
-      otpKey,
-      {
-        codeHash,
-        expiresAt,
-      },
-      ttlSeconds,
-    );
-
     try {
+      await this._otpRepository.save(
+        otpKey,
+        {
+          codeHash,
+          expiresAt,
+        },
+        ttlSeconds,
+      );
+
       await this._emailService.sendOtpEmail(
         persistedUser.email,
         persistedUser.name,
@@ -78,10 +78,13 @@ export class RegisterUseCase implements IRegisterUseCase {
         "registration",
       );
     } catch {
-      await this._otpRepository.delete(otpKey);
+      await Promise.allSettled([
+        this._otpRepository.delete(otpKey),
+        this._userRepository.deleteById(persistedUser.id),
+      ]);
 
       throw new Error(
-        "Registration could not be completed because the verification email failed. Please try again.",
+        "Registration could not be completed during verification setup. Please try again.",
       );
     }
     return {

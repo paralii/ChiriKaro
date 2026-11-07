@@ -2,27 +2,62 @@ import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 import { InvalidClinicDataError } from "@domain/error/DomainError.ts";
 
 export interface ClinicProps {
-  id: string;
+  _id: string | null;
   name: string;
   address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
   phone?: string | null;
   contactEmail?: string | null;
+  registrationNumber?: string | null;
   ownerAdminId: string | null;
   status: ClinicStatus;
   createdAt: Date;
   updatedAt: Date;
 }
 
-type NewClinicProps = Pick<ClinicProps, "id" | "name"> &
+type NewClinicProps = Pick<ClinicProps, "name"> &
   Partial<
     Pick<
       ClinicProps,
-      "address" | "phone" | "contactEmail" | "ownerAdminId" | "status"
+      | "_id"
+      | "address"
+      | "city"
+      | "state"
+      | "pincode"
+      | "phone"
+      | "contactEmail"
+      | "registrationNumber"
+      | "ownerAdminId"
+      | "status"
     >
   >;
 
 const MIN_NAME_LENGTH = 2;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
+const PHONE_PATTERN = /^[0-9\s-]{7,15}$/;
+const PINCODE_PATTERN = /^\d{6}$/;
+
+function optionalTrimmed(
+  value: string | null | undefined,
+  field: string,
+): string | null {
+  if (value == null) return null;
+  return requireNonBlank(value, field);
+}
+
+function optionalMatching(
+  value: string | null | undefined,
+  field: string,
+  pattern: RegExp,
+): string | null {
+  const trimmed = optionalTrimmed(value, field);
+  if (trimmed !== null && !pattern.test(trimmed)) {
+    throw new InvalidClinicDataError(`Clinic ${field} is not valid`);
+  }
+  return trimmed;
+}
 
 function requireNonBlank(
   value: string | null | undefined,
@@ -39,7 +74,6 @@ export class Clinic {
   private constructor(private props: ClinicProps) {}
 
   static create(props: NewClinicProps): Clinic {
-    const id = requireNonBlank(props.id, "id");
     const name = props.name?.trim();
     if (!name || name.length < MIN_NAME_LENGTH) {
       throw new InvalidClinicDataError(
@@ -55,6 +89,9 @@ export class Clinic {
         "Clinic contactEmail is not a valid email address",
       );
     }
+    const phone = optionalMatching(props.phone, "phone", PHONE_PATTERN);
+    const pincode = optionalMatching(props.pincode, "pincode", PINCODE_PATTERN);
+
     const ownerAdminId =
       props.ownerAdminId == null
         ? null
@@ -63,10 +100,17 @@ export class Clinic {
     const now = new Date();
     const status = props.status ?? ClinicStatus.PENDING;
     return new Clinic({
-      id,
+      _id: props._id ?? null,
       name,
-      address: props.address ?? null,
-      phone: props.phone ?? null,
+      address: optionalTrimmed(props.address, "address"),
+      city: optionalTrimmed(props.city, "city"),
+      state: optionalTrimmed(props.state, "state"),
+      pincode,
+      phone,
+      registrationNumber: optionalTrimmed(
+        props.registrationNumber,
+        "registrationNumber",
+      ),
       contactEmail,
       ownerAdminId,
       status,
@@ -117,7 +161,7 @@ export class Clinic {
   }
 
   get id() {
-    return this.props.id;
+    return this.props._id;
   }
   get name() {
     return this.props.name;
@@ -125,8 +169,20 @@ export class Clinic {
   get address() {
     return this.props.address;
   }
+  get city() {
+    return this.props.city;
+  }
+  get state() {
+    return this.props.state;
+  }
+  get pincode() {
+    return this.props.pincode;
+  }
   get phone() {
     return this.props.phone;
+  }
+  get registrationNumber() {
+    return this.props.registrationNumber;
   }
   get contactEmail() {
     return this.props.contactEmail;

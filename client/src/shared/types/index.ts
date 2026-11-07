@@ -70,6 +70,17 @@ export type DoctorOnboardingProfile = {
   updatedAt?: string;
 };
 export type DoctorOnboardingDTO = { onboardingStatus: DoctorOnboardingStatus; profile: DoctorOnboardingProfile | null };
+export type DoctorAvailabilitySlot = { day: DoctorDayOfWeek; startTime: string; endTime: string };
+export type DoctorBreak = { day: DoctorDayOfWeek; startTime: string; endTime: string };
+export type DoctorAvailability = {
+  doctorId: string;
+  workingHours: Array<{ day: DoctorDayOfWeek; isOpen: boolean; startTime: string; endTime: string }>;
+  breaks: DoctorBreak[];
+  slotDurationMinutes: number;
+  bufferTimeMinutes: number;
+  updatedAt: string;
+};
+export type DoctorAvailabilitySlots = { doctorId: string; slots: DoctorAvailabilitySlot[] };
 export type DoctorVerificationSummary = {
   doctorId: string;
   firstName: string;

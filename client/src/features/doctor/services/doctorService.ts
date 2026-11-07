@@ -1,5 +1,5 @@
 import { api, http } from '@/shared/lib/http';
-import type { DoctorConsultationFee, DoctorOnboardingDTO, DoctorOnboardingStep, DoctorProfile, Slot, SlotConfig, WorkingHour } from '@/shared/types';
+import type { DoctorAvailability, DoctorAvailabilitySlots, DoctorConsultationFee, DoctorOnboardingDTO, DoctorOnboardingStep, DoctorProfile } from '@/shared/types';
 
 type ApiEnvelope<T> = { data?: T };
 
@@ -26,14 +26,14 @@ export const doctorService = {
     return (await http.get<Blob>(`/doctor/onboarding/documents/${encodeURIComponent(safeType)}`, { responseType: 'blob' })).data;
   },
   getConsultationFee: () => responseData(api.get<ApiEnvelope<DoctorConsultationFee>>('/doctor/consultation-fee'), 'Consultation fee was not returned.'),
+  getAvailability: () => responseData(api.get<ApiEnvelope<DoctorAvailability>>('/doctor/availability'), 'Doctor availability was not returned.'),
+  configureAvailability: (body: Pick<DoctorAvailability, 'workingHours' | 'breaks' | 'slotDurationMinutes' | 'bufferTimeMinutes'>) =>
+    responseData(api.put<ApiEnvelope<DoctorAvailability>>('/doctor/availability', body), 'Updated doctor availability was not returned.'),
+  generateAvailabilitySlots: () => responseData(api.post<ApiEnvelope<DoctorAvailabilitySlots>>('/doctor/availability/slots'), 'Availability slots were not returned.'),
   getProfile: () => api.get<DoctorProfile>('/doctor/profile'),
   patchProfile: (body: unknown) => api.patch<DoctorProfile>('/doctor/profile', body),
-  saveAvailability: (workingHours: WorkingHour[]) => api.put<DoctorProfile>('/doctor/availability', { workingHours }),
-  getSlotConfig: () => api.get<SlotConfig>('/doctor/slot-config'),
-  saveSlotConfig: (body: Pick<SlotConfig, 'slotDuration' | 'bufferMinutes'>) => api.put<SlotConfig>('/doctor/slot-config', body),
   getUploadUrl: (file: File) => api.post<{ key: string; uploadUrl: string }>('/doctor/documents/upload-url', { fileName: file.name, contentType: file.type, fileSize: file.size }),
   addDocument: (documentType: string, documentKey: string) => api.post<DoctorProfile>('/doctor/documents', { documentType, documentKey }),
   getDocumentUrl: (type: string) => api.get<{ url: string }>(`/doctor/documents/${encodeURIComponent(type)}/download-url`),
   submitVerification: () => responseData(api.post<ApiEnvelope<DoctorOnboardingDTO>>('/doctor/verification/submit'), 'Doctor verification status was not returned.'),
-  generateSlots: () => api.post<Slot[]>('/doctor/generate-slots'),
 };

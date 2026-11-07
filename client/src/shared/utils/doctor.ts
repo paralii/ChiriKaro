@@ -1,4 +1,4 @@
-import type { DoctorDayOfWeek, DoctorOnboardingProfile, WorkingHour } from '@/shared/types';
+import type { DoctorAvailabilitySlot, DoctorBreak, DoctorDayOfWeek, DoctorOnboardingProfile, WorkingHour } from '@/shared/types';
 
 const weekdays: Record<string, DoctorDayOfWeek> = {
   Monday: 'MONDAY', Tuesday: 'TUESDAY', Wednesday: 'WEDNESDAY', Thursday: 'THURSDAY',
@@ -33,4 +33,39 @@ export function parseList(value: string): string[] {
 
 export function findInvalidHours(hours: WorkingHour[]): WorkingHour | undefined {
   return hours.find((hour) => hour.isOpen && (!hour.startTime || !hour.endTime || hour.startTime >= hour.endTime));
+}
+
+export function findClinicHoursConflict(doctorHours: WorkingHour[], clinicHours: WorkingHour[]): WorkingHour | undefined {
+  return doctorHours.find((hour) => {
+    if (!hour.isOpen) return false;
+    const clinicHour = clinicHours.find((item) => item.day.toUpperCase() === hour.day.toUpperCase());
+    return !clinicHour?.isOpen || hour.startTime < clinicHour.startTime || hour.endTime > clinicHour.endTime;
+  });
+}
+
+export function getDoctorBreakError(breaks: DoctorBreak[], hours: WorkingHour[]): string | undefined {
+  for (const pause of breaks) {
+    const day = `${pause.day[0]}${pause.day.slice(1).toLowerCase()}`;
+    const dayHours = hours.find((hour) => hour.day.toUpperCase() === pause.day && hour.isOpen);
+    if (!dayHours) return `${day}: a break requires an open working day.`;
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(pause.startTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(pause.endTime) || pause.startTime >= pause.endTime) {
+      return `${day}: enter a valid break time range.`;
+    }
+    if (pause.startTime < dayHours.startTime || pause.endTime > dayHours.endTime) return `${day}: the break must fit within working hours.`;
+  }
+
+  const ordered = [...breaks].sort((a, b) => a.day.localeCompare(b.day) || a.startTime.localeCompare(b.startTime));
+  for (let index = 1; index < ordered.length; index += 1) {
+    const previous = ordered[index - 1]!;
+    const current = ordered[index]!;
+    if (previous.day === current.day && previous.endTime > current.startTime) {
+      return `${current.day[0]}${current.day.slice(1).toLowerCase()}: breaks must not overlap.`;
+    }
+  }
+  return undefined;
+}
+
+export function sortAvailabilitySlots(slots: DoctorAvailabilitySlot[]): DoctorAvailabilitySlot[] {
+  const order: DoctorDayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  return [...slots].sort((a, b) => order.indexOf(a.day) - order.indexOf(b.day) || a.startTime.localeCompare(b.startTime));
 }

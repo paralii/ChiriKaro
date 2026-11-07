@@ -56,7 +56,10 @@ export default function TeamAccessPage() {
       <Notices error={error} />
       {feeError ? <Notices error={feeError} /> : null}
       <WelcomeBand pill="ACCOUNT ACTIVE" title={`Welcome, ${dashboard?.user.name ?? user.name}.`} description={`Your ${roleLabels[user.role].toLowerCase()} workspace is ready.`}
-        action={user.role === 'DOCTOR' ? <Link to="/doctor/dashboard"><Button variant="secondary" tabIndex={-1}>Continue onboarding</Button></Link> : undefined} />
+        action={user.role === 'DOCTOR' ? <div className="flex flex-wrap gap-2">
+          <Link to="/doctor/dashboard"><Button type="button" variant="secondary" tabIndex={-1}>Continue onboarding</Button></Link>
+          <Link to="/doctor/availability"><Button type="button" variant="ghost" tabIndex={-1}>Manage availability</Button></Link>
+        </div> : undefined} />
       <Card>
         <SectionHeading title="Workspace details" description={busy ? 'Loading your clinic association...' : 'Information associated with your account'} />
         <DetailList items={details} />

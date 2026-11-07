@@ -13,6 +13,7 @@ import { useAction } from "@shared/hooks/useAction";
 import { useOtpStep } from "@/features/auth/hooks/useOtpStep";
 
 import { authService } from "@/features/auth/services/authService";
+import { clinicService } from "@/features/clinic/services/clinicService";
 
 import { normalizeEmail, validateEmail } from "@shared/utils/validators";
 
@@ -22,6 +23,7 @@ export function ClinicRegisterForm({
   onVerifyingChange?: (v: boolean) => void;
 }) {
   const [name, setName] = useState("");
+  const [clinicName, setClinicName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -36,6 +38,10 @@ export function ClinicRegisterForm({
   function validateDetails() {
     if (name.trim().length < 2) {
       throw new Error("Owner name must be at least 2 characters long.");
+    }
+
+    if (clinicName.trim().length < 2) {
+      throw new Error("Clinic name must be at least 2 characters long.");
     }
 
     if (!validateEmail(email)) {
@@ -54,11 +60,15 @@ export function ClinicRegisterForm({
   async function register() {
     validateDetails();
 
-    await authService.register({
-      name: name.trim(),
-      email: normalizeEmail(email),
-      password,
-      role: "CLINIC_ADMIN",
+    await clinicService.register({
+      admin: {
+        name: name.trim(),
+        email: normalizeEmail(email),
+        password,
+      },
+      clinic: {
+        name: clinicName.trim(),
+      },
     });
 
     otp.setVerifying(true);
@@ -103,6 +113,16 @@ export function ClinicRegisterForm({
               onChange={(e) => setName(e.target.value)}
               placeholder="Your full name"
               autoComplete="name"
+              minLength={2}
+              required
+            />
+
+            <TextField
+              label="Clinic name"
+              value={clinicName}
+              onChange={(e) => setClinicName(e.target.value)}
+              placeholder="Your clinic name"
+              autoComplete="organization"
               minLength={2}
               required
             />

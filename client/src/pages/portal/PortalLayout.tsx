@@ -23,16 +23,16 @@ export default function PortalLayout() {
   const title = getPageTitle(role, section);
 
   useEffect(() => {
-    if (role === 'super_admin') void dispatch(loadAdminClinics());
-    if (role === 'clinic_admin') void dispatch(loadClinic());
+    if (role === 'SUPER_ADMIN') void dispatch(loadAdminClinics(1));
+    if (role === 'CLINIC_ADMIN') void dispatch(loadClinic());
   }, [dispatch, role]);
 
   return (
     <PortalTemplate
-      sidebar={<PortalSidebar role={role} workspaceName={role === 'clinic_admin' ? clinic?.name : undefined} items={navItems[role]} pendingCount={role === 'super_admin' ? pending : 0} onLogout={logout} />}
+      sidebar={<PortalSidebar role={role} workspaceName={role === 'CLINIC_ADMIN' ? clinic?.name : undefined} items={navItems[role]} pendingCount={role === 'SUPER_ADMIN' ? pending : 0} onLogout={logout} />}
       topbar={<PortalTopbar title={title} userName={user.name} />}
     >
-      <PageHeading eyebrow={`${roleLabels[role]} workspace`} title={title} chip={role === 'clinic_admin' && (section === 'doctors' || section === 'staff') ? 'INVITATIONS' : undefined} />
+      <PageHeading eyebrow={`${roleLabels[role]} workspace`} title={title} chip={role === 'CLINIC_ADMIN' && (section === 'doctors' || section === 'staff') ? 'INVITATIONS' : undefined} />
       <Outlet />
     </PortalTemplate>
   );

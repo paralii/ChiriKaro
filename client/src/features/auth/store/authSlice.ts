@@ -13,6 +13,7 @@ export interface UserProfile {
   email: string;
   role: Role;
   clinicId?: string | null;
+  avatar?: string | null;
 }
 
 interface AuthState {

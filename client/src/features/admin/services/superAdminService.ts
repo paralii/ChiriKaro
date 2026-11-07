@@ -1,9 +1,12 @@
 import { api } from '@/shared/lib/http';
-import type { Clinic, ClinicStatus, ClinicSummary } from '@/shared/types';
+import type { Clinic, ClinicStatus, ClinicSummary, SuperAdminStatistics } from '@/shared/types';
 
 type ApiEnvelope<T> = { data?: T; meta?: { page: number; limit: number; totalItems: number; totalPages: number } };
 export type ClinicPage = { items: Clinic[]; page: number; limit: number; totalItems: number; totalPages: number };
-type SuperAdminStatistics = { clinics: { total: number; approved: number; pending: number; blocked: number } };
+type SuperAdminStatisticsResponse = {
+  clinics: { total: number; approved: number; pending: number; blocked: number };
+  doctors: SuperAdminStatistics['doctors'];
+};
 
 export const superAdminService = {
   listClinics: async (page = 1, limit = 20): Promise<ClinicPage> => {
@@ -21,14 +24,19 @@ export const superAdminService = {
     if (!response.data) throw new Error('Clinic details were not returned.');
     return response.data;
   },
-  getSummary: async (): Promise<ClinicSummary> => {
-    const response = await api.get<ApiEnvelope<SuperAdminStatistics>>('/super-admin/statistics');
-    const clinics = response.data?.clinics;
-    if (!clinics) throw new Error('Clinic statistics were not returned.');
-    return {
-      ...clinics,
-      rejected: Math.max(0, clinics.total - clinics.approved - clinics.pending - clinics.blocked),
+  getStatistics: async (): Promise<SuperAdminStatistics> => {
+    const response = await api.get<ApiEnvelope<SuperAdminStatisticsResponse>>('/super-admin/statistics');
+    const statistics = response.data;
+    if (!statistics?.clinics || !statistics.doctors) throw new Error('Super Admin statistics were not returned.');
+    const clinics: ClinicSummary = {
+      ...statistics.clinics,
+      rejected: Math.max(0, statistics.clinics.total - statistics.clinics.approved - statistics.clinics.pending - statistics.clinics.blocked),
     };
+    return { clinics, doctors: statistics.doctors };
+  },
+  getSummary: async (): Promise<ClinicSummary> => {
+    const statistics = await superAdminService.getStatistics();
+    return statistics.clinics;
   },
   updateStatus: async (id: string, status: ClinicStatus) => {
     const response = await api.patch<ApiEnvelope<Clinic>>(`/super-admin/clinics/${encodeURIComponent(id)}/status`, { status });

@@ -19,6 +19,20 @@ export type RegisterResult = {
 export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
 export type Clinic = { id: string; name: string; address?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; status: ClinicStatus; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
+export type SuperAdminDoctorStatistics = {
+  total: number;
+  verified: number;
+  pendingVerification: number;
+  rejected: number;
+  verificationOverview: {
+    notStarted: number;
+    inProgress: number;
+    pendingVerification: number;
+    verified: number;
+    rejected: number;
+  };
+};
+export type SuperAdminStatistics = { clinics: ClinicSummary; doctors: SuperAdminDoctorStatistics };
 export type RoleDashboard = {
   user: { id: string; name: string; role: Role; clinicId: string | null };
   clinic: { id: string; name: string; status: ClinicStatus } | null;

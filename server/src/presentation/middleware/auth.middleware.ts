@@ -27,16 +27,9 @@ export class AuthMiddleware {
     _res: Response,
     next: NextFunction,
   ): Promise<void> => {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies?.accessToken;
 
-    if (!authHeader?.startsWith("Bearer ")) {
-      next(new UnauthorizedError("Access token is missing"));
-      return;
-    }
-
-    const token = authHeader.slice(7).trim();
-
-    if (!token) {
+    if (typeof token !== "string" || !token.trim()) {
       next(new UnauthorizedError("Access token is missing"));
       return;
     }
@@ -44,7 +37,7 @@ export class AuthMiddleware {
     let payload: TokenPayload;
 
     try {
-      payload = this.dependencies.tokenService.verifyAccessToken(token);
+      payload = this.dependencies.tokenService.verifyAccessToken(token.trim());
     } catch {
       next(new UnauthorizedError("Invalid or expired access token"));
       return;

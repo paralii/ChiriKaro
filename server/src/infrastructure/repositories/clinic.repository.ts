@@ -55,7 +55,7 @@ export class ClinicRepository
       .findByIdAndUpdate(
         clinic.id,
         { $set: data },
-        { new: true, runValidators: true },
+        { returnDocument: "after", runValidators: true },
       )
       .exec();
 

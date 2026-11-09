@@ -61,7 +61,14 @@ export class AuthMiddleware {
           user.clinicId,
         );
 
-        if (!clinic || clinic.status !== ClinicStatus.APPROVED) {
+        if (
+          !clinic ||
+          (clinic.status !== ClinicStatus.APPROVED &&
+            !(
+              user.role === Role.CLINIC_ADMIN &&
+              [ClinicStatus.PENDING, ClinicStatus.REJECTED].includes(clinic.status)
+            ))
+        ) {
           next(new ForbiddenError("This clinic is not active"));
           return;
         }

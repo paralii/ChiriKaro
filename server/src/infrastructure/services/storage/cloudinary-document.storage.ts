@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { IDocumentStorage, StoredDocument } from "@application/interfaces/services/IDocumentStorage.ts";
 import { env } from "@infrastructure/config/env.ts";
+import { logger } from "@infrastructure/logger/logger.ts";
 import { BadRequestError, InternalServerError, NotFoundError } from "@shared/errors/index.ts";
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -32,7 +33,7 @@ export class CloudinaryDocumentStorage implements IDocumentStorage {
     const publicId = `${this.folder}/${randomUUID()}${extension}`;
     const signedParameters = { public_id: publicId, timestamp, type: "private" };
     const form = new FormData();
-    form.set("file", `data:${contentType};base64,${content.toString("base64")}`);
+    form.set("file", new Blob([new Uint8Array(content)], { type: contentType }), `${randomUUID()}${extension}`);
     form.set("api_key", env.CLOUDINARY_API_KEY);
     form.set("timestamp", timestamp);
     form.set("public_id", publicId);
@@ -48,9 +49,28 @@ export class CloudinaryDocumentStorage implements IDocumentStorage {
     } catch {
       throw new InternalServerError("Document storage is unavailable");
     }
-    if (!response.ok) throw new InternalServerError("Cloudinary could not store the document");
+    let result: { public_id?: unknown; error?: { message?: unknown; http_code?: unknown } };
+    try {
+      result = (await response.json()) as typeof result;
+    } catch {
+      throw new InternalServerError(`Cloudinary returned an unreadable response (${response.status})`);
+    }
+    if (!response.ok) {
+      const providerMessage = typeof result.error?.message === "string"
+        ? result.error.message.slice(0, 500)
+        : "Unknown upload error";
+      const providerCode = typeof result.error?.http_code === "number"
+        ? result.error.http_code
+        : response.status;
+      logger.error("Cloudinary document upload rejected", {
+        providerCode,
+        providerMessage,
+        contentType,
+        sizeBytes: content.length,
+      });
+      throw new InternalServerError(`Cloudinary upload failed (${providerCode}): ${providerMessage}`);
+    }
 
-    const result = (await response.json()) as { public_id?: unknown };
     if (result.public_id !== publicId) throw new InternalServerError("Cloudinary returned an invalid document reference");
     return publicId;
   }
@@ -84,5 +104,36 @@ export class CloudinaryDocumentStorage implements IDocumentStorage {
     const contentType = Object.entries(CONTENT_TYPES).find(([, value]) => value === extension)?.[0];
     if (!contentType) throw new NotFoundError("Document");
     return { key, contentType, content: Buffer.from(await response.arrayBuffer()) };
+  }
+
+  async delete(key: string): Promise<void> {
+    const escapedFolder = this.folder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = new RegExp(`^${escapedFolder}/[a-f\\d-]{36}\\.(pdf|jpg|png)$`, "i").exec(key);
+    if (!match) throw new NotFoundError("Document");
+
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const signedParameters = { public_id: key, timestamp, type: "private" };
+    const form = new FormData();
+    form.set("public_id", key);
+    form.set("timestamp", timestamp);
+    form.set("type", "private");
+    form.set("api_key", env.CLOUDINARY_API_KEY);
+    form.set("signature", signParameters(signedParameters));
+
+    let response: Response;
+    try {
+      response = await fetch(
+        `https://api.cloudinary.com/v1_1/${encodeURIComponent(env.CLOUDINARY_CLOUD_NAME)}/raw/destroy`,
+        { method: "POST", body: form },
+      );
+    } catch {
+      throw new InternalServerError("Document storage is unavailable");
+    }
+
+    const result = await response.json().catch(() => null) as { result?: unknown; error?: { message?: unknown } } | null;
+    if (!response.ok || (result?.result !== "ok" && result?.result !== "not found")) {
+      const providerMessage = typeof result?.error?.message === "string" ? result.error.message.slice(0, 300) : "Unknown deletion error";
+      throw new InternalServerError(`Cloudinary could not delete the document: ${providerMessage}`);
+    }
   }
 }

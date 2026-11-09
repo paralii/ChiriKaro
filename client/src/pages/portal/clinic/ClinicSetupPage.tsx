@@ -16,6 +16,22 @@ import { patchClinic } from '@/features/clinic/store/clinicSlice';
 import { findInvalidHours, parseList } from '@/shared/utils/doctor';
 import type { ClinicProfile } from '@/shared/types';
 
+const normalizeWorkingHours = (value: unknown): ClinicProfile['workingHours'] => {
+  const rows = Array.isArray(value) ? value.filter((row) => row && typeof row === 'object') as Array<Record<string, unknown>> : [];
+  return defaultHours.map((fallback, index) => {
+    const row = rows.find((item) => String(item.day ?? item.weekday ?? '').toLowerCase() === fallback.day.toLowerCase()) ?? rows[index];
+    if (!row) return fallback;
+    const start = row.startTime ?? row.start ?? row.openingTime;
+    const end = row.endTime ?? row.end ?? row.closingTime;
+    return {
+      day: fallback.day,
+      isOpen: typeof row.isOpen === 'boolean' ? row.isOpen : typeof row.open === 'boolean' ? row.open : fallback.isOpen,
+      startTime: typeof start === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(start) ? start : fallback.startTime,
+      endTime: typeof end === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(end) ? end : fallback.endTime,
+    };
+  });
+};
+
 export default function ClinicSetupPage() {
   const dispatch = useAppDispatch();
   const [profile, setProfile] = useState<ClinicProfile | null>(null);
@@ -24,7 +40,7 @@ export default function ClinicSetupPage() {
   useEffect(() => {
     void run(async () => {
       const saved = await clinicService.getProfile();
-      setProfile({ ...saved, workingHours: saved.workingHours?.length ? saved.workingHours : defaultHours });
+      setProfile({ ...saved, workingHours: normalizeWorkingHours(saved.workingHours) });
     }, { fallback: 'Could not load clinic setup.' });
   }, [run]);
 
@@ -72,6 +88,13 @@ export default function ClinicSetupPage() {
     setProfile(submitted);
   }, { success: 'Clinic setup submitted for verification.', fallback: 'Could not submit clinic setup.' });
 
+  const documents = Array.isArray(profile?.documents)
+    ? profile.documents.filter((document) => document && typeof document === 'object' && typeof document.documentType === 'string' && document.documentType.trim().length > 0).map((document) => ({
+      ...document,
+      documentType: document.documentType.replaceAll('_', ' '),
+    }))
+    : [];
+
   return (
     <div className="grid gap-[18px] [&>section]:mt-0">
       <Notices error={error} message={message} />
@@ -83,7 +106,7 @@ export default function ClinicSetupPage() {
           <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic." /><WorkingHoursForm initial={profile.workingHours} busy={busy} onSave={saveHours} /></Card>
           <Card className="pb-5">
             <SectionHeading title="Clinic documents" description="Private PDF, JPG, or PNG files up to 10 MB." />
-            <DocumentUploader types={['Clinic registration', 'Operating license', 'Insurance certificate', 'Other']} documents={profile.documents.map((document) => ({ ...document, documentType: document.documentType.replaceAll('_', ' ') }))} busy={busy} onUpload={upload} onOpen={open} />
+            <DocumentUploader types={['Clinic registration', 'Operating license', 'Insurance certificate', 'Other']} documents={documents} busy={busy} onUpload={upload} onOpen={open} />
           </Card>
           <Card className="flex flex-wrap items-center justify-between gap-4 p-[18px]">
             <div><strong className="text-sm">Setup status: {profile.setupStatus?.replaceAll('_', ' ') ?? 'IN PROGRESS'}</strong><p className="mt-1 text-xs text-[#777b89]">Submit completed clinic information and documents for verification.</p></div>

@@ -23,7 +23,7 @@ export const validate = (
         }
         errors[key].push(detail.message);
       });
-      next(new ValidationError(errors));
+      next(new ValidationError("Validation failed", errors));
       return;
     }
 

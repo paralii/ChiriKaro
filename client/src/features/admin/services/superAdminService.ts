@@ -1,4 +1,4 @@
-import { api } from '@/shared/lib/http';
+import { api, http } from '@/shared/lib/http';
 import type { Clinic, ClinicStatus, ClinicSummary, SuperAdminStatistics } from '@/shared/types';
 
 type ApiEnvelope<T> = { data?: T; meta?: { page: number; limit: number; totalItems: number; totalPages: number } };
@@ -24,6 +24,7 @@ export const superAdminService = {
     if (!response.data) throw new Error('Clinic details were not returned.');
     return response.data;
   },
+  getClinicDocument: async (id: string, documentType: string) => (await http.get<Blob>(`/super-admin/clinics/${encodeURIComponent(id)}/documents/${encodeURIComponent(documentType)}`, { responseType: 'blob' })).data,
   getStatistics: async (): Promise<SuperAdminStatistics> => {
     const response = await api.get<ApiEnvelope<SuperAdminStatisticsResponse>>('/super-admin/statistics');
     const statistics = response.data;

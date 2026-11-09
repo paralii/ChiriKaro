@@ -32,7 +32,7 @@ export class DoctorRepository implements IDoctorRepository {
     const document = await DentistModel.findOneAndUpdate(
       { userId: new Types.ObjectId(doctor.userId) },
       { $set: this.toPersistence(doctor) },
-      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+      { returnDocument: "after", upsert: true, runValidators: true, setDefaultsOnInsert: true },
     ).exec();
     if (!document) throw new InternalServerError("Doctor onboarding could not be saved");
     return this.toDomain(document);

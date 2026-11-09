@@ -4,6 +4,8 @@ import type { IListClinicsUseCase } from "@application/interfaces/use-cases/supe
 import type { IGetClinicDetailsUseCase } from "@application/interfaces/use-cases/super-admin/IGetClinicDetailsUseCase.ts";
 import type { IUpdateClinicStatusUseCase } from "@application/interfaces/use-cases/super-admin/IUpdateClinicStatusUseCase.ts";
 import type { IGetSuperAdminStatisticsUseCase } from "@application/interfaces/use-cases/super-admin/IGetSuperAdminStatisticsUseCase.ts";
+import type { IGetClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicDocumentUseCase.ts";
+import { ValidationError } from "@shared/errors/index.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 
@@ -13,6 +15,7 @@ export class SuperAdminController {
     private readonly getClinicDetailsUseCase: IGetClinicDetailsUseCase,
     private readonly updateClinicStatusUseCase: IUpdateClinicStatusUseCase,
     private readonly getStatisticsUseCase: IGetSuperAdminStatisticsUseCase,
+    private readonly getClinicDocumentUseCase: IGetClinicDocumentUseCase,
   ) {}
 
   listClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -48,6 +51,15 @@ export class SuperAdminController {
     try {
       const result = await this.getStatisticsUseCase.execute();
       res.status(HttpStatus.OK).json(ApiResponse.success("Super Admin statistics retrieved successfully", result));
+    } catch (error) { next(error); }
+  };
+
+  getClinicDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id, documentType } = req.params;
+      if (typeof id !== "string" || typeof documentType !== "string") throw new ValidationError("Clinic and document are required");
+      const result = await this.getClinicDocumentUseCase.execute(id, documentType);
+      res.status(HttpStatus.OK).type(result.contentType).send(result.content);
     } catch (error) { next(error); }
   };
 }

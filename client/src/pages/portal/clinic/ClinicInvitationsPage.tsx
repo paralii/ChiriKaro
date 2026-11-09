@@ -19,9 +19,10 @@ export default function ClinicInvitationsPage({ invitee }: { invitee: 'doctor' |
 
   const refresh = useCallback(async () => {
     const result = await clinicService.listPendingInvitations();
-    setInvitations(result);
-    return result;
-  }, []);
+    const relevant = result.filter((item) => item.role === (invitee === 'doctor' ? 'DOCTOR' : 'STAFF'));
+    setInvitations(relevant);
+    return relevant;
+  }, [invitee]);
 
   useEffect(() => {
     void run(refresh, { fallback: 'Could not load pending invitations.' });
@@ -30,11 +31,15 @@ export default function ClinicInvitationsPage({ invitee }: { invitee: 'doctor' |
   const invite = (email: string) => {
     if (!email.trim()) return setError('Enter an email address.');
     void run(async () => {
-      const result = await clinicService.invite({ email: normalizeEmail(email), role: invitee === 'doctor' ? 'DOCTOR' : 'STAFF' });
+      const normalized = normalizeEmail(email);
+      const existing = invitations.find((item) => item.email.toLowerCase() === normalized);
+      const result = existing
+        ? await clinicService.resendInvitation(existing.id)
+        : await clinicService.invite({ email: normalized, role: invitee === 'doctor' ? 'DOCTOR' : 'STAFF' });
       setInvitation(result);
       await refresh();
-      return result;
-    }, { success: (r) => `Invitation email sent to ${r.email}.`, fallback: 'Could not send invitation.' });
+      return { invitation: result, resent: Boolean(existing) };
+    }, { success: (result) => result.resent ? `A new invitation email was sent to ${result.invitation.email}.` : `Invitation email sent to ${result.invitation.email}.`, fallback: 'Could not send invitation.' });
   };
 
   const resend = (id: string) => void run(async () => {
@@ -46,7 +51,7 @@ export default function ClinicInvitationsPage({ invitee }: { invitee: 'doctor' |
   return (
     <>
       <Notices error={error} message={message} />
-      <Card className="pb-5"><InviteForm invitee={invitee === 'doctor' ? 'doctor' : 'staff member'} busy={busy} invitation={invitation} onInvite={invite} /></Card>
+      <Card className="pb-5"><InviteForm invitee={invitee === 'doctor' ? 'doctor' : 'staff member'} busy={busy} invitation={invitation?.role === (invitee === 'doctor' ? 'DOCTOR' : 'STAFF') ? invitation : null} onInvite={invite} /></Card>
       <Card>
         <SectionHeading title="Pending invitations" description={`${invitations.length} invitation${invitations.length === 1 ? '' : 's'} awaiting acceptance.`} />
         {invitations.length ? (

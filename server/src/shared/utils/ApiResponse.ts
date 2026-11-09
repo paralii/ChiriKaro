@@ -8,8 +8,8 @@ export interface PaginationMeta {
 export class ApiResponse<T = unknown> {
   public readonly success: boolean;
   public readonly message: string;
-  public readonly data?: T;
-  public readonly meta?: PaginationMeta;
+  public readonly data: T | undefined;
+  public readonly meta: PaginationMeta | undefined;
 
   private constructor(
     success: boolean,

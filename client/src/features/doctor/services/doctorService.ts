@@ -25,6 +25,8 @@ export const doctorService = {
     const safeType = documentType.trim().replace(/\s+/g, '_');
     return (await http.get<Blob>(`/doctor/onboarding/documents/${encodeURIComponent(safeType)}`, { responseType: 'blob' })).data;
   },
+  deleteOnboardingDocument: (documentType: string) =>
+    responseData(api.delete<ApiEnvelope<DoctorOnboardingDTO>>(`/doctor/onboarding/documents/${encodeURIComponent(documentType.trim().replace(/\s+/g, '_'))}`), 'Updated doctor documents were not returned.'),
   getConsultationFee: () => responseData(api.get<ApiEnvelope<DoctorConsultationFee>>('/doctor/consultation-fee'), 'Consultation fee was not returned.'),
   getAvailability: () => responseData(api.get<ApiEnvelope<DoctorAvailability>>('/doctor/availability'), 'Doctor availability was not returned.'),
   configureAvailability: (body: Pick<DoctorAvailability, 'workingHours' | 'breaks' | 'slotDurationMinutes' | 'bufferTimeMinutes'>) =>

@@ -16,6 +16,8 @@ import { UploadDoctorDocumentUseCase } from "@application/use-cases/doctor/uploa
 import type { IUploadDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IUploadDoctorDocumentUseCase.ts";
 import { GetDoctorDocumentUseCase } from "@application/use-cases/doctor/get-doctor-document.use-case.ts";
 import type { IGetDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorDocumentUseCase.ts";
+import { DeleteDoctorDocumentUseCase } from "@application/use-cases/doctor/delete-doctor-document.use-case.ts";
+import type { IDeleteDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IDeleteDoctorDocumentUseCase.ts";
 import type { IDoctorDocumentStorage } from "@application/interfaces/services/IDoctorDocumentStorage.ts";
 import { SubmitDoctorVerificationUseCase } from "@application/use-cases/doctor/submit-doctor-verification.use-case.ts";
 import type { ISubmitDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/ISubmitDoctorVerificationUseCase.ts";
@@ -53,6 +55,8 @@ const uploadDoctorDocumentUseCase: IUploadDoctorDocumentUseCase =
   new UploadDoctorDocumentUseCase(doctorRepository, documentStorage);
 const getDoctorDocumentUseCase: IGetDoctorDocumentUseCase =
   new GetDoctorDocumentUseCase(doctorRepository, documentStorage);
+const deleteDoctorDocumentUseCase: IDeleteDoctorDocumentUseCase =
+  new DeleteDoctorDocumentUseCase(doctorRepository, documentStorage);
 const submitDoctorVerificationUseCase: ISubmitDoctorVerificationUseCase =
   new SubmitDoctorVerificationUseCase(doctorRepository);
 const listPendingDoctorVerificationsUseCase: IListPendingDoctorVerificationsUseCase =
@@ -81,6 +85,7 @@ const controller = new DoctorController(
   updateDoctorOnboardingUseCase,
   uploadDoctorDocumentUseCase,
   getDoctorDocumentUseCase,
+  deleteDoctorDocumentUseCase,
   submitDoctorVerificationUseCase,
   listPendingDoctorVerificationsUseCase,
   getDoctorVerificationDetailsUseCase,

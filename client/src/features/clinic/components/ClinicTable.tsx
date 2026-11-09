@@ -17,11 +17,13 @@ export function ClinicTable({ clinics, onStatus, onDetails, busy }: { clinics: C
           <td className={tdClass}>{c.contactEmail ?? '—'}</td>
           <td className={tdClass}>
             <div className="flex items-center gap-[5px] whitespace-nowrap">
-              {c.status === 'PENDING' ? (
+              {c.status === 'PENDING' && c.setupStatus === 'PENDING_VERIFICATION' ? (
                 <>
                   <Button size="xs" variant="ghost" disabled={busy} onClick={() => onStatus(c.id, 'APPROVED')}>Approve</Button>
                   <Button size="xs" variant="ghost" disabled={busy} onClick={() => onStatus(c.id, 'REJECTED')}>Reject</Button>
                 </>
+              ) : c.status === 'PENDING' ? (
+                <span className="text-[9px] text-[#777c8a]">Awaiting clinic submission</span>
               ) : c.status === 'APPROVED' ? (
                 <Button size="xs" variant="ghost" disabled={busy} onClick={() => onStatus(c.id, 'BLOCKED')}>Block</Button>
               ) : c.status === 'REJECTED' ? (

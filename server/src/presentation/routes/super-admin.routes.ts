@@ -8,6 +8,7 @@ export function createSuperAdminRouter(
 ): Router {
   const router = Router();
   const { authenticate, authorizeSuperAdmin } = middleware;
+  router.get("/super-admin/clinics/:id/documents/:documentType", authenticate, authorizeSuperAdmin, controller.getClinicDocument);
   router.get("/super-admin/clinics", authenticate, authorizeSuperAdmin, controller.listClinics);
   router.get("/super-admin/clinics/:id", authenticate, authorizeSuperAdmin, controller.getClinic);
   router.patch("/super-admin/clinics/:id/status", authenticate, authorizeSuperAdmin, controller.updateClinicStatus);

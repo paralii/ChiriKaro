@@ -24,7 +24,7 @@ export abstract class BaseRepository<T extends Document> {
     id: string,
     data: UpdateQuery<T>,
   ): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+    return this.model.findByIdAndUpdate(id, data, { returnDocument: "after" }).exec();
   }
 
   public async deleteDocumentById(id: string): Promise<boolean> {

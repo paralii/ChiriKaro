@@ -3,6 +3,7 @@ import type { IGetDoctorOnboardingUseCase } from "@application/interfaces/use-ca
 import type { IUpdateDoctorOnboardingUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorOnboardingUseCase.ts";
 import type { IUploadDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IUploadDoctorDocumentUseCase.ts";
 import type { IGetDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorDocumentUseCase.ts";
+import type { IDeleteDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IDeleteDoctorDocumentUseCase.ts";
 import type { ISubmitDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/ISubmitDoctorVerificationUseCase.ts";
 import type { IListPendingDoctorVerificationsUseCase } from "@application/interfaces/use-cases/doctor/IListPendingDoctorVerificationsUseCase.ts";
 import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorVerificationDetailsUseCase.ts";
@@ -25,6 +26,7 @@ export class DoctorController {
     private readonly _updateOnboardingUseCase: IUpdateDoctorOnboardingUseCase,
     private readonly _uploadDocumentUseCase: IUploadDoctorDocumentUseCase,
     private readonly _getDocumentUseCase: IGetDoctorDocumentUseCase,
+    private readonly _deleteDocumentUseCase: IDeleteDoctorDocumentUseCase,
     private readonly _submitVerificationUseCase: ISubmitDoctorVerificationUseCase,
     private readonly _listPendingVerificationsUseCase: IListPendingDoctorVerificationsUseCase,
     private readonly _getVerificationDetailsUseCase: IGetDoctorVerificationDetailsUseCase,
@@ -83,6 +85,15 @@ export class DoctorController {
       if (typeof documentType !== "string") throw new ValidationError("Document type is required");
       const result = await this._getDocumentUseCase.execute(req.user!.sub, documentType);
       res.status(HttpStatus.OK).type(result.contentType).send(result.content);
+    } catch (error) { next(error); }
+  };
+
+  deleteDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const documentType = req.params.documentType;
+      if (typeof documentType !== "string") throw new ValidationError("Document type is required");
+      const result = await this._deleteDocumentUseCase.execute(req.user!.sub, req.user!.clinicId!, documentType);
+      res.status(HttpStatus.OK).json(ApiResponse.success("Doctor document removed", result));
     } catch (error) { next(error); }
   };
 

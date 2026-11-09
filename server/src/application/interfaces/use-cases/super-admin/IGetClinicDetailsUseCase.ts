@@ -1,5 +1,5 @@
-import type { ClinicSummaryDTO } from "@application/dto/super-admin/clinic-management.dto.ts";
+import type { ClinicDetailsDTO } from "@application/dto/super-admin/clinic-management.dto.ts";
 
 export interface IGetClinicDetailsUseCase {
-  execute(clinicId: string): Promise<ClinicSummaryDTO>;
+  execute(clinicId: string): Promise<ClinicDetailsDTO>;
 }

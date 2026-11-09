@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
-import { WelcomeBand } from '@/components/molecules/WelcomeBand';
 import { WorkingHoursForm } from '@/features/clinic/components/WorkingHoursForm';
 import { DoctorAvailabilityStep } from '@/features/doctor/components/DoctorAvailabilityStep';
 import { DoctorBreaksForm } from '@/features/doctor/components/DoctorBreaksForm';
@@ -88,8 +86,6 @@ export default function DoctorAvailabilityPage() {
   return (
     <div className="grid gap-[18px] [&>section]:mt-0">
       <Notices error={error} message={message} />
-      <WelcomeBand pill="DOCTOR AVAILABILITY" title="Manage your availability" description="Configure working hours, breaks, slot duration and buffer time for this clinic."
-        action={<Link to="/doctor/workspace"><Button type="button" variant="secondary" tabIndex={-1}>Workspace details</Button></Link>} />
       {!availability && busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading doctor availability...</Card> : null}
       {!availability && !busy ? (
         <Card className="p-[18px] text-sm text-[#777c8a]">

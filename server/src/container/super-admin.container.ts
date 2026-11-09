@@ -14,6 +14,8 @@ import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts"
 import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
 import { SuperAdminController } from "@presentation/controllers/super-admin.controller.ts";
 import { createSuperAdminRouter } from "@presentation/routes/super-admin.routes.ts";
+import { GetClinicDocumentUseCase } from "@application/use-cases/clinic/get-clinic-document.use-case.ts";
+import { CloudinaryClinicDocumentStorage } from "@infrastructure/services/storage/cloudinary-clinic-document.storage.ts";
 
 const clinicRepository = new ClinicRepository();
 const superAdminClinicRepository = new SuperAdminClinicRepository();
@@ -27,11 +29,13 @@ const listClinicsUseCase: IListClinicsUseCase = new ListClinicsUseCase(superAdmi
 const getClinicDetailsUseCase: IGetClinicDetailsUseCase = new GetClinicDetailsUseCase(superAdminClinicRepository);
 const updateClinicStatusUseCase: IUpdateClinicStatusUseCase = new UpdateClinicStatusUseCase(superAdminClinicRepository);
 const getStatisticsUseCase: IGetSuperAdminStatisticsUseCase = new GetSuperAdminStatisticsUseCase(statisticsRepository);
+const getClinicDocumentUseCase = new GetClinicDocumentUseCase(clinicRepository, new CloudinaryClinicDocumentStorage());
 const controller = new SuperAdminController(
   listClinicsUseCase,
   getClinicDetailsUseCase,
   updateClinicStatusUseCase,
   getStatisticsUseCase,
+  getClinicDocumentUseCase,
 );
 
 export const superAdminRouter = createSuperAdminRouter(controller, {

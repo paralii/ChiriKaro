@@ -16,15 +16,34 @@ export function toDoctorWorkingHours(hours: WorkingHour[]) {
 }
 
 export function toDisplayWorkingHours(profileHours: DoctorOnboardingProfile['workingHours']): WorkingHour[] {
-  return profileHours.map((hour) => ({ ...hour, day: `${hour.day[0]}${hour.day.slice(1).toLowerCase()}` }));
+  const rows = Array.isArray(profileHours) ? profileHours : [];
+  return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+    const canonical = day.toUpperCase() as DoctorDayOfWeek;
+    const hour = rows.find((row) => String(row?.day ?? '').trim().toUpperCase() === canonical);
+    return {
+      day,
+      isOpen: Boolean(hour?.isOpen),
+      startTime: hour?.startTime ?? '09:00',
+      endTime: hour?.endTime ?? '17:00',
+    };
+  });
+}
+
+export function hasCompleteDoctorHours(profileHours: DoctorOnboardingProfile['workingHours']): boolean {
+  if (!Array.isArray(profileHours) || profileHours.length !== 7) return false;
+  const expectedDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const storedDays = new Set(profileHours.map((hour) => String(hour?.day ?? '').trim().toUpperCase()));
+  if (storedDays.size !== 7 || expectedDays.some((day) => !storedDays.has(day))) return false;
+  const displayHours = toDisplayWorkingHours(profileHours);
+  return displayHours.some((hour) => hour.isOpen) && !findInvalidHours(displayHours);
 }
 
 export function findResumeStep(profile: DoctorOnboardingProfile): number {
   if (!profile.firstName || !profile.lastName) return 0;
-  if (!profile.professionalTitle || !profile.qualifications.length || profile.yearsOfExperience === null || !profile.registrationNumber || !profile.registrationAuthority) return 1;
-  if (!profile.specializations.length || !profile.procedures.length || profile.workingHours.length !== 7) return 2;
-  if (!profile.documents.length) return 3;
-  return 4;
+  if (!profile.professionalTitle || !profile.qualifications?.length || profile.yearsOfExperience === null || !profile.registrationNumber || !profile.registrationAuthority) return 1;
+  if (!profile.specializations?.length || !profile.procedures?.length) return 2;
+  if (!profile.documents?.some((document) => document && typeof document.documentType === 'string' && document.documentType.trim())) return 4;
+  return 5;
 }
 
 export function parseList(value: string): string[] {

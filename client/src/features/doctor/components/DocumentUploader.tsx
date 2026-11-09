@@ -4,13 +4,14 @@ import { Select } from '@components/atoms/Select';
 import { FormField } from '@components/molecules/FormField';
 import { DocumentList } from '@components/molecules/DocumentList';
 
-export function DocumentUploader({ types, documents, busy, showStatus, onUpload, onOpen }: {
+export function DocumentUploader({ types, documents, busy, showStatus, onUpload, onOpen, onDelete }: {
   types: string[];
   documents: { documentType: string; status?: string }[];
   busy: boolean;
   showStatus?: boolean;
   onUpload: (type: string, file: File) => void;
   onOpen: (type: string) => void;
+  onDelete?: (type: string) => void;
 }) {
   const [type, setType] = useState(types[0]);
   return (
@@ -22,7 +23,7 @@ export function DocumentUploader({ types, documents, busy, showStatus, onUpload,
             onChange={(e) => { const file = e.target.files?.[0]; if (file) onUpload(type, file); e.currentTarget.value = ''; }} />
         </FormField>
       </div>
-      <DocumentList items={documents.map((d) => ({ key: d.documentType, label: d.documentType, status: showStatus ? d.status : undefined }))} onOpen={onOpen} />
+      <DocumentList items={documents.map((d) => ({ key: d.documentType, label: d.documentType, status: showStatus ? d.status : undefined }))} onOpen={onOpen} onDelete={onDelete} busy={busy} />
     </>
   );
 }

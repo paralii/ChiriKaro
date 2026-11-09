@@ -11,16 +11,16 @@ import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 
 export class SuperAdminController {
   constructor(
-    private readonly listClinicsUseCase: IListClinicsUseCase,
-    private readonly getClinicDetailsUseCase: IGetClinicDetailsUseCase,
-    private readonly updateClinicStatusUseCase: IUpdateClinicStatusUseCase,
-    private readonly getStatisticsUseCase: IGetSuperAdminStatisticsUseCase,
-    private readonly getClinicDocumentUseCase: IGetClinicDocumentUseCase,
+    private readonly _listClinicsUseCase: IListClinicsUseCase,
+    private readonly _getClinicDetailsUseCase: IGetClinicDetailsUseCase,
+    private readonly _updateClinicStatusUseCase: IUpdateClinicStatusUseCase,
+    private readonly _getStatisticsUseCase: IGetSuperAdminStatisticsUseCase,
+    private readonly _getClinicDocumentUseCase: IGetClinicDocumentUseCase,
   ) {}
 
   listClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await this.listClinicsUseCase.execute(req.query as unknown as ClinicListQueryDTO);
+      const result = await this._listClinicsUseCase.execute(req.query as unknown as ClinicListQueryDTO);
       res.status(HttpStatus.OK).json(ApiResponse.success("Clinics retrieved successfully", result.clinics, {
         page: result.page,
         limit: result.limit,
@@ -32,14 +32,14 @@ export class SuperAdminController {
 
   getClinic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const clinic = await this.getClinicDetailsUseCase.execute(req.params.id as string);
+      const clinic = await this._getClinicDetailsUseCase.execute(req.params.id as string);
       res.status(HttpStatus.OK).json(ApiResponse.success("Clinic retrieved successfully", clinic));
     } catch (error) { next(error); }
   };
 
   updateClinicStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const clinic = await this.updateClinicStatusUseCase.execute({
+      const clinic = await this._updateClinicStatusUseCase.execute({
         clinicId: req.params.id as string,
         status: req.body?.status,
       });
@@ -49,7 +49,7 @@ export class SuperAdminController {
 
   getStatistics = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await this.getStatisticsUseCase.execute();
+      const result = await this._getStatisticsUseCase.execute();
       res.status(HttpStatus.OK).json(ApiResponse.success("Super Admin statistics retrieved successfully", result));
     } catch (error) { next(error); }
   };
@@ -58,7 +58,7 @@ export class SuperAdminController {
     try {
       const { id, documentType } = req.params;
       if (typeof id !== "string" || typeof documentType !== "string") throw new ValidationError("Clinic and document are required");
-      const result = await this.getClinicDocumentUseCase.execute(id, documentType);
+      const result = await this._getClinicDocumentUseCase.execute(id, documentType);
       res.status(HttpStatus.OK).type(result.contentType).send(result.content);
     } catch (error) { next(error); }
   };

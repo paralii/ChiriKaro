@@ -86,7 +86,7 @@ export class InvitationRepository
       .findOneAndUpdate(
         { _id: new Types.ObjectId(invitation.id) },
         { $set: this.toPersistence(invitation) },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
       )
       .select("+tokenHash")
       .exec();

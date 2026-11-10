@@ -1,3 +1,6 @@
+import type { Response } from "express";
+import { HttpStatus } from "@shared/enums/http-status.enum.ts";
+
 export interface PaginationMeta {
   page: number;
   limit: number;
@@ -5,37 +8,54 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
-export class ApiResponse<T = unknown> {
-  public readonly success: boolean;
-  public readonly message: string;
-  public readonly data?: T;
-  public readonly meta?: PaginationMeta;
-
-  private constructor(
+export class ApiResponse{
+  private static send<T>(
+    res: Response,
+    statusCode: number,
     success: boolean,
     message: string,
-    data?: T,
-    meta?: PaginationMeta,
-  ) {
-    this.success = success;
-    this.message = message;
-    this.data = data;
-    this.meta = meta;
+    data: T | null = null,
+    meta: PaginationMeta | null = null,
+  ): void {
+    res.status(statusCode).json({
+      success,
+      message,
+      data,
+      meta,
+    });
   }
 
   public static success<T>(
+    res: Response,
     message: string,
     data?: T,
-    meta?: PaginationMeta,
-  ): ApiResponse<T> {
-    return new ApiResponse<T>(true, message, data, meta);
+    statusCode: number = HttpStatus.OK,
+  ): void {
+    this.send(res, statusCode, true, message, data ?? null);
   }
 
-  public static created<T>(message: string, data?: T): ApiResponse<T> {
-    return new ApiResponse<T>(true, message, data);
+  public static created<T>(
+    res: Response,
+    message: string,
+    data: T,
+  ): void {
+    this.send(res, HttpStatus.CREATED, true, message, data);
   }
   
-  public static failed(message: string): ApiResponse {
-    return new ApiResponse(false, message);
+  public static failed(
+    res: Response,
+    message: string,
+    statusCode: number = HttpStatus.BAD_REQUEST,
+  ): void {
+    this.send(res, statusCode, false, message);
+  }
+
+  public static paginated<T>(
+    res: Response,
+    message: string,
+    data: T,
+    meta: PaginationMeta,
+  ): void {
+    this.send(res, HttpStatus.OK, true, message, data, meta);
   }
 }

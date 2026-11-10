@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { DetailList } from '@/components/molecules/DetailList';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
-import { WelcomeBand } from '@/components/molecules/WelcomeBand';
 import { roleDashboardService } from '@/features/dashboard/services/roleDashboardService';
 import { doctorService } from '@/features/doctor/services/doctorService';
 import { useAction } from '@/shared/hooks/useAction';
@@ -55,11 +52,6 @@ export default function TeamAccessPage() {
     <>
       <Notices error={error} />
       {feeError ? <Notices error={feeError} /> : null}
-      <WelcomeBand pill="ACCOUNT ACTIVE" title={`Welcome, ${dashboard?.user.name ?? user.name}.`} description={`Your ${roleLabels[user.role].toLowerCase()} workspace is ready.`}
-        action={user.role === 'DOCTOR' ? <div className="flex flex-wrap gap-2">
-          <Link to="/doctor/dashboard"><Button type="button" variant="secondary" tabIndex={-1}>Continue onboarding</Button></Link>
-          <Link to="/doctor/availability"><Button type="button" variant="ghost" tabIndex={-1}>Manage availability</Button></Link>
-        </div> : undefined} />
       <Card>
         <SectionHeading title="Workspace details" description={busy ? 'Loading your clinic association...' : 'Information associated with your account'} />
         <DetailList items={details} />

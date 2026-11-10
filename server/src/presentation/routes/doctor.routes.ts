@@ -30,6 +30,12 @@ export function DoctorRouter(
     authorizeDoctor,
     controller.getDocument,
   );
+  router.delete(
+    "/doctor/onboarding/documents/:documentType",
+    authenticate,
+    authorizeDoctor,
+    controller.deleteDocument,
+  );
 
   router.get("/doctor/verification", authenticate, authorizeDoctor, controller.getVerification);
   router.post("/doctor/verification/submit", authenticate, authorizeDoctor, controller.submitVerification);

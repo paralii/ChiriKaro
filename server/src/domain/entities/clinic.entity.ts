@@ -155,11 +155,13 @@ export class Clinic {
 
   approve(): void {
     this.props.status = ClinicStatus.APPROVED;
+    this.props.setupStatus = ClinicSetupStatus.VERIFIED;
     this.touch();
   }
 
   reject(): void {
     this.props.status = ClinicStatus.REJECTED;
+    this.props.setupStatus = ClinicSetupStatus.REJECTED;
     this.touch();
   }
 

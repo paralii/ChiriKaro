@@ -42,39 +42,67 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
     const doc = await this.model.findOneAndUpdate(
       { _id: new Types.ObjectId(clinic.id) },
       { $set: this.toPersistence(clinic) },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     ).exec();
     return this.toDomain(doc!);
   }
 
   private toDomain(doc: IClinicDocument): Clinic {
-    return Clinic.fromPersistence({
-      _id: doc._id.toString(),
-      name: doc.name,
-      address: doc.address ?? null,
-      phone: doc.phone ?? null,
-      contactEmail: doc.contactEmail ?? null,
-      ownerAdminId: doc.ownerAdminId ? doc.ownerAdminId.toString() : null,
-      status: doc.status,
-      specializations: doc.services ?? [],
-      workingHours: doc.workingHours ?? [],
-      documents: doc.documents ?? [],
-      setupStatus: doc.setupStatus,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-    });
-  }
+  return Clinic.fromPersistence({
+    _id: doc._id.toString(),
+    name: doc.name,
+    address: doc.address ?? null,
+    city: doc.city ?? null,
+    state: doc.state ?? null,
+    pincode: doc.pincode ?? null,
+    phone: doc.phone ?? null,
+    contactEmail: doc.contactEmail ?? null,
+    registrationNumber: doc.registrationNumber ?? null,
+    ownerAdminId: doc.ownerAdminId
+      ? doc.ownerAdminId.toString()
+      : null,
+    status: doc.status,
+    specializations: doc.services ?? [],
+
+    workingHours: (doc.workingHours ?? []).map((hour) => ({
+      day: hour.day,
+      isOpen: hour.isOpen,
+      startTime: hour.startTime,
+      endTime: hour.endTime,
+    })),
+
+    documents: (doc.documents ?? []).map((document) => ({
+      documentType: document.documentType,
+      documentKey: document.documentKey,
+      uploadedAt: document.uploadedAt,
+    })),
+
+    setupStatus: doc.setupStatus,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  });
+}
 
   private toPersistence(clinic: Clinic) {
-    return {
-      name: clinic.name,
-      address: clinic.address,
-      phone: clinic.phone,
-      contactEmail: clinic.contactEmail,
-      ownerAdminId: clinic.ownerAdminId ? new Types.ObjectId(clinic.ownerAdminId) : null,
-      status: clinic.status,
-    };
-  }
+  return {
+    name: clinic.name,
+    address: clinic.address,
+    city: clinic.city,
+    state: clinic.state,
+    pincode: clinic.pincode,
+    phone: clinic.phone,
+    contactEmail: clinic.contactEmail,
+    registrationNumber: clinic.registrationNumber,
+    ownerAdminId: clinic.ownerAdminId
+      ? new Types.ObjectId(clinic.ownerAdminId)
+      : null,
+    services: clinic.specializations,
+    workingHours: clinic.workingHours,
+    documents: clinic.documents,
+    status: clinic.status,
+    setupStatus: clinic.setupStatus,
+  };
+}
 }
 
 export class SuperAdminStatisticsRepository implements ISuperAdminStatisticsRepository {

@@ -20,10 +20,10 @@ export function PortalSidebar({ role, workspaceName, items, pendingCount = 0, on
         {items.map((i) => <NavItem key={i.path} path={i.path} badge={i.path === 'pending' ? pendingCount : undefined}>{i.label}</NavItem>)}
       </nav>
       <div className="mt-auto max-md:hidden">
-        <div className="mx-0.5 mb-[13px] flex items-center gap-2.5 border-t border-[#ececf1] px-2 py-[11px]">
+        {role !== 'SUPER_ADMIN' ? <div className="mx-0.5 mb-[13px] flex items-center gap-2.5 border-t border-[#ececf1] px-2 py-[11px]">
           <span className="grid size-[25px] place-items-center rounded-full border border-[#d9dce6] text-xs text-brand-deep">?</span>
           <span><strong className="block text-[10px]">Need a hand?</strong><small className="mt-[3px] block text-[9px] text-[#888b97]">Contact support</small></span>
-        </div>
+        </div> : null}
         <button className={sideLinkClass()} onClick={onLogout}><SideMark />Sign out</button>
       </div>
     </aside>

@@ -261,6 +261,15 @@ export class Doctor {
     this.markInProgress();
   }
 
+  removeDocument(documentType: string): string {
+    this.ensureEditable();
+    const document = this.props.documents.find((item) => item.documentType === documentType);
+    if (!document) throw new InvalidDoctorDataError("Doctor document was not found");
+    this.props.documents = this.props.documents.filter((item) => item.documentType !== documentType);
+    this.markInProgress();
+    return document.documentKey;
+  }
+
   submitForVerification(): void {
     if (this.props.verificationStatus !== "IN_PROGRESS") {
       throw new InvalidDoctorDataError("Doctor onboarding must be updated before submission");

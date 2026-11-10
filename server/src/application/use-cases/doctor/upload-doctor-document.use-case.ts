@@ -5,6 +5,7 @@ import type { IUploadDoctorDocumentUseCase } from "@application/interfaces/use-c
 import type { DoctorOnboardingDTO } from "@application/dto/doctor/doctor-onboarding.dto.ts";
 import { BadRequestError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
 import { toDoctorOnboardingDTO } from "@application/mappers/doctor-onboarding.mapper.ts";
+import { logger } from "@infrastructure/logger/logger.ts";
 
 export class UploadDoctorDocumentUseCase implements IUploadDoctorDocumentUseCase {
   constructor(
@@ -26,9 +27,10 @@ export class UploadDoctorDocumentUseCase implements IUploadDoctorDocumentUseCase
     const doctor = await this._doctorRepository.findByUserId(userId);
     if (!doctor) throw new NotFoundError("Doctor onboarding profile");
     if (doctor.clinicId !== clinicId) throw new BadRequestError("Doctor profile belongs to another clinic");
-    if (doctor.verificationStatus !== "NOT_STARTED" && doctor.verificationStatus !== "IN_PROGRESS") {
+    if (doctor.verificationStatus !== "NOT_STARTED" && doctor.verificationStatus !== "IN_PROGRESS" && doctor.verificationStatus !== "REJECTED") {
       throw new ValidationError("Doctor onboarding cannot be edited in its current status");
     }
+    const previousKey = doctor.documents.find((document) => document.documentType === documentType)?.documentKey;
     const key = await this._storage.save(content, contentType);
     try {
       doctor.addDocument({
@@ -43,6 +45,11 @@ export class UploadDoctorDocumentUseCase implements IUploadDoctorDocumentUseCase
       if (error instanceof DomainError) throw new ValidationError(error.message);
       throw error;
     }
-    return toDoctorOnboardingDTO(await this._doctorRepository.save(doctor));
+    const saved = await this._doctorRepository.save(doctor);
+    if (previousKey) {
+      try { await this._storage.delete(previousKey); }
+      catch (error) { logger.warn("Replaced doctor document cleanup failed", { documentType, message: error instanceof Error ? error.message : "Unknown storage error" }); }
+    }
+    return toDoctorOnboardingDTO(saved);
   }
 }

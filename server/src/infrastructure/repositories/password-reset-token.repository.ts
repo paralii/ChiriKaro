@@ -43,7 +43,7 @@ export class MongoPasswordResetTokenRepository
         },
         {
           upsert: true,
-          new: true,
+          returnDocument: "after",
           runValidators: true,
         },
       )

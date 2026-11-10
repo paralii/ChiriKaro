@@ -19,6 +19,7 @@ import AcceptInvitationPage from '@/pages/AcceptInvitationPage';
 import TeamAccessPage from '@/pages/portal/TeamAccessPage';
 import DoctorOnboardingPage from '@/pages/portal/doctor/DoctorOnboardingPage';
 import DoctorAvailabilityPage from '@/pages/portal/doctor/DoctorAvailabilityPage';
+import DoctorPortalLayout from '@/pages/portal/doctor/DoctorPortalLayout';
 import PatientPortalLayout from '@/pages/portal/patient/PatientPortalLayout';
 import PatientDashboardPage from '@/pages/portal/patient/PatientDashboardPage';
 import PatientProfilePage from '@/pages/portal/patient/PatientProfilePage';
@@ -43,9 +44,12 @@ export default function AppRouter() {
       </Route>
 
       <Route element={<RequireDoctor />}>
-        <Route path="/doctor/dashboard" element={<DoctorOnboardingPage />} />
-        <Route path="/doctor/availability" element={<DoctorAvailabilityPage />} />
-        <Route path="/doctor/workspace" element={<TeamAccessPage />} />
+        <Route path="/doctor" element={<DoctorPortalLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DoctorOnboardingPage />} />
+          <Route path="availability" element={<DoctorAvailabilityPage />} />
+          <Route path="workspace" element={<TeamAccessPage />} />
+        </Route>
       </Route>
       <Route element={<RequireStaff />}>
         <Route path="/staff/dashboard" element={<TeamAccessPage />} />

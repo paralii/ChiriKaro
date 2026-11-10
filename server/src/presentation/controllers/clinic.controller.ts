@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
+import { ValidationError } from "@shared/errors/index.ts";
 
 import type { IRegisterClinicUseCase } from "@application/interfaces/use-cases/clinic/IRegisterClinicUseCase.ts";
 import type { IGetClinicProfileUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicProfileUseCase.ts";
@@ -10,7 +11,6 @@ import type { IUpdateClinicSetupUseCase } from "@application/interfaces/use-case
 import type { ISubmitClinicSetupUseCase } from "@application/interfaces/use-cases/clinic/ISubmitClinicSetupUseCase.ts";
 import type { IUploadClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IUploadClinicDocumentUseCase.ts";
 import type { IGetClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicDocumentUseCase.ts";
-import { ValidationError } from "@shared/errors/index.ts";
 
 export class ClinicController {
   constructor(
@@ -34,7 +34,7 @@ export class ClinicController {
         req.body,
       );
 
-      res.status(HttpStatus.CREATED).json(ApiResponse.created(message, data));
+      ApiResponse.created(res, message, data);
     } catch (error) {
       next(error);
     }
@@ -49,7 +49,7 @@ export class ClinicController {
       const result = await this._getClinicProfileUseCase.execute(
         req.user!.clinicId!,
       );
-      res.status(HttpStatus.OK).json(ApiResponse.success("Clinic profile retrieved", result));
+      ApiResponse.success(res, "Clinic profile retrieved", result);
     } catch (error) {
       next(error);
     }
@@ -65,7 +65,7 @@ export class ClinicController {
         clinicId: req.user!.clinicId!,
         updates: req.body,
       });
-      res.status(HttpStatus.OK).json(ApiResponse.success("Clinic profile updated", result));
+      ApiResponse.success(res, "Clinic profile updated", result);
     } catch (error) {
       next(error);
     }
@@ -80,44 +80,88 @@ export class ClinicController {
       const result = await this._getClinicDashboardUseCase.execute(
         req.user!.clinicId!,
       );
-      res.status(HttpStatus.OK).json(ApiResponse.success("Clinic dashboard retrieved", result));
+      ApiResponse.success(res, "Clinic dashboard retrieved", result);
     } catch (error) {
       next(error);
     }
   };
 
-  public updateSetup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateSetup = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
-      const result = await this._updateClinicSetupUseCase.execute(req.user!.clinicId!, req.body);
-      res.status(HttpStatus.OK).json(ApiResponse.success("Clinic setup updated", result));
-    } catch (error) { next(error); }
-  };
-
-  public uploadDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!Buffer.isBuffer(req.body)) throw new ValidationError("Upload the document as a raw PDF, JPEG, or PNG body");
-      const documentType = req.query.documentType;
-      if (typeof documentType !== "string") throw new ValidationError("Document type is required");
-      const result = await this._uploadClinicDocumentUseCase.execute(
-        req.user!.clinicId!, documentType, req.body, req.header("content-type") ?? "",
+      const result = await this._updateClinicSetupUseCase.execute(
+        req.user!.clinicId!,
+        req.body,
       );
-      res.status(HttpStatus.CREATED).json(ApiResponse.created("Clinic document uploaded", result));
-    } catch (error) { next(error); }
+      ApiResponse.success(res, "Clinic setup updated", result);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public getDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public uploadDocument = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      if (!Buffer.isBuffer(req.body))
+        throw new ValidationError(
+          "Upload the document as a raw PDF, JPEG, or PNG body",
+        );
+      const documentType = req.query.documentType;
+      if (typeof documentType !== "string")
+        throw new ValidationError("Document type is required");
+      const result = await this._uploadClinicDocumentUseCase.execute(
+        req.user!.clinicId!,
+        documentType,
+        req.body,
+        req.header("content-type") ?? "",
+      );
+      ApiResponse.created(res, "Clinic document uploaded", result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getDocument = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const documentType = req.params.documentType;
-      if (typeof documentType !== "string") throw new ValidationError("Document type is required");
-      const result = await this._getClinicDocumentUseCase.execute(req.user!.clinicId!, documentType);
+      if (typeof documentType !== "string")
+        throw new ValidationError("Document type is required");
+      const result = await this._getClinicDocumentUseCase.execute(
+        req.user!.clinicId!,
+        documentType,
+      );
       res.status(HttpStatus.OK).type(result.contentType).send(result.content);
-    } catch (error) { next(error); }
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public submitSetup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public submitSetup = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
-      const result = await this._submitClinicSetupUseCase.execute(req.user!.clinicId!);
-      res.status(HttpStatus.OK).json(ApiResponse.success("Clinic setup submitted for verification", result));
-    } catch (error) { next(error); }
+      const result = await this._submitClinicSetupUseCase.execute(
+        req.user!.clinicId!,
+      );
+      ApiResponse.success(
+        res,
+        "Clinic setup submitted for verification",
+        result,
+      );
+    } catch (error) {
+      next(error);
+    }
   };
 }

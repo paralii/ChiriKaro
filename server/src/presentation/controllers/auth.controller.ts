@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 
 import type { IRegisterUseCase } from "@application/interfaces/use-cases/auth/IRegisterUseCase.ts";
@@ -39,9 +38,7 @@ export class AuthController {
     try {
       const result = await this._registerUseCase.execute(req.body);
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("User registered", result.user));
+      ApiResponse.created(res, "User registered", result.user);
     } catch (error) {
       next(error);
     }
@@ -61,9 +58,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("User Logined", result.user));
+      ApiResponse.success(res, "User Logined", result.user);
     } catch (error) {
       next(error);
     }
@@ -81,9 +76,7 @@ export class AuthController {
 
       AuthCookieHelper.clearAuthCookies(res);
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("Logged out successfully"));
+      ApiResponse.success(res, "Logged out successfully");
     } catch (error) {
       next(error);
     }
@@ -97,7 +90,7 @@ export class AuthController {
     try {
       const result = await this._getProfileUseCase.execute(req.user!.sub);
 
-      res.status(HttpStatus.OK).json(ApiResponse.success("", result));
+      ApiResponse.success(res, "User data fetched", result);
     } catch (error) {
       next(error);
     }
@@ -119,9 +112,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("Token refreshed successfully"));
+      ApiResponse.success(res, "Token refreshed successfully");
     } catch (error) {
       next(error);
     }
@@ -135,13 +126,10 @@ export class AuthController {
     try {
       await this._forgotPasswordUseCase.execute(req.body);
 
-      res
-        .status(HttpStatus.OK)
-        .json(
-          ApiResponse.success(
-            "If the account exists, password reset instructions will be sent.",
-          ),
-        );
+      ApiResponse.success(
+        res,
+        "If the account exists, password reset instructions will be sent.",
+      );
     } catch (error) {
       next(error);
     }
@@ -155,9 +143,7 @@ export class AuthController {
     try {
       await this._resetPasswordUseCase.execute(req.body);
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("Password reset successfully"));
+      ApiResponse.success(res, "Password reset successfully");
     } catch (error) {
       next(error);
     }
@@ -171,9 +157,7 @@ export class AuthController {
     try {
       const result = await this._verifyOtpUseCase.execute(req.body);
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("Otp verified", result));
+      ApiResponse.success(res, "Otp verified", result);
     } catch (error) {
       next(error);
     }
@@ -187,13 +171,10 @@ export class AuthController {
     try {
       await this._resendOtpUseCase.execute(req.body);
 
-      res
-        .status(HttpStatus.OK)
-        .json(
-          ApiResponse.success(
-            "If applicable, a verification code will be sent.",
-          ),
-        );
+      ApiResponse.success(
+        res,
+        "If applicable, a verification code will be sent.",
+      );
     } catch (error) {
       next(error);
     }
@@ -213,9 +194,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("google user authorized", result.user));
+      ApiResponse.success(res, "google user authorized", result.user);
     } catch (error) {
       next(error);
     }
@@ -232,9 +211,7 @@ export class AuthController {
         userId: req.user!.sub,
       });
 
-      res
-        .status(HttpStatus.OK)
-        .json(ApiResponse.success("Password changed successfully"));
+      ApiResponse.success(res, "Password changed successfully");
     } catch (error) {
       next(error);
     }

@@ -85,7 +85,7 @@ export const superAdminService = {
   },
   updateStatus: async (id: string, status: ClinicStatus) => {
     const response = await api.patch<ApiEnvelope<Clinic>>(
-      `${API_ROUTES.SUPER_ADMIN.CLINIC_STATUS}`,
+      `${API_ROUTES.SUPER_ADMIN.CLINIC_STATUS(id)}`,
       { status },
     );
     if (!response.data)

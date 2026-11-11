@@ -209,7 +209,7 @@ export class AuthController {
       );
 
       res.redirect(
-        `${process.env.CLIENT_URL ?? "http://localhost:5173"}/auth/google/callback?success=1`,
+        `${process.env.CLIENT_URL ?? "http://localhost:2026"}/auth/google/callback?success=1`,
       );
     } catch (error) {
       const message =
@@ -218,7 +218,7 @@ export class AuthController {
         AuthCookieHelper.clearAuthCookies(res);
       }
       res.redirect(
-        `${process.env.CLIENT_URL ?? "http://localhost:5173"}/auth/google/callback?error=${encodeURIComponent(message)}`,
+        `${process.env.CLIENT_URL ?? "http://localhost:2026"}/auth/google/callback?error=${encodeURIComponent(message)}`,
       );
     }
   };

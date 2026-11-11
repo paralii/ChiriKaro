@@ -5,9 +5,11 @@ import { TextField } from '@/components/molecules/FormField';
 import { PasswordField } from '@/components/molecules/PasswordField';
 import { AuthSubmitButton } from '@/components/molecules/AuthSubmitButton';
 import { Notices } from '@/components/molecules/Notices';
+import { Button } from '@/components/atoms/Button';
 import { useLogin } from '@/features/auth/hooks/useLogin';
+import { authService } from '@/features/auth/services/authService';
 
-export function SignInForm({ emailPlaceholder = 'you@example.com', extras = true }: { emailPlaceholder?: string; extras?: boolean }) {
+export function SignInForm({ emailPlaceholder = 'you@example.com', extras = true, google = true }: { emailPlaceholder?: string; extras?: boolean; google?: boolean }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, busy, error } = useLogin();
@@ -18,6 +20,17 @@ export function SignInForm({ emailPlaceholder = 'you@example.com', extras = true
     <>
       <Notices error={error} />
       <Form onSubmit={submit}>
+        {google ? <Button
+          type="button"
+          variant="secondary"
+          className="mb-4 w-full"
+          disabled={busy}
+          onClick={() => {
+            if (!busy) window.location.assign(authService.getGoogleAuthUrl('signin'));
+          }}
+        >
+          Continue with Google
+        </Button> : null}
         <TextField label="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={emailPlaceholder} autoComplete="email" required />
         <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete="current-password" required />
         {extras ? (

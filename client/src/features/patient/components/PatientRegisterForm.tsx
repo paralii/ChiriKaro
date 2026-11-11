@@ -8,6 +8,7 @@ import { PasswordField } from "@/components/molecules/PasswordField";
 import { OtpField } from "@/components/molecules/OtpField";
 import { AuthSubmitButton } from "@/components/molecules/AuthSubmitButton";
 import { Notices } from "@/components/molecules/Notices";
+import { Button } from "@/components/atoms/Button";
 
 import { useAction } from "@/shared/hooks/useAction";
 import { useOtpStep } from "@/features/auth/hooks/useOtpStep";
@@ -97,6 +98,22 @@ export function PatientRegisterForm({
       <Form onSubmit={submit}>
         {!otp.verifying ? (
           <>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full"
+              disabled={busy}
+              onClick={() => {
+                if (!busy) window.location.assign(authService.getGoogleAuthUrl('signup'));
+              }}
+            >
+              Sign up with Google
+            </Button>
+            <div className="my-1 flex items-center gap-3 text-[11px] text-[#858997]" aria-hidden="true">
+              <span className="h-px flex-1 bg-[#e5e7eb]" />
+              <span>or use email</span>
+              <span className="h-px flex-1 bg-[#e5e7eb]" />
+            </div>
             <TextField
               label="Full name"
               value={name}

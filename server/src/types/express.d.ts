@@ -7,6 +7,7 @@ declare global {
       requestId?: string;
       user?: TokenPayload;
       googleProfile?: OAuthProfile;
+      googleAuthIntent?: "signup" | "signin";
     }
   }
 }

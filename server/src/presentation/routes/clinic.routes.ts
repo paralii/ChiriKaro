@@ -1,6 +1,7 @@
 import { Router } from "express";
 import express from "express";
 import type { RequestHandler } from "express";
+import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 
 import type { ClinicController } from "@presentation/controllers/clinic.controller.ts";
 
@@ -22,116 +23,113 @@ export function ClinicRouter(
   const router = Router();
   const { authenticate, authorizeClinicAdmin } = middlewares;
 
-  //Clinic registration
-  router.post("/clinic/register", clinicController.register);
+  router.post(API_ROUTES.CLINIC.REGISTER, clinicController.register);
 
-  // Clinic profile and dashboard
   router.get(
-    "/clinic/profile",
+    API_ROUTES.CLINIC.PROFILE,
     authenticate,
     authorizeClinicAdmin,
     clinicController.getProfile,
   );
 
   router.patch(
-    "/clinic/setup",
+    API_ROUTES.CLINIC.SETUP,
     authenticate,
     authorizeClinicAdmin,
     clinicController.updateSetup,
   );
   router.post(
-    "/clinic/setup/documents",
+    API_ROUTES.CLINIC.SETUP_DOCUMENTS,
     authenticate,
     authorizeClinicAdmin,
-    express.raw({ type: ["application/pdf", "image/jpeg", "image/png"], limit: "10mb" }),
+    express.raw({
+      type: ["application/pdf", "image/jpeg", "image/png"],
+      limit: "10mb",
+    }),
     clinicController.uploadDocument,
   );
   router.get(
-    "/clinic/setup/documents/:documentType",
+    API_ROUTES.CLINIC.SETUP_DOCUMENT_BY_TYPE,
     authenticate,
     authorizeClinicAdmin,
     clinicController.getDocument,
   );
   router.post(
-    "/clinic/setup/submit",
+    API_ROUTES.CLINIC.SETUP_SUBMIT,
     authenticate,
     authorizeClinicAdmin,
     clinicController.submitSetup,
   );
 
   router.patch(
-    "/clinic/profile",
+    API_ROUTES.CLINIC.PROFILE,
     authenticate,
     authorizeClinicAdmin,
     clinicController.updateProfile,
   );
 
   router.get(
-    "/clinic/dashboard",
+    API_ROUTES.CLINIC.DASHBOARD,
     authenticate,
     authorizeClinicAdmin,
     clinicController.getDashboard,
   );
 
-  // //Clinic settings
-  // router.put(
-  //   "/clinic/specializations",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.updateSpecializations,
-  // );
-  // router.put(
-  //   "/clinic/working-hours",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.updateWorkingHours,
-  // );
+  router.get(
+    API_ROUTES.CLINIC.PENDING_VERIFICATIONS,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.listPendingVerifications,
+  );
+  router.get(
+    API_ROUTES.CLINIC.DOCTOR_VERIFICATION,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.getVerificationDetails,
+  );
+  router.patch(
+    API_ROUTES.CLINIC.DOCTOR_CONSULTATION_FEE,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.updateConsultationFee,
+  );
+  router.get(
+    API_ROUTES.CLINIC.DOCTOR_VERIFICATION_DOCUMENT,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.getClinicDoctorDocument,
+  );
+  router.post(
+    API_ROUTES.CLINIC.DOCTOR_VERIFICATION_APPROVE,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.approveVerification,
+  );
+  router.post(
+    API_ROUTES.CLINIC.DOCTOR_VERIFICATION_REJECT,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.rejectVerification,
+  );
 
-  // //Clinic documents
-  // router.post(
-  //   "/clinic/documents/upload-url",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.createDocumentUploadUrl,
-  // );
-  // router.get(
-  //   "/clinic/documents",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.getDocuments,
-  // );
-  // router.post(
-  //   "/clinic/documents",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.saveDocument,
-  // );
-  // router.get(
-  //   "/clinic/documents/:documentType/download-url",
-  //   authenticate,
-  //   authorizeClinicAdmin,
-  //   clinicController.getDocumentDownloadUrl,
-  // );
-
-  // //Super admin: clinic management
-  // router.get(
-  //   "/super-admin/clinics",
-  //   authenticate,
-  //   authorizeSuperAdmin,
-  //   clinicController.listClinics,
-  // );
-  // router.get(
-  //   "/super-admin/clinics/dashboard",
-  //   authenticate,
-  //   authorizeSuperAdmin,
-  //   clinicController.getClinicsDashboard,
-  // );
-  // router.patch(
-  //   "/super-admin/clinics/:id/status",
-  //   authenticate,
-  //   authorizeSuperAdmin,
-  //   clinicController.updateClinicStatus,
-  // );
+  router.post(
+    API_ROUTES.CLINIC.INVITATIONS,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.create,
+  );
+  router.get(
+    API_ROUTES.CLINIC.PENDING_INVITATIONS,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.listPending,
+  );
+  router.post(
+    API_ROUTES.CLINIC.RESEND_INVITATION,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.resend,
+  );
 
   return router;
 }

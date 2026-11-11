@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type { RequestHandler } from "express";
+import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 
 import type { AuthController } from "@presentation/controllers/auth.controller.ts";
 
@@ -31,59 +32,55 @@ export function createAuthRouter(
     passwordResetRateLimiter,
   } = middlewares;
 
-  //Registration
   router.post(
-    "/auth/register",
+    API_ROUTES.AUTH.REGISTER,
     ...(registerRateLimiter ? [registerRateLimiter] : []),
     authController.register,
   );
   router.post(
-    "/auth/login",
+    API_ROUTES.AUTH.LOGIN,
     ...(loginRateLimiter ? [loginRateLimiter] : []),
     authController.login,
   );
-  router.post("/auth/refresh-token", authController.refreshToken);
-  router.post("/auth/logout", authenticate, authController.logout);
+  router.post(API_ROUTES.AUTH.REFRESH_TOKEN, authController.refreshToken);
+  router.post(API_ROUTES.AUTH.LOGOUT, authenticate, authController.logout);
 
-  //Profile
-  router.get("/auth/profile", authenticate, authController.getProfile);
+  router.get(API_ROUTES.AUTH.PROFILE, authenticate, authController.getProfile);
 
-  //Email verification (OTP)
   router.post(
-    "/auth/verify-otp",
+    API_ROUTES.AUTH.VERIFY_OTP,
     ...(otpVerifyRateLimiter ? [otpVerifyRateLimiter] : []),
     authController.verifyOtp,
   );
   router.post(
-    "/auth/resend-otp",
+    API_ROUTES.AUTH.RESEND_OTP,
     ...(otpResendRateLimiter ? [otpResendRateLimiter] : []),
     authController.resendOtp,
   );
 
-  //Password recovery
   router.post(
-    "/auth/forgot-password",
+    API_ROUTES.AUTH.FORGOT_PASSWORD,
     ...(passwordResetRateLimiter ? [passwordResetRateLimiter] : []),
     authController.forgotPassword,
   );
   router.post(
-    "/auth/reset-password",
+    API_ROUTES.AUTH.RESET_PASSWORD,
     ...(passwordResetRateLimiter ? [passwordResetRateLimiter] : []),
     authController.resetPassword,
   );
   router.post(
-    "/auth/change-password",
+    API_ROUTES.AUTH.CHANGE_PASSWORD,
     authenticate,
     authController.changePassword,
   );
 
   if (googleRedirect) {
-    router.get("/auth/google", googleRedirect);
+    router.get(API_ROUTES.AUTH.GOOGLE, googleRedirect);
   }
 
   if (googleAuthenticate) {
     router.get(
-      "/auth/google/callback",
+      API_ROUTES.AUTH.GOOGLE_CALLBACK,
       googleAuthenticate,
       authController.googleAuth,
     );

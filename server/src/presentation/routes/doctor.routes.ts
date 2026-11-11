@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import type { RequestHandler } from "express";
 import type { DoctorController } from "@presentation/controllers/doctor.controller.ts";
+import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 
 export interface DoctorRouterMiddlewares {
   authenticate: RequestHandler;
@@ -9,76 +10,82 @@ export interface DoctorRouterMiddlewares {
 }
 
 export function DoctorRouter(
-  controller: DoctorController,
+  doctorController: DoctorController,
   middlewares: DoctorRouterMiddlewares,
 ): Router {
   const router = Router();
-  const { authenticate, authorizeDoctor, authorizeClinicAdmin } = middlewares;
-
-  router.get("/doctor/onboarding", authenticate, authorizeDoctor, controller.getOnboarding);
-  router.patch("/doctor/onboarding/:step", authenticate, authorizeDoctor, controller.updateOnboarding);
-  router.post(
-    "/doctor/onboarding/documents",
-    authenticate,
-    authorizeDoctor,
-    express.raw({ type: ["application/pdf", "image/jpeg", "image/png"], limit: "10mb" }),
-    controller.uploadDocument,
-  );
-  router.get(
-    "/doctor/onboarding/documents/:documentType",
-    authenticate,
-    authorizeDoctor,
-    controller.getDocument,
-  );
-  router.delete(
-    "/doctor/onboarding/documents/:documentType",
-    authenticate,
-    authorizeDoctor,
-    controller.deleteDocument,
-  );
-
-  router.get("/doctor/verification", authenticate, authorizeDoctor, controller.getVerification);
-  router.post("/doctor/verification/submit", authenticate, authorizeDoctor, controller.submitVerification);
-  router.get("/doctor/consultation-fee", authenticate, authorizeDoctor, controller.getConsultationFee);
-  router.get("/doctor/availability", authenticate, authorizeDoctor, controller.getAvailability);
-  router.put("/doctor/availability", authenticate, authorizeDoctor, controller.configureAvailability);
-  router.post("/doctor/availability/slots", authenticate, authorizeDoctor, controller.generateAvailabilitySlots);
+  const { authenticate, authorizeDoctor } = middlewares;
 
   router.get(
-    "/clinic/doctors/pending-verification",
+    API_ROUTES.DOCTOR.ONBOARDING,
     authenticate,
-    authorizeClinicAdmin,
-    controller.listPendingVerifications,
-  );
-  router.get(
-    "/clinic/doctors/:doctorId/verification",
-    authenticate,
-    authorizeClinicAdmin,
-    controller.getVerificationDetails,
+    authorizeDoctor,
+    doctorController.getOnboarding,
   );
   router.patch(
-    "/clinic/doctors/:doctorId/consultation-fee",
+    API_ROUTES.DOCTOR.ONBOARDING_STEP,
     authenticate,
-    authorizeClinicAdmin,
-    controller.updateConsultationFee,
+    authorizeDoctor,
+    doctorController.updateOnboarding,
+  );
+  router.post(
+    API_ROUTES.DOCTOR.ONBOARDING_DOCUMENTS,
+    authenticate,
+    authorizeDoctor,
+    express.raw({
+      type: ["application/pdf", "image/jpeg", "image/png"],
+      limit: "10mb",
+    }),
+    doctorController.uploadDocument,
   );
   router.get(
-    "/clinic/doctors/:doctorId/verification/documents/:documentType",
+    API_ROUTES.DOCTOR.ONBOARDING_DOCUMENT_BY_TYPE,
     authenticate,
-    authorizeClinicAdmin,
-    controller.getClinicDoctorDocument,
+    authorizeDoctor,
+    doctorController.getDocument,
+  );
+  router.delete(
+    API_ROUTES.DOCTOR.ONBOARDING_DOCUMENT_BY_TYPE,
+    authenticate,
+    authorizeDoctor,
+    doctorController.deleteDocument,
+  );
+
+  router.get(
+    API_ROUTES.DOCTOR.VERIFICATION,
+    authenticate,
+    authorizeDoctor,
+    doctorController.getVerification,
   );
   router.post(
-    "/clinic/doctors/:doctorId/verification/approve",
+    API_ROUTES.DOCTOR.VERIFICATION_SUBMIT,
     authenticate,
-    authorizeClinicAdmin,
-    controller.approveVerification,
+    authorizeDoctor,
+    doctorController.submitVerification,
+  );
+  router.get(
+    API_ROUTES.DOCTOR.CONSULTATION_FEE,
+    authenticate,
+    authorizeDoctor,
+    doctorController.getConsultationFee,
+  );
+  router.get(
+    API_ROUTES.DOCTOR.AVAILABILITY,
+    authenticate,
+    authorizeDoctor,
+    doctorController.getAvailability,
+  );
+  router.put(
+    API_ROUTES.DOCTOR.AVAILABILITY,
+    authenticate,
+    authorizeDoctor,
+    doctorController.configureAvailability,
   );
   router.post(
-    "/clinic/doctors/:doctorId/verification/reject",
+    API_ROUTES.DOCTOR.AVAILABILITY_SLOTS,
     authenticate,
-    authorizeClinicAdmin,
-    controller.rejectVerification,
+    authorizeDoctor,
+    doctorController.generateAvailabilitySlots,
   );
   return router;
 }

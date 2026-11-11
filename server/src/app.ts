@@ -2,7 +2,6 @@ import express from "express";
 import type { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
 import { authRouter } from "@container/auth.container.ts";
 import { superAdminRouter } from "@container/super-admin.container.ts";
 import { clinicRouter } from "@container/clinic.container.ts";
@@ -10,7 +9,7 @@ import { doctorRouter } from "@container/doctor.container.ts";
 import { invitationRouter } from "@container/invitation.container.ts";
 import { roleDashboardRouter } from "@container/role-dashboard.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
-import { HttpStatus } from "@shared/enums/http-status.enum.ts";
+import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
 
 export class App {
@@ -47,22 +46,20 @@ export class App {
 
   private initializeHealthCheck(): void {
     this.instance.get("/health", (_req, res) => {
-      res.status(200).json(
-        ApiResponse.success("Server is running and health is good", {
-          timestamp: new Date().toLocaleString("en-IN", {
-            timeZone: "Asia/Kolkata",
-          }),
+      ApiResponse.success(res, "Server is running and health is good", {
+        timestamp: new Date().toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
         }),
-      );
+      })
     });
   }
 
   private initializeRoutes(): void {
-    this.instance.use("/api", authRouter);
-    this.instance.use("/api", superAdminRouter);
-    this.instance.use("/api", clinicRouter);
-    this.instance.use("/api", doctorRouter);
-    this.instance.use("/api", invitationRouter);
+    this.instance.use(API_ROUTES.AUTH.BASE, authRouter);
+    this.instance.use(API_ROUTES.SUPER_ADMIN.BASE, superAdminRouter);
+    this.instance.use(API_ROUTES.CLINIC.BASE, clinicRouter);
+    this.instance.use(API_ROUTES.DOCTOR.BASE, doctorRouter);
+    this.instance.use(API_ROUTES.INVITATION.BASE, invitationRouter);
     this.instance.use("/api", roleDashboardRouter);
   }
 
@@ -70,9 +67,7 @@ export class App {
     this.instance.use(errorMiddleware);
 
     this.instance.use((_req, res) => {
-      res
-        .status(HttpStatus.NOT_FOUND)
-        .json(ApiResponse.failed("Route not found"));
+      ApiResponse.failed(res, "Route not found")
     });
   }
 }

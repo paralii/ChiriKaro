@@ -1,35 +1,13 @@
 import { Router } from "express";
-import type { RequestHandler } from "express";
 import type { InvitationController } from "@presentation/controllers/invitation.controller.ts";
+import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 
 export function createInvitationRouter(
-  controller: InvitationController,
-  middleware: { authenticate: RequestHandler; authorizeClinicAdmin: RequestHandler },
+  invitationController: InvitationController,
 ): Router {
   const router = Router();
-  const { authenticate, authorizeClinicAdmin } = middleware;
 
-  router.post("/invitation/validate", controller.validate);
-  router.post("/invitation/accept", controller.accept);
-
-  router.post(
-    "/clinic/invitations",
-    authenticate,
-    authorizeClinicAdmin,
-    controller.create,
-  );
-  router.get(
-    "/clinic/invitations/pending",
-    authenticate,
-    authorizeClinicAdmin,
-    controller.listPending,
-  );
-  router.post(
-    "/clinic/invitations/:id/resend",
-    authenticate,
-    authorizeClinicAdmin,
-    controller.resend,
-  );
-
+  router.post(API_ROUTES.INVITATION.VALIDATE, invitationController.validate);
+  router.post(API_ROUTES.INVITATION.ACCEPT, invitationController.accept);
   return router;
 }

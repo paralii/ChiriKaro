@@ -29,22 +29,24 @@ const invitationTokenService = new InvitationTokenService();
 const invitationLinkGenerator = new InvitationLinkGenerator();
 const passwordService = new PasswordService();
 
-const createInvitationUseCase: ICreateInvitationUseCase = new CreateInvitationUseCase(
-  clinicRepository,
-  userRepository,
-  invitationRepository,
-  invitationTokenService,
-  invitationLinkGenerator,
-  emailService,
-);
+const createInvitationUseCase: ICreateInvitationUseCase =
+  new CreateInvitationUseCase(
+    clinicRepository,
+    userRepository,
+    invitationRepository,
+    invitationTokenService,
+    invitationLinkGenerator,
+    emailService,
+  );
 const listPendingInvitationsUseCase: IListPendingInvitationsUseCase =
   new ListPendingInvitationsUseCase(invitationRepository);
-const resendInvitationUseCase: IResendInvitationUseCase = new ResendInvitationUseCase(
-  invitationRepository,
-  invitationTokenService,
-  invitationLinkGenerator,
-  emailService,
-);
+const resendInvitationUseCase: IResendInvitationUseCase =
+  new ResendInvitationUseCase(
+    invitationRepository,
+    invitationTokenService,
+    invitationLinkGenerator,
+    emailService,
+  );
 const validateInvitationUseCase: IValidateInvitationUseCase =
   new ValidateInvitationUseCase(
     invitationRepository,

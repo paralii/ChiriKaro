@@ -10,12 +10,6 @@ export interface ClinicRouterMiddlewares {
   authorizeClinicAdmin: RequestHandler;
 }
 
-export interface ClinicRouterMiddlewares {
-  authenticate: RequestHandler;
-  authorizeClinicAdmin: RequestHandler;
-  authorizeSuperAdmin: RequestHandler;
-}
-
 export function ClinicRouter(
   clinicController: ClinicController,
   middlewares: ClinicRouterMiddlewares,
@@ -110,25 +104,6 @@ export function ClinicRouter(
     authenticate,
     authorizeClinicAdmin,
     clinicController.rejectVerification,
-  );
-
-  router.post(
-    API_ROUTES.CLINIC.INVITATIONS,
-    authenticate,
-    authorizeClinicAdmin,
-    clinicController.create,
-  );
-  router.get(
-    API_ROUTES.CLINIC.PENDING_INVITATIONS,
-    authenticate,
-    authorizeClinicAdmin,
-    clinicController.listPending,
-  );
-  router.post(
-    API_ROUTES.CLINIC.RESEND_INVITATION,
-    authenticate,
-    authorizeClinicAdmin,
-    clinicController.resend,
   );
 
   return router;

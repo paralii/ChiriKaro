@@ -29,7 +29,7 @@ export const doctorService = {
   updateOnboarding: (step: DoctorOnboardingStep, body: unknown) =>
     responseData(
       api.patch<ApiEnvelope<DoctorOnboardingDTO>>(
-        `${API_ROUTES.DOCTOR.ONBOARDING}/${step}`,
+        API_ROUTES.DOCTOR.ONBOARDING_STEP(step),
         body,
       ),
       "Updated onboarding data was not returned.",
@@ -37,7 +37,7 @@ export const doctorService = {
   uploadOnboardingDocument: async (documentType: string, file: File) => {
     const safeType = documentType.trim().replace(/\s+/g, "_");
     const response = await http.post<ApiEnvelope<DoctorOnboardingDTO>>(
-      `${API_ROUTES.DOCTOR.ONBOARDING_DOCUMENTS}/${encodeURIComponent(safeType)}`,
+      API_ROUTES.DOCTOR.ONBOARDING_DOCUMENT_BY_TYPE(safeType),
       file,
       {
         headers: { "Content-Type": file.type },
@@ -51,18 +51,21 @@ export const doctorService = {
     const safeType = documentType.trim().replace(/\s+/g, "_");
     return (
       await http.get<Blob>(
-        `${API_ROUTES.DOCTOR.ONBOARDING_DOCUMENTS}/${encodeURIComponent(safeType)}`,
+        API_ROUTES.DOCTOR.ONBOARDING_DOCUMENT_BY_TYPE(safeType),
         { responseType: "blob" },
       )
     ).data;
   },
-  deleteOnboardingDocument: (documentType: string) =>
-    responseData(
+  deleteOnboardingDocument: (documentType: string) => {
+    const safeType = documentType.trim().replace(/\s+/g, "_");
+
+    return responseData(
       api.delete<ApiEnvelope<DoctorOnboardingDTO>>(
-        `${API_ROUTES.DOCTOR.ONBOARDING_DOCUMENTS}/${encodeURIComponent(documentType.trim().replace(/\s+/g, "_"))}`,
+        API_ROUTES.DOCTOR.ONBOARDING_DOCUMENT_BY_TYPE(safeType),
       ),
       "Updated doctor documents were not returned.",
-    ),
+    );
+  },
   getConsultationFee: () =>
     responseData(
       api.get<ApiEnvelope<DoctorConsultationFee>>(
@@ -112,9 +115,7 @@ export const doctorService = {
       documentKey,
     }),
   getDocumentUrl: (type: string) =>
-    api.get<{ url: string }>(
-      `${API_ROUTES.DOCTOR.DOCUMENTS}/${encodeURIComponent(type)}/download-url`,
-    ),
+    api.get<{ url: string }>(API_ROUTES.DOCTOR.DOCUMENT_DOWNLOAD_URL(type)),
   submitVerification: () =>
     responseData(
       api.post<ApiEnvelope<DoctorOnboardingDTO>>(

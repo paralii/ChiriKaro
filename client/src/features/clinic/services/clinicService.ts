@@ -64,7 +64,7 @@ export const clinicService = {
   uploadDocument: async (documentType: string, file: File) => {
     const safeType = documentType.trim().replace(/\s+/g, "_");
     const response = await http.post<ApiEnvelope<ClinicProfile>>(
-      `${API_ROUTES.CLINIC.SETUP_DOCUMENTS}?documentType=${enc(safeType)}`,
+      API_ROUTES.CLINIC.SETUP_DOCUMENT_UPLOAD(safeType),
       file,
       {
         headers: { "Content-Type": file.type },
@@ -77,7 +77,7 @@ export const clinicService = {
   getDocument: async (type: string) => {
     const safeType = type.trim().replace(/\s+/g, "_");
     return (
-      await http.get<Blob>(`${API_ROUTES.CLINIC.SETUP_DOCUMENTS}/${enc(safeType)}`, {
+      await http.get<Blob>(API_ROUTES.CLINIC.SETUP_DOCUMENT_BY_TYPE(safeType), {
         responseType: "blob",
       })
     ).data;
@@ -95,7 +95,7 @@ export const clinicService = {
   resendInvitation: (id: string) =>
     responseData(
       api.post<ApiEnvelope<Invitation>>(
-        `${API_ROUTES.CLINIC.INVITATIONS}/${enc(id)}/resend`,
+        API_ROUTES.CLINIC.RESEND_INVITATION(id),
       ),
       "Updated invitation details were not returned.",
     ),
@@ -116,14 +116,14 @@ export const clinicService = {
   approveDoctorVerification: (id: string) =>
     responseData(
       api.post<ApiEnvelope<DoctorOnboardingDTO>>(
-        `${API_ROUTES.CLINIC.DOCTORS}/${enc(id)}/verification/approve`,
+        API_ROUTES.CLINIC.DOCTOR_VERIFICATION_APPROVE(id),
       ),
       "Doctor approval was not returned.",
     ),
   rejectDoctorVerification: (id: string, reason: string) =>
     responseData(
       api.post<ApiEnvelope<DoctorOnboardingDTO>>(
-        `${API_ROUTES.CLINIC.DOCTORS}/${enc(id)}/verification/reject`,
+        API_ROUTES.CLINIC.DOCTOR_VERIFICATION_REJECT(id),
         { reason },
       ),
       "Doctor rejection was not returned.",
@@ -131,25 +131,30 @@ export const clinicService = {
   getDoctorVerificationDocument: async (id: string, type: string) =>
     (
       await http.get<Blob>(
-        `${API_ROUTES.CLINIC.DOCTORS}/${enc(id)}/verification/documents/${enc(type.trim().replace(/\s+/g, "_"))}`,
+        API_ROUTES.CLINIC.DOCTOR_VERIFICATION_DOCUMENT(
+          id,
+          type.trim().replace(/\s+/g, "_"),
+        ),
         { responseType: "blob" },
       )
     ).data,
   setDoctorFee: (id: string, consultationFee: number) =>
     responseData(
       api.patch<ApiEnvelope<DoctorConsultationFee>>(
-        `${API_ROUTES.CLINIC.DOCTORS}/${enc(id)}/consultation-fee`,
+        API_ROUTES.CLINIC.DOCTOR_CONSULTATION_FEE(id),
         { consultationFee },
       ),
       "Updated consultation fee was not returned.",
     ),
   listDoctors: () => api.get<DoctorSummary[]>(API_ROUTES.CLINIC.DOCTORS),
-  getDoctor: (id: string) => api.get<DoctorDetail>(`${API_ROUTES.CLINIC.DOCTORS}/${id}`),
-  approveDoctor: (id: string) => api.post(`${API_ROUTES.CLINIC.DOCTORS}/${id}/approve`),
+  getDoctor: (id: string) =>
+    api.get<DoctorDetail>(API_ROUTES.CLINIC.DOCTOR_DETAILS(id)),
+  approveDoctor: (id: string) =>
+    api.post(API_ROUTES.CLINIC.DOCTOR_APPROVE(id)),
   rejectDoctor: (id: string, reason: string) =>
-    api.post(`${API_ROUTES.CLINIC.DOCTORS}/${id}/reject`, { reason }),
+    api.post(API_ROUTES.CLINIC.DOCTOR_REJECT(id), { reason }),
   getDoctorDocumentUrl: (id: string, type: string) =>
     api.get<{ url: string }>(
-      `${API_ROUTES.CLINIC.DOCTORS}/${id}/documents/${enc(type)}/documents`,
+      API_ROUTES.CLINIC.DOCTOR_DOCUMENT_URL(id, type),
     ),
 };

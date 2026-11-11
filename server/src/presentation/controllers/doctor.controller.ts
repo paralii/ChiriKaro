@@ -9,13 +9,7 @@ import type { IUploadDoctorDocumentUseCase } from "@application/interfaces/use-c
 import type { IGetDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorDocumentUseCase.ts";
 import type { IDeleteDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IDeleteDoctorDocumentUseCase.ts";
 import type { ISubmitDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/ISubmitDoctorVerificationUseCase.ts";
-import type { IListPendingDoctorVerificationsUseCase } from "@application/interfaces/use-cases/doctor/IListPendingDoctorVerificationsUseCase.ts";
-import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorVerificationDetailsUseCase.ts";
-import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
-import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
-import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorConsultationFeeUseCase.ts";
-import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
 import type { IGetDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorAvailabilityUseCase.ts";
 import type { IConfigureDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IConfigureDoctorAvailabilityUseCase.ts";
 import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
@@ -29,13 +23,7 @@ export class DoctorController {
     private readonly _getDocumentUseCase: IGetDoctorDocumentUseCase,
     private readonly _deleteDocumentUseCase: IDeleteDoctorDocumentUseCase,
     private readonly _submitVerificationUseCase: ISubmitDoctorVerificationUseCase,
-    private readonly _listPendingVerificationsUseCase: IListPendingDoctorVerificationsUseCase,
-    private readonly _getVerificationDetailsUseCase: IGetDoctorVerificationDetailsUseCase,
-    private readonly _approveVerificationUseCase: IApproveDoctorVerificationUseCase,
-    private readonly _rejectVerificationUseCase: IRejectDoctorVerificationUseCase,
-    private readonly _getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase,
     private readonly _getConsultationFeeUseCase: IGetDoctorConsultationFeeUseCase,
-    private readonly _updateConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase,
     private readonly _getAvailabilityUseCase: IGetDoctorAvailabilityUseCase,
     private readonly _configureAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase,
     private readonly _generateAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase,
@@ -185,104 +173,6 @@ export class DoctorController {
     }
   };
 
-  listPendingVerifications = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const result = await this._listPendingVerificationsUseCase.execute(
-        req.user!.clinicId!,
-      );
-      ApiResponse.success(
-        res,
-        "Pending doctor verifications retrieved",
-        result,
-      );
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  getVerificationDetails = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const doctorId = req.params.doctorId;
-      if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
-      const result = await this._getVerificationDetailsUseCase.execute(
-        doctorId,
-        req.user!.clinicId!,
-      );
-      ApiResponse.success(res, "Doctor verification details retrieved", result);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  approveVerification = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const doctorId = req.params.doctorId;
-      if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
-      const result = await this._approveVerificationUseCase.execute(
-        doctorId,
-        req.user!.clinicId!,
-      );
-      ApiResponse.success(res, "Doctor profile approved", result);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  rejectVerification = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const doctorId = req.params.doctorId;
-      if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
-      const result = await this._rejectVerificationUseCase.execute(
-        doctorId,
-        req.user!.clinicId!,
-        req.body?.reason,
-      );
-      ApiResponse.success(res, "Doctor profile rejected", result);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  getClinicDoctorDocument = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const { doctorId, documentType } = req.params;
-      if (typeof doctorId !== "string" || typeof documentType !== "string") {
-        throw new ValidationError("Doctor id and document type are required");
-      }
-      const result = await this._getClinicDoctorDocumentUseCase.execute(
-        doctorId,
-        req.user!.clinicId!,
-        documentType,
-      );
-      res.status(HttpStatus.OK).type(result.contentType).send(result.content);
-    } catch (error) {
-      next(error);
-    }
-  };
-
   getConsultationFee = async (
     req: Request,
     res: Response,
@@ -294,26 +184,6 @@ export class DoctorController {
         req.user!.clinicId!,
       );
       ApiResponse.success(res, "Doctor consultation fee retrieved", result);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  updateConsultationFee = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
-    try {
-      const doctorId = req.params.doctorId;
-      if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
-      const result = await this._updateConsultationFeeUseCase.execute({
-        doctorId,
-        clinicId: req.user!.clinicId!,
-        consultationFee: req.body?.consultationFee,
-      });
-      ApiResponse.success(res, "Doctor consultation fee updated", result);
     } catch (error) {
       next(error);
     }

@@ -21,20 +21,8 @@ import type { IDeleteDoctorDocumentUseCase } from "@application/interfaces/use-c
 import type { IDoctorDocumentStorage } from "@application/interfaces/services/IDoctorDocumentStorage.ts";
 import { SubmitDoctorVerificationUseCase } from "@application/use-cases/doctor/submit-doctor-verification.use-case.ts";
 import type { ISubmitDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/ISubmitDoctorVerificationUseCase.ts";
-import { ListPendingDoctorVerificationsUseCase } from "@application/use-cases/doctor/list-pending-doctor-verifications.use-case.ts";
-import type { IListPendingDoctorVerificationsUseCase } from "@application/interfaces/use-cases/doctor/IListPendingDoctorVerificationsUseCase.ts";
-import { GetDoctorVerificationDetailsUseCase } from "@application/use-cases/doctor/get-doctor-verification-details.use-case.ts";
-import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorVerificationDetailsUseCase.ts";
-import { ApproveDoctorVerificationUseCase } from "@application/use-cases/doctor/approve-doctor-verification.use-case.ts";
-import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
-import { RejectDoctorVerificationUseCase } from "@application/use-cases/doctor/reject-doctor-verification.use-case.ts";
-import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
-import { GetClinicDoctorDocumentUseCase } from "@application/use-cases/doctor/get-clinic-doctor-document.use-case.ts";
-import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 import { GetDoctorConsultationFeeUseCase } from "@application/use-cases/doctor/get-doctor-consultation-fee.use-case.ts";
 import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorConsultationFeeUseCase.ts";
-import { UpdateDoctorConsultationFeeUseCase } from "@application/use-cases/doctor/update-doctor-consultation-fee.use-case.ts";
-import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
 import { GetDoctorAvailabilityUseCase } from "@application/use-cases/doctor/get-doctor-availability.use-case.ts";
 import type { IGetDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorAvailabilityUseCase.ts";
 import { ConfigureDoctorAvailabilityUseCase } from "@application/use-cases/doctor/configure-doctor-availability.use-case.ts";
@@ -45,7 +33,8 @@ import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/inter
 const doctorRepository = new DoctorRepository();
 const clinicRepository = new ClinicRepository();
 const userRepository = new MongoUserRepository();
-const documentStorage: IDoctorDocumentStorage = new CloudinaryDoctorDocumentStorage();
+const documentStorage: IDoctorDocumentStorage =
+  new CloudinaryDoctorDocumentStorage();
 
 const getDoctorOnboardingUseCase: IGetDoctorOnboardingUseCase =
   new GetDoctorOnboardingUseCase(doctorRepository);
@@ -59,20 +48,8 @@ const deleteDoctorDocumentUseCase: IDeleteDoctorDocumentUseCase =
   new DeleteDoctorDocumentUseCase(doctorRepository, documentStorage);
 const submitDoctorVerificationUseCase: ISubmitDoctorVerificationUseCase =
   new SubmitDoctorVerificationUseCase(doctorRepository);
-const listPendingDoctorVerificationsUseCase: IListPendingDoctorVerificationsUseCase =
-  new ListPendingDoctorVerificationsUseCase(doctorRepository);
-const getDoctorVerificationDetailsUseCase: IGetDoctorVerificationDetailsUseCase =
-  new GetDoctorVerificationDetailsUseCase(doctorRepository);
-const approveDoctorVerificationUseCase: IApproveDoctorVerificationUseCase =
-  new ApproveDoctorVerificationUseCase(doctorRepository);
-const rejectDoctorVerificationUseCase: IRejectDoctorVerificationUseCase =
-  new RejectDoctorVerificationUseCase(doctorRepository);
-const getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase =
-  new GetClinicDoctorDocumentUseCase(doctorRepository, documentStorage);
 const getDoctorConsultationFeeUseCase: IGetDoctorConsultationFeeUseCase =
   new GetDoctorConsultationFeeUseCase(doctorRepository);
-const updateDoctorConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase =
-  new UpdateDoctorConsultationFeeUseCase(doctorRepository);
 const getDoctorAvailabilityUseCase: IGetDoctorAvailabilityUseCase =
   new GetDoctorAvailabilityUseCase(doctorRepository);
 const configureDoctorAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase =
@@ -87,13 +64,7 @@ const controller = new DoctorController(
   getDoctorDocumentUseCase,
   deleteDoctorDocumentUseCase,
   submitDoctorVerificationUseCase,
-  listPendingDoctorVerificationsUseCase,
-  getDoctorVerificationDetailsUseCase,
-  approveDoctorVerificationUseCase,
-  rejectDoctorVerificationUseCase,
-  getClinicDoctorDocumentUseCase,
   getDoctorConsultationFeeUseCase,
-  updateDoctorConsultationFeeUseCase,
   getDoctorAvailabilityUseCase,
   configureDoctorAvailabilityUseCase,
   generateDoctorAvailabilitySlotsUseCase,

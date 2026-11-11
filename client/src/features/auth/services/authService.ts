@@ -28,4 +28,6 @@ export const authService = {
   refreshToken: () => api.post(API_ROUTES.AUTH.REFRESH_TOKEN),
   logout: (refreshToken: string | null) =>
     api.post(API_ROUTES.AUTH.LOGOUT, { refreshToken }),
+  getGoogleAuthUrl: (intent: "signup" | "signin" = "signin") =>
+    `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${API_ROUTES.AUTH.GOOGLE}?intent=${intent}`,
 };

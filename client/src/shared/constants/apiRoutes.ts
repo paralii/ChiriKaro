@@ -14,6 +14,7 @@ export const API_ROUTES = {
 
     REFRESH_TOKEN: "/auth/refresh-token",
     LOGOUT: "/auth/logout",
+    GOOGLE: "/auth/google",
   },
 
   SUPER_ADMIN: {

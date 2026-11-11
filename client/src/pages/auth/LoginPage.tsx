@@ -50,6 +50,7 @@ export default function LoginPage() {
     >
       <SignInForm
         emailPlaceholder={role === 'clinic' ? 'owner@clinic.com' : undefined}
+        google={role === 'patient'}
       />
     </AuthTemplate>
   );

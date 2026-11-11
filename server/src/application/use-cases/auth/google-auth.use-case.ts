@@ -21,7 +21,10 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     private readonly _tokenService: ITokenService,
   ) {}
 
-  public async execute(profile: OAuthProfile): Promise<GoogleAuthResponseDTO> {
+  public async execute(
+    profile: OAuthProfile,
+    intent: "signup" | "signin" = "signin",
+  ): Promise<GoogleAuthResponseDTO> {
     if (!profile.googleId || !profile.email) {
       throw new UnauthorizedError("Invalid Google account");
     }
@@ -31,13 +34,30 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
 
     let user = await this._userRepository.findByGoogleId(profile.googleId);
 
+    if (intent === "signup" && user && user.role !== Role.PATIENT) {
+      throw new ConflictError(
+        "Google sign-up is currently available for patient accounts only",
+      );
+    }
+
     if (!user) {
-      const existingUser = await this._userRepository.findByEmail(profile.email);
+      const existingUser = await this._userRepository.findByEmail(
+        profile.email,
+      );
       if (existingUser) {
+        if (intent === "signup") {
+          throw new ConflictError(
+            "An account with this email already exists. Sign in with that account or use Google sign-in if it is already linked.",
+          );
+        }
         throw new ConflictError(
           "An account with this email already exists. " +
             "Sign in using the existing account and link Google securely.",
         );
+      }
+
+      if (intent === "signup" && !profile.emailVerified) {
+        throw new UnauthorizedError("Google email must be verified");
       }
 
       user = User.create({
@@ -52,6 +72,10 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       });
 
       user = await this._userRepository.save(user);
+    } else if (user.email.toLowerCase() !== profile.email.toLowerCase()) {
+      throw new ConflictError(
+        "Google account email does not match the linked account",
+      );
     }
 
     if (user.status !== UserStatus.ACTIVE) {

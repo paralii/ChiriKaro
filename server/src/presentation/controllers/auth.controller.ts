@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
+import { UnauthorizedError } from "@shared/errors/index.ts";
 
 import type { IRegisterUseCase } from "@application/interfaces/use-cases/auth/IRegisterUseCase.ts";
 import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILoginUseCase.ts";
@@ -183,10 +184,23 @@ export class AuthController {
   public googleAuth = async (
     req: Request,
     res: Response,
-    next: NextFunction,
+    _reqNext: NextFunction,
   ): Promise<void> => {
+    void _reqNext;
     try {
-      const result = await this._googleAuthUseCase.execute(req.body);
+      if (!req.googleProfile) {
+        throw new UnauthorizedError("Google authentication failed");
+      }
+      if (
+        req.googleAuthIntent === "signup" &&
+        !req.googleProfile.emailVerified
+      ) {
+        throw new UnauthorizedError("Google email must be verified");
+      }
+      const result = await this._googleAuthUseCase.execute(
+        req.googleProfile,
+        req.googleAuthIntent,
+      );
 
       AuthCookieHelper.setAuthCookies(
         res,
@@ -194,9 +208,18 @@ export class AuthController {
         result.refreshToken,
       );
 
-      ApiResponse.success(res, "google user authorized", result.user);
+      res.redirect(
+        `${process.env.CLIENT_URL ?? "http://localhost:2026"}/auth/google/callback?success=1`,
+      );
     } catch (error) {
-      next(error);
+      const message =
+        error instanceof Error ? error.message : "Google sign-in failed";
+      if (message === "Google authentication failed") {
+        AuthCookieHelper.clearAuthCookies(res);
+      }
+      res.redirect(
+        `${process.env.CLIENT_URL ?? "http://localhost:2026"}/auth/google/callback?error=${encodeURIComponent(message)}`,
+      );
     }
   };
 

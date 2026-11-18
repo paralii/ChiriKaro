@@ -13,7 +13,7 @@ import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@shared/errors/index.ts";
 
 function toDTO(entry: QueueEntryRecord): QueueEntryDTO {
-  return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, doctorName: entry.doctorNameSnapshot, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };
+  return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, doctorName: entry.doctorNameSnapshot, clinicName: entry.clinicNameSnapshot, timeZone: entry.timeZone, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };
 }
 
 export class RegisterWalkInUseCase implements IRegisterWalkInUseCase {
@@ -21,6 +21,7 @@ export class RegisterWalkInUseCase implements IRegisterWalkInUseCase {
 
   async execute(input: RegisterWalkInInput): Promise<QueueEntryDTO> {
     if (![Role.CLINIC_ADMIN, Role.STAFF].includes(input.actorRole as Role)) throw new ForbiddenError("Only clinic admins and staff can register walk-ins");
+    if (!Types.ObjectId.isValid(input.actorUserId)) throw new BadRequestError("Authenticated user identity is invalid");
     if (!/^[A-Za-z0-9._:-]{16,128}$/.test(String(input.idempotencyKey ?? ""))) throw new BadRequestError("Idempotency-Key must contain 16 to 128 safe characters");
     const doctorUserId = typeof input.doctorUserId === "string" ? input.doctorUserId : "";
     const email = typeof input.patientEmail === "string" ? input.patientEmail.trim().toLowerCase() : "";
@@ -55,7 +56,10 @@ export class RegisterWalkInUseCase implements IRegisterWalkInUseCase {
       id: new Types.ObjectId().toString(), clinicId: input.clinicId, doctorUserId,
       localDate, kind: "WALK_IN", appointmentId: null, patientUserId,
       patientNameSnapshot: patientName, doctorNameSnapshot: `${doctor.firstName} ${doctor.lastName}`,
+      clinicNameSnapshot: clinic.name, timeZone: clinic.timeZone,
       tokenNumber, status: QueueEntryStatus.WAITING,
+      createdByUserId: input.actorUserId, createdByRole: input.actorRole,
+      statusHistory: [{ fromStatus: null, toStatus: QueueEntryStatus.WAITING, actorUserId: input.actorUserId, actorRole: input.actorRole, changedAt: now }],
       idempotencyKey, requestFingerprint: fingerprint, createdAt: now, updatedAt: now,
     };
     try { return toDTO(await this.queue.create(entry)); }

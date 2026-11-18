@@ -3,6 +3,7 @@ import type { IRegisterWalkInUseCase } from "@application/interfaces/use-cases/c
 import type { ICheckInAppointmentUseCase } from "@application/interfaces/use-cases/clinic/ICheckInAppointmentUseCase.ts";
 import type { IListClinicQueueUseCase } from "@application/interfaces/use-cases/clinic/IListClinicQueueUseCase.ts";
 import type { IListQueueDoctorsUseCase } from "@application/interfaces/use-cases/clinic/IListQueueDoctorsUseCase.ts";
+import type { ITransitionQueueEntryUseCase } from "@application/interfaces/use-cases/clinic/ITransitionQueueEntryUseCase.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { BadRequestError } from "@shared/errors/index.ts";
 
@@ -12,6 +13,7 @@ export class ClinicQueueController {
     private readonly checkInAppointmentUseCase: ICheckInAppointmentUseCase,
     private readonly listQueue: IListClinicQueueUseCase,
     private readonly listDoctors: IListQueueDoctorsUseCase,
+    private readonly transitionQueueEntry: ITransitionQueueEntryUseCase,
   ) {}
 
   createWalkIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -53,6 +55,22 @@ export class ClinicQueueController {
     try {
       if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
       ApiResponse.success(res, "Queue doctors retrieved", await this.listDoctors.execute({ clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role }));
+    } catch (error) { next(error); }
+  };
+
+  updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      const queueEntryId = req.params.queueEntryId;
+      if (typeof queueEntryId !== "string") throw new BadRequestError("Queue entry id is required");
+      const result = await this.transitionQueueEntry.execute({
+        clinicId: req.user.clinicId,
+        actorUserId: req.user.sub,
+        actorRole: req.user.role,
+        queueEntryId,
+        nextStatus: req.body?.status,
+      });
+      ApiResponse.success(res, "Queue status updated", result);
     } catch (error) { next(error); }
   };
 }

@@ -2,7 +2,6 @@ import { AppointmentStatus } from "@domain/enum/appointment-status.enum.ts";
 import { PaymentStatus } from "@domain/enum/payment-status.enum.ts";
 import { QueueEntryStatus } from "@domain/enum/queue-entry-status.enum.ts";
 
-/** A dated, clinic-local candidate interval. It is not a booking or reservation. */
 export interface BookingSlot {
   clinicId: string;
   doctorUserId: string;
@@ -14,7 +13,6 @@ export interface BookingSlot {
   localEndTime: string;
 }
 
-/** Appointment captures patient, clinic, doctor, and the quoted fee historically. */
 export interface AppointmentRecord {
   id: string;
   patientUserId: string;
@@ -44,7 +42,6 @@ export interface AppointmentChangeRecord {
   changedAt: Date;
 }
 
-/** Payment is attached to one appointment; provider references are reconciliation data. */
 export interface AppointmentPaymentRecord {
   id: string;
   appointmentId: string;
@@ -58,7 +55,6 @@ export interface AppointmentPaymentRecord {
   updatedAt: Date;
 }
 
-/** Queue entry is operational state, distinct from appointment and payment state. */
 export interface QueueEntryRecord {
   id: string;
   clinicId: string;
@@ -69,8 +65,13 @@ export interface QueueEntryRecord {
   patientUserId: string | null;
   patientNameSnapshot: string;
   doctorNameSnapshot: string;
+  clinicNameSnapshot: string;
+  timeZone: string;
   tokenNumber: number;
   status: QueueEntryStatus;
+  createdByUserId: string;
+  createdByRole: string;
+  statusHistory: Array<{ fromStatus: QueueEntryStatus | null; toStatus: QueueEntryStatus; actorUserId: string; actorRole: string; changedAt: Date }>;
   idempotencyKey: string;
   requestFingerprint: string;
   createdAt: Date;

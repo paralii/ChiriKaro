@@ -11,8 +11,13 @@ export interface IQueueEntryDocument extends Document {
   patientUserId: Types.ObjectId | null;
   patientNameSnapshot: string;
   doctorNameSnapshot: string;
+  clinicNameSnapshot: string;
+  timeZone: string;
   tokenNumber: number;
   status: QueueEntryStatus;
+  createdByUserId: Types.ObjectId;
+  createdByRole: string;
+  statusHistory: Array<{ fromStatus: QueueEntryStatus | null; toStatus: QueueEntryStatus; actorUserId: Types.ObjectId; actorRole: string; changedAt: Date }>;
   idempotencyKey: string;
   requestFingerprint: string;
   createdAt: Date;
@@ -28,8 +33,19 @@ const schema = new Schema<IQueueEntryDocument>({
   patientUserId: { type: Schema.Types.ObjectId, ref: "User", default: null, immutable: true },
   patientNameSnapshot: { type: String, required: true, trim: true, maxlength: 120, immutable: true },
   doctorNameSnapshot: { type: String, required: true, trim: true, maxlength: 200, immutable: true },
+  clinicNameSnapshot: { type: String, required: true, trim: true, maxlength: 150, immutable: true },
+  timeZone: { type: String, required: true, immutable: true },
   tokenNumber: { type: Number, required: true, min: 1, validate: Number.isSafeInteger, immutable: true },
   status: { type: String, required: true, enum: Object.values(QueueEntryStatus), default: QueueEntryStatus.WAITING },
+  createdByUserId: { type: Schema.Types.ObjectId, ref: "User", required: true, immutable: true },
+  createdByRole: { type: String, required: true, immutable: true },
+  statusHistory: { type: [{
+    fromStatus: { type: String, enum: [...Object.values(QueueEntryStatus), null], default: null },
+    toStatus: { type: String, enum: Object.values(QueueEntryStatus), required: true },
+    actorUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    actorRole: { type: String, required: true },
+    changedAt: { type: Date, required: true },
+  }], required: true, default: [] },
   idempotencyKey: { type: String, required: true, maxlength: 128, immutable: true },
   requestFingerprint: { type: String, required: true, immutable: true },
 }, { timestamps: true, versionKey: false });

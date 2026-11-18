@@ -6,6 +6,11 @@ import type { ClinicProfile } from '@shared/types';
 
 export function ClinicProfileForm({ initial, busy, onSave, profileOnly = false, setupOnly = false }: { initial: ClinicProfile; busy: boolean; onSave: (values: ClinicProfile) => void; profileOnly?: boolean; setupOnly?: boolean }) {
   const [v, setV] = useState(initial);
+  const [lastInitial, setLastInitial] = useState(initial);
+  if (lastInitial !== initial) {
+    setLastInitial(initial);
+    setV(initial);
+  }
   const bind = (field: keyof ClinicProfile) => ({
     value: (v[field] as string | null) ?? '',
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => setV((c) => ({ ...c, [field]: e.target.value })),
@@ -15,16 +20,16 @@ export function ClinicProfileForm({ initial, busy, onSave, profileOnly = false, 
   return (
     <Form onSubmit={submit} className="max-w-[520px] p-[18px]">
       {!setupOnly ? <>
-        <TextField label="Clinic name" {...bind('name')} minLength={2} maxLength={150} required />
-        {!profileOnly ? <TextField label="Clinic type" {...bind('clinicType')} placeholder="Dental clinic" /> : null}
-        <TextField label="Contact email" type="email" {...bind('contactEmail')} required />
-        <TextField label="Phone" type="tel" {...bind('phone')} pattern="[+0-9 ()-]{7,20}" title="Enter a valid phone number." />
-        <TextField label="Registration number" {...bind('registrationNumber')} />
+        <TextField label="Clinic name" {...bind('name')} minLength={2} maxLength={150} required disabled={busy} />
+        {!profileOnly ? <TextField label="Clinic type" {...bind('clinicType')} placeholder="Dental clinic" disabled={busy} /> : null}
+        <TextField label="Contact email" type="email" {...bind('contactEmail')} required disabled={busy} />
+        <TextField label="Phone" type="tel" {...bind('phone')} pattern="[+0-9 ()-]{7,20}" title="Enter a valid phone number." disabled={busy} />
+        <TextField label="Registration number" {...bind('registrationNumber')} disabled={busy} />
       </> : null}
-      <TextField label="Address" {...bind('address')} />
-      <TextField label="City" {...bind('city')} />
-      <TextField label="State" {...bind('state')} />
-      <TextField label="Postal code" {...bind('pincode')} pattern="[A-Za-z0-9 -]{3,12}" title="Enter a valid postal code." />
+      <TextField label="Address" {...bind('address')} disabled={busy} />
+      <TextField label="City" {...bind('city')} disabled={busy} />
+      <TextField label="State" {...bind('state')} disabled={busy} />
+      <TextField label="Postal code" {...bind('pincode')} pattern="[A-Za-z0-9 -]{3,12}" title="Enter a valid postal code." disabled={busy} />
       {!setupOnly && !profileOnly ? <TextField label="About the clinic" {...bind('description')} maxLength={500} /> : null}
       <Button className="mt-[3px] justify-self-start" disabled={busy}>{busy ? 'Saving...' : setupOnly ? 'Save location' : 'Save clinic profile'}</Button>
     </Form>

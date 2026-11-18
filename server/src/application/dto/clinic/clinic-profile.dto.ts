@@ -17,12 +17,12 @@ export interface ClinicProfileDTO {
   phone: string | null;
   contactEmail: string | null;
   registrationNumber: string | null;
-  ownerAdminId: string | null;
   status: ClinicStatus;
   specializations: string[];
   workingHours: ClinicWorkingHour[];
   documents: ClinicDocumentDTO[];
   setupStatus: ClinicSetupStatus;
+  rejectionReason: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

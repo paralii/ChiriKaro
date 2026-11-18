@@ -2,7 +2,11 @@ import { api, http } from "@/shared/lib/http";
 import type {
   ClinicDashboard,
   ClinicProfile,
+  ClinicDoctorSpecialization,
+  ClinicDoctorSchedule,
+  DoctorAvailability,
   DoctorConsultationFee,
+  DoctorFeeChangeRequest,
   DoctorDetail,
   DoctorOnboardingDTO,
   DoctorSummary,
@@ -106,6 +110,34 @@ export const clinicService = {
       ),
       "Pending doctor verifications were not returned.",
     ),
+  listDoctorSpecializationAssignments: () =>
+    responseData(
+      api.get<ApiEnvelope<ClinicDoctorSpecialization[]>>(
+        API_ROUTES.CLINIC.DOCTOR_SPECIALIZATION_ASSIGNMENTS,
+      ),
+      "Clinic doctor specialization assignments were not returned.",
+    ),
+  updateDoctorSpecializations: (id: string, specializations: string[]) =>
+    responseData(
+      api.patch<ApiEnvelope<ClinicDoctorSpecialization>>(
+        API_ROUTES.CLINIC.DOCTOR_SPECIALIZATIONS(id),
+        { specializations },
+      ),
+      "Updated doctor specializations were not returned.",
+    ),
+  listDoctorSchedules: () =>
+    responseData(
+      api.get<ApiEnvelope<ClinicDoctorSchedule[]>>(API_ROUTES.CLINIC.DOCTOR_SCHEDULES),
+      "Clinic doctor schedules were not returned.",
+    ),
+  updateDoctorWorkingHours: (id: string, workingHours: ClinicDoctorSchedule["workingHours"]) =>
+    responseData(
+      api.patch<ApiEnvelope<DoctorAvailability>>(
+        API_ROUTES.CLINIC.DOCTOR_WORKING_HOURS(id),
+        { workingHours },
+      ),
+      "Updated doctor working hours were not returned.",
+    ),
   getDoctorVerification: (id: string) =>
     responseData(
       api.get<ApiEnvelope<DoctorOnboardingDTO>>(
@@ -146,6 +178,10 @@ export const clinicService = {
       ),
       "Updated consultation fee was not returned.",
     ),
+  listDoctorFeeChangeRequests: () =>
+    responseData(api.get<ApiEnvelope<DoctorFeeChangeRequest[]>>(API_ROUTES.CLINIC.DOCTOR_FEE_CHANGE_REQUESTS), "Fee change requests were not returned."),
+  reviewDoctorFeeChangeRequest: (doctorId: string, requestId: string, decision: 'APPROVED' | 'REJECTED', reason?: string) =>
+    responseData(api.patch<ApiEnvelope<DoctorFeeChangeRequest>>(API_ROUTES.CLINIC.DOCTOR_FEE_CHANGE_REQUEST(doctorId, requestId), { decision, ...(reason ? { reason } : {}) }), "Fee change review was not returned."),
   listDoctors: () => api.get<DoctorSummary[]>(API_ROUTES.CLINIC.DOCTORS),
   getDoctor: (id: string) =>
     api.get<DoctorDetail>(API_ROUTES.CLINIC.DOCTOR_DETAILS(id)),

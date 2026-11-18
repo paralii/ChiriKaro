@@ -13,6 +13,7 @@ import type { IGetDoctorConsultationFeeUseCase } from "@application/interfaces/u
 import type { IGetDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorAvailabilityUseCase.ts";
 import type { IConfigureDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IConfigureDoctorAvailabilityUseCase.ts";
 import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
+import type { IManageDoctorFeeChangeRequestsUseCase } from "@application/interfaces/use-cases/doctor/IManageDoctorFeeChangeRequestsUseCase.ts";
 import type { DoctorOnboardingStep } from "@application/dto/doctor/doctor-onboarding.dto.ts";
 
 export class DoctorController {
@@ -27,6 +28,7 @@ export class DoctorController {
     private readonly _getAvailabilityUseCase: IGetDoctorAvailabilityUseCase,
     private readonly _configureAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase,
     private readonly _generateAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase,
+    private readonly _feeChangeRequestsUseCase: IManageDoctorFeeChangeRequestsUseCase,
   ) {}
 
   getOnboarding = async (
@@ -187,6 +189,23 @@ export class DoctorController {
     } catch (error) {
       next(error);
     }
+  };
+
+  listFeeChangeRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._feeChangeRequestsUseCase.listForDoctor(req.user!.sub, req.user!.clinicId!);
+      ApiResponse.success(res, "Consultation fee change requests retrieved", result);
+    } catch (error) { next(error); }
+  };
+
+  requestFeeChange = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._feeChangeRequestsUseCase.request(req.user!.sub, req.user!.clinicId!, {
+        requestedFee: req.body?.requestedFee,
+        reason: req.body?.reason,
+      });
+      ApiResponse.created(res, "Consultation fee change request submitted", result);
+    } catch (error) { next(error); }
   };
 
   getAvailability = async (

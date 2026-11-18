@@ -113,7 +113,6 @@ export class RegisterClinicUseCase implements IRegisterClinicUseCase {
         phone: finalClinic.phone ?? null,
         contactEmail: finalClinic.contactEmail ?? null,
         registrationNumber: finalClinic.registrationNumber ?? null,
-        ownerAdminId: finalClinic.ownerAdminId,
         status: finalClinic.status,
         createdAt: finalClinic.createdAt,
       },

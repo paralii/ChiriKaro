@@ -43,6 +43,16 @@ import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/u
 import { GetClinicDoctorDocumentUseCase } from "@application/use-cases/doctor/get-clinic-doctor-document.use-case.ts";
 import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 import type { IDoctorDocumentStorage } from "@application/interfaces/services/IDoctorDocumentStorage.ts";
+import { ListClinicDoctorSpecializationsUseCase } from "@application/use-cases/clinic/list-clinic-doctor-specializations.use-case.ts";
+import type { IListClinicDoctorSpecializationsUseCase } from "@application/interfaces/use-cases/clinic/IListClinicDoctorSpecializationsUseCase.ts";
+import { UpdateClinicDoctorSpecializationsUseCase } from "@application/use-cases/clinic/update-clinic-doctor-specializations.use-case.ts";
+import type { IUpdateClinicDoctorSpecializationsUseCase } from "@application/interfaces/use-cases/clinic/IUpdateClinicDoctorSpecializationsUseCase.ts";
+import { ListClinicDoctorSchedulesUseCase } from "@application/use-cases/clinic/list-clinic-doctor-schedules.use-case.ts";
+import type { IListClinicDoctorSchedulesUseCase } from "@application/interfaces/use-cases/clinic/IListClinicDoctorSchedulesUseCase.ts";
+import { ConfigureDoctorAvailabilityUseCase } from "@application/use-cases/doctor/configure-doctor-availability.use-case.ts";
+import type { IConfigureClinicDoctorWorkingHoursUseCase } from "@application/interfaces/use-cases/doctor/IConfigureClinicDoctorWorkingHoursUseCase.ts";
+import { ManageDoctorFeeChangeRequestsUseCase } from "@application/use-cases/doctor/manage-doctor-fee-change-requests.use-case.ts";
+import { IdGenerator } from "@infrastructure/services/UuidGenerator.ts";
 
 const clinicRepository = new ClinicRepository();
 const userRepository = new MongoUserRepository();
@@ -71,7 +81,7 @@ const getClinicDashboardUseCase: IGetClinicDashboardUseCase =
   new GetClinicDashboardUseCase(clinicRepository, userRepository);
 const clinicDocumentStorage = new CloudinaryClinicDocumentStorage();
 const updateClinicSetupUseCase: IUpdateClinicSetupUseCase =
-  new UpdateClinicSetupUseCase(clinicRepository);
+  new UpdateClinicSetupUseCase(clinicRepository, doctorRepository);
 const submitClinicSetupUseCase: ISubmitClinicSetupUseCase =
   new SubmitClinicSetupUseCase(clinicRepository);
 const uploadClinicDocumentUseCase: IUploadClinicDocumentUseCase =
@@ -90,6 +100,15 @@ const getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase =
   new GetClinicDoctorDocumentUseCase(doctorRepository, documentStorage);
 const updateDoctorConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase =
   new UpdateDoctorConsultationFeeUseCase(doctorRepository);
+const listDoctorSpecializationsUseCase: IListClinicDoctorSpecializationsUseCase =
+  new ListClinicDoctorSpecializationsUseCase(doctorRepository);
+const updateDoctorSpecializationsUseCase: IUpdateClinicDoctorSpecializationsUseCase =
+  new UpdateClinicDoctorSpecializationsUseCase(doctorRepository, clinicRepository);
+const listDoctorSchedulesUseCase: IListClinicDoctorSchedulesUseCase =
+  new ListClinicDoctorSchedulesUseCase(doctorRepository);
+const updateDoctorWorkingHoursUseCase: IConfigureClinicDoctorWorkingHoursUseCase =
+  new ConfigureDoctorAvailabilityUseCase(doctorRepository, clinicRepository);
+const feeChangeRequestsUseCase = new ManageDoctorFeeChangeRequestsUseCase(doctorRepository, new IdGenerator());
 
 export const clinicController = new ClinicController(
   registerClinicUseCase,
@@ -106,6 +125,11 @@ export const clinicController = new ClinicController(
   rejectDoctorVerificationUseCase,
   getClinicDoctorDocumentUseCase,
   updateDoctorConsultationFeeUseCase,
+  listDoctorSpecializationsUseCase,
+  updateDoctorSpecializationsUseCase,
+  listDoctorSchedulesUseCase,
+  updateDoctorWorkingHoursUseCase,
+  feeChangeRequestsUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({

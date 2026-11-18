@@ -9,6 +9,9 @@ import type { IGetClinicDetailsUseCase } from "@application/interfaces/use-cases
 import type { IUpdateClinicStatusUseCase } from "@application/interfaces/use-cases/super-admin/IUpdateClinicStatusUseCase.ts";
 import type { IGetSuperAdminStatisticsUseCase } from "@application/interfaces/use-cases/super-admin/IGetSuperAdminStatisticsUseCase.ts";
 import type { IGetClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicDocumentUseCase.ts";
+import type { IManagePatientsUseCase } from "@application/interfaces/use-cases/super-admin/IManagePatientsUseCase.ts";
+import type { IManageDoctorsUseCase } from "@application/interfaces/use-cases/super-admin/IManageDoctorsUseCase.ts";
+import type { DoctorListQueryDTO } from "@application/dto/super-admin/clinic-management.dto.ts";
 
 export class SuperAdminController {
   constructor(
@@ -17,6 +20,8 @@ export class SuperAdminController {
     private readonly _updateClinicStatusUseCase: IUpdateClinicStatusUseCase,
     private readonly _getStatisticsUseCase: IGetSuperAdminStatisticsUseCase,
     private readonly _getClinicDocumentUseCase: IGetClinicDocumentUseCase,
+    private readonly _managePatientsUseCase: IManagePatientsUseCase,
+    private readonly _manageDoctorsUseCase: IManageDoctorsUseCase,
   ) {}
 
   listClinics = async (
@@ -68,6 +73,8 @@ export class SuperAdminController {
       const clinic = await this._updateClinicStatusUseCase.execute({
         clinicId: req.params.id as string,
         status: req.body?.status,
+        reason: req.body?.reason,
+        reviewerId: req.user!.sub,
       });
       ApiResponse.success(res, "Clinic status updated successfully", clinic);
     } catch (error) {
@@ -90,6 +97,45 @@ export class SuperAdminController {
     } catch (error) {
       next(error);
     }
+  };
+
+  listPatients = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._managePatientsUseCase.list(req.query);
+      ApiResponse.paginated(res, "Patients retrieved successfully", result.patients, {
+        page: result.page, limit: result.limit, totalItems: result.totalItems, totalPages: result.totalPages,
+      });
+    } catch (error) { next(error); }
+  };
+
+  updatePatientStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const patient = await this._managePatientsUseCase.setStatus(req.params.id as string, req.body?.status);
+      ApiResponse.success(res, "Patient status updated successfully", patient);
+    } catch (error) { next(error); }
+  };
+
+  getPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const patient = await this._managePatientsUseCase.getDetails(req.params.id as string);
+      ApiResponse.success(res, "Patient retrieved successfully", patient);
+    } catch (error) { next(error); }
+  };
+
+  listDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._manageDoctorsUseCase.list(req.query as unknown as DoctorListQueryDTO);
+      ApiResponse.paginated(res, "Doctors retrieved successfully", result.doctors, {
+        page: result.page, limit: result.limit, totalItems: result.totalItems, totalPages: result.totalPages,
+      });
+    } catch (error) { next(error); }
+  };
+
+  getDoctor = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const doctor = await this._manageDoctorsUseCase.getDetails(req.params.id as string);
+      ApiResponse.success(res, "Doctor retrieved successfully", doctor);
+    } catch (error) { next(error); }
   };
 
   getClinicDocument = async (

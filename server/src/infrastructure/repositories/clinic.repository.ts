@@ -83,6 +83,7 @@ export class ClinicRepository
       workingHours: doc.workingHours ?? [],
       documents: doc.documents ?? [],
       setupStatus: doc.setupStatus,
+      reviewHistory: (doc.reviewHistory ?? []).map((item) => ({ decision: item.decision, reason: item.reason, reviewerId: item.reviewerId?.toString() ?? null, reviewedAt: item.reviewedAt })),
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
@@ -106,6 +107,7 @@ export class ClinicRepository
       workingHours: clinic.workingHours,
       documents: clinic.documents,
       setupStatus: clinic.setupStatus,
+      reviewHistory: clinic.reviewHistory.map((item) => ({ decision: item.decision, reason: item.reason, reviewerId: item.reviewerId ? new Types.ObjectId(item.reviewerId) : null, reviewedAt: item.reviewedAt })),
     };
   }
 }

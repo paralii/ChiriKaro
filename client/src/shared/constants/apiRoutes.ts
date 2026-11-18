@@ -30,6 +30,11 @@ export const API_ROUTES = {
       `/super-admin/clinics/${encodeURIComponent(id)}/status`,
 
     STATISTICS: "/super-admin/statistics",
+    PATIENTS: "/super-admin/patients",
+    PATIENT_DETAILS: (id: string) => `/super-admin/patients/${encodeURIComponent(id)}`,
+    PATIENT_STATUS: (id: string) => `/super-admin/patients/${encodeURIComponent(id)}/status`,
+    DOCTORS: "/super-admin/doctors",
+    DOCTOR_DETAILS: (id: string) => `/super-admin/doctors/${encodeURIComponent(id)}`,
   },
 
   CLINIC: {
@@ -51,6 +56,12 @@ export const API_ROUTES = {
       `/clinic/invitations/${encodeURIComponent(id)}/resend`,
 
     DOCTORS: "/clinic/doctors",
+    DOCTOR_SPECIALIZATION_ASSIGNMENTS: "/clinic/doctors/specialization-assignments",
+    DOCTOR_SPECIALIZATIONS: (id: string) =>
+      `/clinic/doctors/${encodeURIComponent(id)}/specializations`,
+    DOCTOR_SCHEDULES: "/clinic/doctors/schedules",
+    DOCTOR_WORKING_HOURS: (id: string) =>
+      `/clinic/doctors/${encodeURIComponent(id)}/working-hours`,
     PENDING_DOCTOR_VERIFICATIONS: "/clinic/doctors/pending-verification",
 
     DOCTOR_DETAILS: (id: string) => `/clinic/doctors/${encodeURIComponent(id)}`,
@@ -69,6 +80,9 @@ export const API_ROUTES = {
 
     DOCTOR_CONSULTATION_FEE: (id: string) =>
       `/clinic/doctors/${encodeURIComponent(id)}/consultation-fee`,
+    DOCTOR_FEE_CHANGE_REQUESTS: "/clinic/doctor-fee-requests",
+    DOCTOR_FEE_CHANGE_REQUEST: (doctorId: string, requestId: string) =>
+      `/clinic/doctor-fee-requests/${encodeURIComponent(doctorId)}/${encodeURIComponent(requestId)}`,
 
     DOCTOR_APPROVE: (id: string) =>
       `/clinic/doctors/${encodeURIComponent(id)}/approve`,
@@ -90,6 +104,7 @@ export const API_ROUTES = {
       `/doctor/onboarding/documents/${encodeURIComponent(documentType)}`,
 
     CONSULTATION_FEE: "/doctor/consultation-fee",
+    CONSULTATION_FEE_REQUESTS: "/doctor/consultation-fee/requests",
 
     AVAILABILITY: "/doctor/availability",
     AVAILABILITY_SLOTS: "/doctor/availability/slots",

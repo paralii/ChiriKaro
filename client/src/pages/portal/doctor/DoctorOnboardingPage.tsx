@@ -16,7 +16,7 @@ import { defaultHours } from '@/shared/constants/schedule';
 import { useAction } from '@/shared/hooks/useAction';
 import { doctorService } from '@/features/doctor/services/doctorService';
 import { openSignedUrl } from '@/services/storageService';
-import { emptyDoctorOnboardingProfile, findInvalidHours, findResumeStep,  toDisplayWorkingHours, toDoctorWorkingHours } from '@/shared/utils/doctor';
+import { emptyDoctorOnboardingProfile, findClinicHoursConflict, findInvalidHours, findResumeStep, toDisplayWorkingHours, toDoctorWorkingHours } from '@/shared/utils/doctor';
 import type { DoctorOnboardingProfile, DoctorOnboardingStep, WorkingHour } from '@/shared/types';
 import { useAppSelector } from '@/store/hooks';
 
@@ -26,6 +26,8 @@ const docTypes = ['Professional license', 'Qualification certificate', 'Identity
 export default function DoctorOnboardingPage() {
   const user = useAppSelector((state) => state.auth.user)!;
   const [profile, setProfile] = useState<DoctorOnboardingProfile | null>(null);
+  const [clinicSpecializations, setClinicSpecializations] = useState<string[]>([]);
+  const [clinicWorkingHours, setClinicWorkingHours] = useState<WorkingHour[]>([]);
   const [step, setStep] = useState(0);
   const { busy, error, message, setError, run } = useAction();
   const locked = profile?.onboardingStatus === 'PENDING_VERIFICATION' || profile?.onboardingStatus === 'VERIFIED';
@@ -33,6 +35,8 @@ export default function DoctorOnboardingPage() {
   useEffect(() => {
     void run(async () => {
       const result = await doctorService.getOnboarding();
+      setClinicSpecializations(result.clinicSpecializations ?? []);
+      setClinicWorkingHours(result.clinicWorkingHours ?? []);
       if (result.profile) {
         const loaded = {
           ...result.profile,
@@ -55,6 +59,8 @@ export default function DoctorOnboardingPage() {
   }, [run, user.name]);
 
   const applyResponse = (result: Awaited<ReturnType<typeof doctorService.updateOnboarding>>) => {
+    setClinicSpecializations(result.clinicSpecializations ?? []);
+    setClinicWorkingHours(result.clinicWorkingHours ?? []);
     if (!result.profile) throw new Error('Doctor onboarding profile was not returned.');
     const updated = {
       ...result.profile,
@@ -107,6 +113,9 @@ export default function DoctorOnboardingPage() {
     const invalid = findInvalidHours(hours);
     if (invalid) return setError(`${invalid.day}: closing time must be later than opening time.`);
     if (!hours.some((hour) => hour.isOpen)) return setError('Open at least one working day.');
+    if (!clinicWorkingHours.length) return setError('Clinic working hours are not configured. Ask your Clinic Admin to set them first.');
+    const conflict = findClinicHoursConflict(hours, clinicWorkingHours);
+    if (conflict) return setError(`${conflict.day}: doctor hours must fit within the clinic working hours.`);
     void run(async () => {
       const updated = applyResponse(await doctorService.updateOnboarding('practice', { workingHours: toDoctorWorkingHours(hours) }));
       if (findResumeStep(updated) > 2) setStep(4);
@@ -202,7 +211,7 @@ export default function DoctorOnboardingPage() {
 
           {step === 1 ? <Card className="pb-5"><SectionHeading title="Professional details" description="Add your qualifications and professional registration information." /><DoctorProfessionalForm initial={profile} busy={busy || Boolean(locked)} onSave={saveProfessional} /></Card> : null}
 
-          {step === 2 ? <Card className="pb-5"><SectionHeading title="Practice details" description="List your specializations and procedures." /><DoctorPracticeForm initial={profile} busy={busy || Boolean(locked)} onSave={savePractice} /></Card> : null}
+          {step === 2 ? <Card className="pb-5"><SectionHeading title="Practice details" description="Choose specializations offered by your clinic and list procedures." /><DoctorPracticeForm initial={profile} busy={busy || Boolean(locked)} clinicSpecializations={clinicSpecializations} onSave={savePractice} /></Card> : null}
 
           {step === 3 ? <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours you are available at this clinic." /><WorkingHoursForm initial={hours} busy={busy || Boolean(locked)} onSave={saveHours} submitLabel="Save hours and continue" /></Card> : null}
 

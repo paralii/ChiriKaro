@@ -9,12 +9,16 @@ import { useAppSelector } from '@/store/hooks';
 const items = [
   { path: 'dashboard', label: 'Overview' },
   { path: 'clinics', label: 'All clinics' },
+  { path: 'patients', label: 'Patients' },
+  { path: 'doctors', label: 'Doctors' },
   { path: 'pending', label: 'Pending review' },
 ];
 
 const titles: Record<string, string> = {
   dashboard: 'Overview',
   clinics: 'Clinic directory',
+  patients: 'Patients',
+  doctors: 'Doctor directory',
   pending: 'Pending clinics',
 };
 

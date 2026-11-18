@@ -1,10 +1,12 @@
 import { DomainError } from "@domain/error/DomainError.ts";
+import { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
 import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
 import type { IClinicDocumentStorage } from "@application/interfaces/services/IClinicDocumentStorage.ts";
 import type { IUploadClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IUploadClinicDocumentUseCase.ts";
 import type { ClinicProfileDTO } from "@application/dto/clinic/clinic-profile.dto.ts";
 import {
   BadRequestError,
+  ConflictError,
   NotFoundError,
   ValidationError,
 } from "@shared/errors/index.ts";
@@ -28,6 +30,12 @@ export class UploadClinicDocumentUseCase implements IUploadClinicDocumentUseCase
       throw new ValidationError("Document type is invalid");
     const clinic = await this._clinicRepository.findById(clinicId);
     if (!clinic) throw new NotFoundError("Clinic");
+    if (clinic.setupStatus === ClinicSetupStatus.PENDING_VERIFICATION) {
+      throw new ConflictError("Clinic documents cannot be changed while review is pending");
+    }
+    if (clinic.setupStatus === ClinicSetupStatus.VERIFIED) {
+      throw new ConflictError("Verified clinic documents cannot be changed");
+    }
     const key = await this._storage.save(content, contentType);
     try {
       clinic.addDocument({

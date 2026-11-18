@@ -24,6 +24,11 @@ export const API_ROUTES = {
     CLINIC_DOCUMENTS: "/clinics/:id/documents",
     CLINIC_DOCUMENT_BY_TYPE: "/clinics/:id/documents/:documentType",
     CLINIC_STATUS: "/clinics/:id/status",
+    PATIENTS: "/patients",
+    PATIENT_STATUS: "/patients/:id/status",
+    PATIENT_DETAILS: "/patients/:id",
+    DOCTORS: "/doctors",
+    DOCTOR_DETAILS: "/doctors/:id",
 
     STATISTICS: "/statistics",
   },
@@ -42,6 +47,7 @@ export const API_ROUTES = {
     VERIFICATION_SUBMIT: "/verification/submit",
 
     CONSULTATION_FEE: "/consultation-fee",
+    CONSULTATION_FEE_REQUESTS: "/consultation-fee/requests",
 
     AVAILABILITY: "/availability",
     AVAILABILITY_SLOTS: "/availability/slots",
@@ -66,9 +72,15 @@ export const API_ROUTES = {
     SETUP_SUBMIT: "/setup/submit",
 
     DOCTORS: "/doctors",
+    DOCTOR_SPECIALIZATION_ASSIGNMENTS: "/doctors/specialization-assignments",
+    DOCTOR_SPECIALIZATIONS: "/doctors/:doctorId/specializations",
+    DOCTOR_SCHEDULES: "/doctors/schedules",
+    DOCTOR_WORKING_HOURS: "/doctors/:doctorId/working-hours",
     PENDING_VERIFICATIONS: "/doctors/pending-verification",
     DOCTOR_VERIFICATION: "/doctors/:doctorId/verification",
     DOCTOR_CONSULTATION_FEE: "/doctors/:doctorId/consultation-fee",
+    DOCTOR_FEE_CHANGE_REQUESTS: "/doctor-fee-requests",
+    DOCTOR_FEE_CHANGE_REQUEST: "/doctor-fee-requests/:doctorId/:requestId",
     DOCTOR_VERIFICATION_DOCUMENT:
       "/doctors/:doctorId/verification/documents/:documentType",
     DOCTOR_VERIFICATION_APPROVE: "/doctors/:doctorId/verification/approve",

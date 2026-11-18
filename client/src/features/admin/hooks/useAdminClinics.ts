@@ -6,6 +6,6 @@ import type { ClinicStatus } from '@/shared/types';
 export function useAdminClinics() {
   const dispatch = useAppDispatch();
   const state = useAppSelector((s) => s.adminClinics);
-  const changeStatus = useCallback((id: string, status: ClinicStatus) => { void dispatch(changeClinicStatus({ id, status })); }, [dispatch]);
+  const changeStatus = useCallback((id: string, status: ClinicStatus, reason?: string) => { void dispatch(changeClinicStatus({ id, status, reason })); }, [dispatch]);
   return { ...state, changeStatus };
 }

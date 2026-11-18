@@ -1,11 +1,14 @@
 import { DomainError } from "@domain/error/DomainError.ts";
 import { Doctor } from "@domain/entities/doctor.entity.ts";
+import type { Clinic } from "@domain/entities/clinic.entity.ts";
 import type { DoctorGender, DoctorWorkingHour } from "@domain/entities/doctor.entity.ts";
 import type { IDoctorRepository } from "@application/interfaces/repositories/IDoctorRepository.ts";
+import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
 import type { IUpdateDoctorOnboardingUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorOnboardingUseCase.ts";
 import type { DoctorOnboardingDTO, DoctorOnboardingStep } from "@application/dto/doctor/doctor-onboarding.dto.ts";
 import { BadRequestError, ValidationError } from "@shared/errors/index.ts";
 import { toDoctorOnboardingDTO } from "@application/mappers/doctor-onboarding.mapper.ts";
+import { findWorkingHoursOutsideClinic } from "@domain/policies/working-hours.policy.ts";
 
 const STEP_FIELDS: Record<DoctorOnboardingStep, string[]> = {
   basic: ["firstName", "lastName", "gender", "dateOfBirth"],
@@ -24,7 +27,7 @@ const validateStringList = (value: unknown, field: string): string[] => {
 };
 
 export class UpdateDoctorOnboardingUseCase implements IUpdateDoctorOnboardingUseCase {
-  constructor(private readonly _doctorRepository: IDoctorRepository) {}
+  constructor(private readonly _doctorRepository: IDoctorRepository, private readonly _clinicRepository: IClinicRepository) {}
 
   async execute(dto: Parameters<IUpdateDoctorOnboardingUseCase["execute"]>[0]): Promise<DoctorOnboardingDTO> {
     if (!/^[a-f\d]{24}$/i.test(dto.userId) || !/^[a-f\d]{24}$/i.test(dto.clinicId)) {
@@ -37,6 +40,19 @@ export class UpdateDoctorOnboardingUseCase implements IUpdateDoctorOnboardingUse
     const allowedFields = STEP_FIELDS[dto.step];
     if (Object.keys(dto.updates).some((field) => !allowedFields.includes(field))) {
       throw new ValidationError(`Updates contain fields outside the ${dto.step} step`);
+    }
+    let clinicForPractice: Clinic | null = null;
+    if (dto.step === "practice" && (dto.updates.specializations !== undefined || dto.updates.workingHours !== undefined)) {
+      clinicForPractice = await this._clinicRepository.findById(dto.clinicId);
+      if (!clinicForPractice) throw new BadRequestError("Clinic could not be found");
+    }
+    if (dto.step === "practice" && dto.updates.specializations !== undefined) {
+      const selected = validateStringList(dto.updates.specializations, "specializations");
+      const clinic = clinicForPractice!;
+      const available = new Set(clinic.specializations.map((item) => item.trim().toLocaleLowerCase()));
+      if (selected.some((item) => !available.has(item.trim().toLocaleLowerCase()))) {
+        throw new ValidationError("Doctor specializations must be selected from the clinic specializations");
+      }
     }
 
     let doctor = await this._doctorRepository.findByUserId(dto.userId);
@@ -56,13 +72,31 @@ export class UpdateDoctorOnboardingUseCase implements IUpdateDoctorOnboardingUse
     try {
       if (dto.step === "basic") this.updateBasic(doctor, dto.updates);
       if (dto.step === "professional") this.updateProfessional(doctor, dto.updates);
-      if (dto.step === "practice") this.updatePractice(doctor, dto.updates);
+      if (dto.step === "practice") {
+        this.updatePractice(doctor, dto.updates);
+        if (dto.updates.workingHours !== undefined) {
+          const clinic = clinicForPractice!;
+          doctor.configureAvailability({
+            workingHours: doctor.workingHours,
+            breaks: doctor.breaks,
+            slotDurationMinutes: doctor.slotDurationMinutes,
+            bufferTimeMinutes: doctor.bufferTimeMinutes,
+          });
+          const conflict = findWorkingHoursOutsideClinic(doctor.workingHours, clinic.workingHours);
+          if (conflict) throw new ValidationError(`Doctor working hours for ${conflict.day} must be within clinic working hours`);
+        }
+      }
     } catch (error) {
       if (error instanceof DomainError) throw new ValidationError(error.message);
       throw error;
     }
 
-    return toDoctorOnboardingDTO(await this._doctorRepository.save(doctor));
+    const [saved, clinic] = await Promise.all([this._doctorRepository.save(doctor), this._clinicRepository.findById(dto.clinicId)]);
+    return {
+      ...toDoctorOnboardingDTO(saved),
+      clinicSpecializations: clinic?.specializations ?? [],
+      clinicWorkingHours: clinic?.workingHours ?? [],
+    };
   }
 
   private updateBasic(doctor: Doctor, updates: Record<string, unknown>): void {

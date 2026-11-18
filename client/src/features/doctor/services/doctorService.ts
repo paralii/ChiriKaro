@@ -4,6 +4,7 @@ import type {
   DoctorAvailability,
   DoctorAvailabilitySlots,
   DoctorConsultationFee,
+  DoctorFeeChangeRequest,
   DoctorOnboardingDTO,
   DoctorOnboardingStep,
   DoctorProfile,
@@ -73,6 +74,10 @@ export const doctorService = {
       ),
       "Consultation fee was not returned.",
     ),
+  listFeeChangeRequests: () =>
+    responseData(api.get<ApiEnvelope<DoctorFeeChangeRequest[]>>(API_ROUTES.DOCTOR.CONSULTATION_FEE_REQUESTS), "Fee change requests were not returned."),
+  requestFeeChange: (requestedFee: number, reason?: string) =>
+    responseData(api.post<ApiEnvelope<DoctorFeeChangeRequest>>(API_ROUTES.DOCTOR.CONSULTATION_FEE_REQUESTS, { requestedFee, ...(reason ? { reason } : {}) }), "Fee change request was not returned."),
   getAvailability: () =>
     responseData(
       api.get<ApiEnvelope<DoctorAvailability>>(API_ROUTES.DOCTOR.AVAILABILITY),

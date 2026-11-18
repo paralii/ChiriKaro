@@ -7,7 +7,6 @@ export const toClinicSummaryDTO = (clinic: Clinic): ClinicSummaryDTO => ({
   address: clinic.address ?? null,
   phone: clinic.phone ?? null,
   contactEmail: clinic.contactEmail ?? null,
-  ownerAdminId: clinic.ownerAdminId,
   status: clinic.status,
   setupStatus: clinic.setupStatus,
   createdAt: clinic.createdAt,

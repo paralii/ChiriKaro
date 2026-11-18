@@ -23,7 +23,7 @@ export default function PortalLayout() {
   const title = getPageTitle(role, section);
 
   useEffect(() => {
-    if (role === 'SUPER_ADMIN') void dispatch(loadAdminClinics(1));
+    if (role === 'SUPER_ADMIN') void dispatch(loadAdminClinics({ page: 1 }));
     if (role === 'CLINIC_ADMIN') void dispatch(loadClinic());
   }, [dispatch, role]);
 

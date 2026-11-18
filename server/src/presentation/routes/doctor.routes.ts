@@ -69,6 +69,8 @@ export function DoctorRouter(
     authorizeDoctor,
     doctorController.getConsultationFee,
   );
+  router.get(API_ROUTES.DOCTOR.CONSULTATION_FEE_REQUESTS, authenticate, authorizeDoctor, doctorController.listFeeChangeRequests);
+  router.post(API_ROUTES.DOCTOR.CONSULTATION_FEE_REQUESTS, authenticate, authorizeDoctor, doctorController.requestFeeChange);
   router.get(
     API_ROUTES.DOCTOR.AVAILABILITY,
     authenticate,

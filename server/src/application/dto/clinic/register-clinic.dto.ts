@@ -30,7 +30,6 @@ export interface RegisterClinicResultDTO {
     phone: string | null;
     contactEmail: string | null;
     registrationNumber: string | null;
-    ownerAdminId: string | null;
     status: ClinicStatus;
     createdAt: Date;
   };

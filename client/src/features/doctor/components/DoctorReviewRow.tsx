@@ -39,10 +39,10 @@ export function DoctorReviewRow({ doctor, busy, onInspect, onApprove, onReject, 
       <td className={tdClass}><CellTitle title={name} lines={[doctor.professionalTitle ?? 'Professional title not provided']} /></td>
       <td className={tdClass}><Badge tone={statusTone(doctor.verificationStatus)}>{doctor.verificationStatus.replaceAll('_', ' ')}</Badge></td>
       <td className={tdClass}>
-        <div className="flex min-w-[180px] gap-[5px]">
-          <input aria-label={`Consultation fee for ${name}`} type="number" min="0" step="0.01" className={smallInput} value={fee} onChange={(event) => setFee(event.target.value)} placeholder="Enter fee" />
-          <Button type="button" size="xs" variant="ghost" disabled={busy} onClick={saveFee}>Save</Button>
-        </div>
+        {doctor.consultationFee == null ? <div className="flex min-w-[180px] gap-[5px]">
+          <input aria-label={`Initial consultation fee for ${name}`} type="number" min="0" step="0.01" className={smallInput} value={fee} onChange={(event) => setFee(event.target.value)} placeholder="Set initial fee" />
+          <Button type="button" size="xs" variant="ghost" disabled={busy} onClick={saveFee}>Set</Button>
+        </div> : <span>{doctor.consultationFee.toFixed(2)} <small className="block text-[#777c8a]">Changes require request approval</small></span>}
       </td>
       <td className={tdClass}>{dateLabel}</td>
       <td className={tdClass}>

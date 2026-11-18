@@ -28,6 +28,11 @@ export class DoctorRepository implements IDoctorRepository {
     return documents.map((document) => this.toDomain(document));
   }
 
+  async findByClinic(clinicId: string): Promise<Doctor[]> {
+    const documents = await DentistModel.find({ clinicId: new Types.ObjectId(clinicId) }).sort({ createdAt: -1 }).exec();
+    return documents.map((document) => this.toDomain(document));
+  }
+
   async save(doctor: Doctor): Promise<Doctor> {
     const document = await DentistModel.findOneAndUpdate(
       { userId: new Types.ObjectId(doctor.userId) },
@@ -61,6 +66,17 @@ export class DoctorRepository implements IDoctorRepository {
       verificationStatus: document.verificationStatus,
       rejectionReason: document.rejectionReason ?? null,
       consultationFee: document.consultationFee ?? null,
+      feeChangeRequests: (document.feeChangeRequests ?? []).map((request) => ({
+        id: request.requestId,
+        currentFeeAtRequest: request.currentFeeAtRequest ?? null,
+        requestedFee: request.requestedFee,
+        reason: request.reason ?? null,
+        status: request.status,
+        reviewerId: request.reviewerId?.toString() ?? null,
+        reviewReason: request.reviewReason ?? null,
+        requestedAt: request.requestedAt,
+        reviewedAt: request.reviewedAt ?? null,
+      })),
       documents: (document.documents ?? []).map((item) => ({
         documentType: item.documentType,
         documentKey: item.documentUrl,
@@ -95,6 +111,17 @@ export class DoctorRepository implements IDoctorRepository {
       verificationStatus: doctor.verificationStatus,
       rejectionReason: doctor.rejectionReason,
       consultationFee: doctor.consultationFee,
+      feeChangeRequests: doctor.feeChangeRequests.map((request) => ({
+        requestId: request.id,
+        currentFeeAtRequest: request.currentFeeAtRequest,
+        requestedFee: request.requestedFee,
+        reason: request.reason,
+        status: request.status,
+        reviewerId: request.reviewerId ? new Types.ObjectId(request.reviewerId) : null,
+        reviewReason: request.reviewReason,
+        requestedAt: request.requestedAt,
+        reviewedAt: request.reviewedAt,
+      })),
       documents: doctor.documents.map((item) => ({
         documentType: item.documentType,
         documentUrl: item.documentKey,

@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 
 import { Role } from "@domain/value-objects/Role.ts";
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";
-import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
+import { canAccessClinicStatus } from "@domain/policies/clinic-access.policy.ts";
 
 import type {
   ITokenService,
@@ -61,14 +61,7 @@ export class AuthMiddleware {
           user.clinicId,
         );
 
-        if (
-          !clinic ||
-          (clinic.status !== ClinicStatus.APPROVED &&
-            !(
-              user.role === Role.CLINIC_ADMIN &&
-              [ClinicStatus.PENDING, ClinicStatus.REJECTED].includes(clinic.status)
-            ))
-        ) {
+        if (!clinic || !canAccessClinicStatus(user.role, clinic.status)) {
           next(new ForbiddenError("This clinic is not active"));
           return;
         }

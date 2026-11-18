@@ -15,6 +15,13 @@ export interface ClinicDocumentData {
   uploadedAt: Date;
 }
 
+export interface ClinicReviewDecision {
+  decision: "APPROVED" | "REJECTED";
+  reason: string | null;
+  reviewerId: string | null;
+  reviewedAt: Date;
+}
+
 export interface ClinicProps {
   _id: string | null;
   name: string;
@@ -31,6 +38,7 @@ export interface ClinicProps {
   workingHours: ClinicWorkingHour[];
   documents: ClinicDocumentData[];
   setupStatus: ClinicSetupStatus;
+  reviewHistory: ClinicReviewDecision[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +61,7 @@ type NewClinicProps = Pick<ClinicProps, "name"> &
       | "workingHours"
       | "documents"
       | "setupStatus"
+      | "reviewHistory"
     >
   >;
 
@@ -140,6 +149,7 @@ export class Clinic {
       workingHours: props.workingHours ?? [],
       documents: props.documents ?? [],
       setupStatus: props.setupStatus ?? ClinicSetupStatus.IN_PROGRESS,
+      reviewHistory: (props.reviewHistory ?? []).map((entry) => ({ ...entry, reviewedAt: new Date(entry.reviewedAt) })),
       createdAt: now,
       updatedAt: new Date(now),
     });
@@ -153,15 +163,19 @@ export class Clinic {
     });
   }
 
-  approve(): void {
+  approve(reviewerId: string | null = null): void {
     this.props.status = ClinicStatus.APPROVED;
     this.props.setupStatus = ClinicSetupStatus.VERIFIED;
+    this.props.reviewHistory.push({ decision: "APPROVED", reason: null, reviewerId, reviewedAt: new Date() });
     this.touch();
   }
 
-  reject(): void {
+  reject(reason: string, reviewerId: string | null = null): void {
+    const normalizedReason = reason.trim();
+    if (!normalizedReason || normalizedReason.length > 1000) throw new InvalidClinicDataError("A rejection reason of 1 to 1000 characters is required");
     this.props.status = ClinicStatus.REJECTED;
     this.props.setupStatus = ClinicSetupStatus.REJECTED;
+    this.props.reviewHistory.push({ decision: "REJECTED", reason: normalizedReason, reviewerId, reviewedAt: new Date() });
     this.touch();
   }
 
@@ -236,7 +250,11 @@ export class Clinic {
       throw new InvalidClinicDataError("At least one specialization is required");
     }
     const normalized = values.map((value) => requireNonBlank(value, "specialization"));
-    this.props.specializations = [...new Set(normalized)];
+    const keys = normalized.map((value) => value.toLocaleLowerCase());
+    if (new Set(keys).size !== keys.length) {
+      throw new InvalidClinicDataError("Specializations must not contain duplicates");
+    }
+    this.props.specializations = normalized;
     this.touch();
   }
 
@@ -286,6 +304,7 @@ export class Clinic {
       throw new InvalidClinicDataError("Upload at least one clinic document before submitting setup");
     }
     this.props.setupStatus = ClinicSetupStatus.PENDING_VERIFICATION;
+    if (this.props.status === ClinicStatus.REJECTED) this.props.status = ClinicStatus.PENDING;
     this.touch();
   }
 
@@ -339,6 +358,7 @@ export class Clinic {
   get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
   get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
   get setupStatus() { return this.props.setupStatus; }
+  get reviewHistory() { return this.props.reviewHistory.map((entry) => ({ ...entry, reviewedAt: new Date(entry.reviewedAt) })); }
   get createdAt() {
     return new Date(this.props.createdAt);
   }

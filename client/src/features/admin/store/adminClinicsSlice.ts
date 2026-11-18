@@ -10,13 +10,14 @@ const initialState = {
     total: 0, verified: 0, pendingVerification: 0, rejected: 0,
     verificationOverview: { notStarted: 0, inProgress: 0, pendingVerification: 0, verified: 0, rejected: 0 },
   } as SuperAdminDoctorStatistics,
-  page: 1, limit: 20, totalItems: 0, totalPages: 0,
+  page: 1, limit: 20, totalItems: 0, totalPages: 0, filterStatus: '', filterSearch: '',
   busy: false, error: '', message: '',
 };
 
-export const loadAdminClinics = createAsyncThunk<{ clinics: ClinicPage; statistics: { clinics: ClinicSummary; doctors: SuperAdminDoctorStatistics } }, number>('adminClinics/load', async (page) => {
-  const [clinics, statistics] = await Promise.all([superAdminService.listClinics(page), superAdminService.getStatistics()]);
-  return { clinics, statistics };
+export type ClinicDirectoryQuery = { page: number; search?: string; status?: string };
+export const loadAdminClinics = createAsyncThunk<{ clinics: ClinicPage; statistics: { clinics: ClinicSummary; doctors: SuperAdminDoctorStatistics }; query: ClinicDirectoryQuery }, ClinicDirectoryQuery>('adminClinics/load', async (query) => {
+  const [clinics, statistics] = await Promise.all([superAdminService.listClinics(query.page, 20, query.search, query.status), superAdminService.getStatistics()]);
+  return { clinics, statistics, query };
 });
 
 export const changeClinicStatus = createAsyncThunk('adminClinics/changeStatus', async ({ id, status, reason }: { id: string; status: ClinicStatus; reason?: string }) => {
@@ -34,6 +35,7 @@ const slice = createSlice({
         const result: ClinicPage = a.payload.clinics;
         s.items = result.items; s.page = result.page; s.limit = result.limit;
         s.totalItems = result.totalItems; s.totalPages = result.totalPages;
+        s.filterStatus = a.payload.query.status ?? ''; s.filterSearch = a.payload.query.search ?? '';
         s.summary = a.payload.statistics.clinics; s.doctorStatistics = a.payload.statistics.doctors; s.error = ''; s.busy = false;
       })
       .addCase(loadAdminClinics.rejected, (s, a) => { s.busy = false; s.error = a.error.message ?? 'Could not load this workspace.'; })
@@ -41,8 +43,8 @@ const slice = createSlice({
       .addCase(changeClinicStatus.fulfilled, (s, a) => {
         const { clinic, statistics } = a.payload;
         const existing = s.items.find((c) => c.id === clinic.id);
-        if (existing) Object.assign(existing, clinic);
-        if (["APPROVED", "REJECTED"].includes(clinic.status)) {
+        if (existing && (!s.filterStatus || s.filterStatus === clinic.status)) Object.assign(existing, clinic);
+        if (existing && s.filterStatus && s.filterStatus !== clinic.status) {
           s.items = s.items.filter((item) => item.id !== clinic.id);
           s.totalItems = Math.max(0, s.totalItems - 1);
           s.totalPages = Math.ceil(s.totalItems / s.limit);

@@ -5,6 +5,8 @@ import type {
   ClinicSummary,
   SuperAdminStatistics,
   SuperAdminPatient,
+  SuperAdminDoctor,
+  SuperAdminDoctorDetail,
 } from "@/shared/types";
 import { API_ROUTES } from "@/shared/constants/apiRoutes";
 
@@ -25,6 +27,7 @@ export type ClinicPage = {
   totalPages: number;
 };
 export type PatientPage = { items: SuperAdminPatient[]; page: number; limit: number; totalItems: number; totalPages: number };
+export type DoctorPage = { items: SuperAdminDoctor[]; page: number; limit: number; totalItems: number; totalPages: number };
 type SuperAdminStatisticsResponse = {
   clinics: {
     total: number;
@@ -36,18 +39,29 @@ type SuperAdminStatisticsResponse = {
 };
 
 export const superAdminService = {
-  listPatients: async (page = 1, limit = 20): Promise<PatientPage> => {
-    const response = await api.get<ApiEnvelope<SuperAdminPatient[]>>(`${API_ROUTES.SUPER_ADMIN.PATIENTS}?page=${page}&limit=${limit}`);
+  listPatients: async (page = 1, limit = 20, search = '', status = ''): Promise<PatientPage> => {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (search.trim()) params.set('search', search.trim());
+    if (status) params.set('status', status);
+    const response = await api.get<ApiEnvelope<SuperAdminPatient[]>>(`${API_ROUTES.SUPER_ADMIN.PATIENTS}?${params}`);
     return { items: response.data ?? [], page: response.meta?.page ?? page, limit: response.meta?.limit ?? limit, totalItems: response.meta?.totalItems ?? 0, totalPages: response.meta?.totalPages ?? 0 };
+  },
+  getPatient: async (id: string): Promise<SuperAdminPatient> => {
+    const response = await api.get<ApiEnvelope<SuperAdminPatient>>(API_ROUTES.SUPER_ADMIN.PATIENT_DETAILS(id));
+    if (!response.data) throw new Error('Patient details were not returned.');
+    return response.data;
   },
   updatePatientStatus: async (id: string, status: SuperAdminPatient['status']): Promise<SuperAdminPatient> => {
     const response = await api.patch<ApiEnvelope<SuperAdminPatient>>(API_ROUTES.SUPER_ADMIN.PATIENT_STATUS(id), { status });
     if (!response.data) throw new Error('Updated patient status was not returned.');
     return response.data;
   },
-  listClinics: async (page = 1, limit = 20): Promise<ClinicPage> => {
+  listClinics: async (page = 1, limit = 20, search = '', status = ''): Promise<ClinicPage> => {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (search.trim()) params.set('search', search.trim());
+    if (status) params.set('status', status);
     const response = await api.get<ApiEnvelope<Clinic[]>>(
-      `${API_ROUTES.SUPER_ADMIN.CLINICS}?page=${page}&limit=${limit}`,
+      `${API_ROUTES.SUPER_ADMIN.CLINICS}?${params}`,
     );
     return {
       items: response.data ?? [],
@@ -56,6 +70,18 @@ export const superAdminService = {
       totalItems: response.meta?.totalItems ?? 0,
       totalPages: response.meta?.totalPages ?? 0,
     };
+  },
+  listDoctors: async (page = 1, limit = 20, search = '', status = ''): Promise<DoctorPage> => {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (search.trim()) params.set('search', search.trim());
+    if (status) params.set('status', status);
+    const response = await api.get<ApiEnvelope<SuperAdminDoctor[]>>(`${API_ROUTES.SUPER_ADMIN.DOCTORS}?${params}`);
+    return { items: response.data ?? [], page: response.meta?.page ?? page, limit: response.meta?.limit ?? limit, totalItems: response.meta?.totalItems ?? 0, totalPages: response.meta?.totalPages ?? 0 };
+  },
+  getDoctor: async (id: string): Promise<SuperAdminDoctorDetail> => {
+    const response = await api.get<ApiEnvelope<SuperAdminDoctorDetail>>(API_ROUTES.SUPER_ADMIN.DOCTOR_DETAILS(id));
+    if (!response.data) throw new Error('Doctor details were not returned.');
+    return response.data;
   },
   getClinic: async (id: string) => {
     const response = await api.get<ApiEnvelope<Clinic>>(

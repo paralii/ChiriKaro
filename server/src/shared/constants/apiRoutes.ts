@@ -26,6 +26,9 @@ export const API_ROUTES = {
     CLINIC_STATUS: "/clinics/:id/status",
     PATIENTS: "/patients",
     PATIENT_STATUS: "/patients/:id/status",
+    PATIENT_DETAILS: "/patients/:id",
+    DOCTORS: "/doctors",
+    DOCTOR_DETAILS: "/doctors/:id",
 
     STATISTICS: "/statistics",
   },

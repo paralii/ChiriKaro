@@ -5,6 +5,8 @@ import { Badge } from '@/components/atoms/Badge';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { ClinicTable } from '@/features/clinic/components/ClinicTable';
+import { Input } from '@/components/atoms/Input';
+import { Form } from '@/components/atoms/Form';
 import { useAdminClinics } from '@/features/admin/hooks/useAdminClinics';
 import { useAppDispatch } from '@/store/hooks';
 import { loadAdminClinics } from '@/features/admin/store/adminClinicsSlice';
@@ -17,10 +19,15 @@ export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?
   const dispatch = useAppDispatch();
   const { items, busy, error, message, changeStatus, page, totalItems, totalPages } = useAdminClinics();
   const [requestedPage, setRequestedPage] = useState(1);
+  const [searchDraft, setSearchDraft] = useState('');
+  const [statusDraft, setStatusDraft] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const [appliedStatus, setAppliedStatus] = useState('');
   const [selectedClinic, setSelectedClinic] = useState<Clinic | null>(null);
   const { busy: detailBusy, error: detailError, run } = useAction();
-  useEffect(() => { void dispatch(loadAdminClinics(requestedPage)); }, [dispatch, requestedPage]);
-  const list = pendingOnly ? items.filter((c) => c.status === 'PENDING') : items;
+  useEffect(() => { void dispatch(loadAdminClinics({ page: requestedPage, search: appliedSearch, status: pendingOnly ? 'PENDING' : appliedStatus })); }, [dispatch, requestedPage, appliedSearch, appliedStatus, pendingOnly]);
+  const list = items;
+  const applyFilters = (event: React.FormEvent) => { event.preventDefault(); setRequestedPage(1); setAppliedSearch(searchDraft.trim()); setAppliedStatus(statusDraft); };
   const showDetails = (id: string) => void run(async () => setSelectedClinic(await superAdminService.getClinic(id)), { fallback: 'Could not load clinic details.' });
   const reviewDocuments = Array.isArray(selectedClinic?.documents)
     ? selectedClinic.documents.filter((doc) => doc && typeof doc.documentType === 'string' && doc.documentType.trim().length > 0)
@@ -39,6 +46,11 @@ export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?
       <Notices error={error} message={message} />
       <Card>
         <SectionHeading title={pendingOnly ? 'Applications awaiting review' : 'Clinic directory'} description={`${pendingOnly ? list.length : totalItems} clinic${(pendingOnly ? list.length : totalItems) === 1 ? '' : 's'} found`} action={<Badge>PAGE {page}{totalPages ? ` OF ${totalPages}` : ''}</Badge>} />
+        <Form onSubmit={applyFilters} className="grid grid-cols-[minmax(180px,1fr)_180px_auto] items-end gap-2 px-[15px] pb-3 max-md:grid-cols-1">
+          <label className="grid gap-1 text-[10px] text-[#777c8a]">Search clinics<Input value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} maxLength={100} placeholder="Name, email, address, city" /></label>
+          {!pendingOnly ? <label className="grid gap-1 text-[10px] text-[#777c8a]">Status<select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)} className="h-[38px] rounded border border-[#cfd2df] bg-white px-2 text-xs"><option value="">All statuses</option>{['PENDING', 'APPROVED', 'REJECTED', 'BLOCKED'].map((status) => <option key={status} value={status}>{status}</option>)}</select></label> : null}
+          <Button size="xs" disabled={busy}>Apply</Button>
+        </Form>
         <ClinicTable clinics={list} onStatus={changeStatus} onDetails={showDetails} busy={busy || detailBusy} />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2 border-t border-[#eff0f4] px-[15px] py-3">

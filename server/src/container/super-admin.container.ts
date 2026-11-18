@@ -17,6 +17,7 @@ import { createSuperAdminRouter } from "@presentation/routes/super-admin.routes.
 import { GetClinicDocumentUseCase } from "@application/use-cases/clinic/get-clinic-document.use-case.ts";
 import { CloudinaryClinicDocumentStorage } from "@infrastructure/services/storage/cloudinary-clinic-document.storage.ts";
 import { ManagePatientsUseCase } from "@application/use-cases/super-admin/manage-patients.use-case.ts";
+import { ManageDoctorsUseCase } from "@application/use-cases/super-admin/manage-doctors.use-case.ts";
 
 const clinicRepository = new ClinicRepository();
 const superAdminClinicRepository = new SuperAdminClinicRepository();
@@ -32,6 +33,7 @@ const updateClinicStatusUseCase: IUpdateClinicStatusUseCase = new UpdateClinicSt
 const getStatisticsUseCase: IGetSuperAdminStatisticsUseCase = new GetSuperAdminStatisticsUseCase(statisticsRepository);
 const getClinicDocumentUseCase = new GetClinicDocumentUseCase(clinicRepository, new CloudinaryClinicDocumentStorage());
 const managePatientsUseCase = new ManagePatientsUseCase(superAdminClinicRepository);
+const manageDoctorsUseCase = new ManageDoctorsUseCase(superAdminClinicRepository);
 const controller = new SuperAdminController(
   listClinicsUseCase,
   getClinicDetailsUseCase,
@@ -39,6 +41,7 @@ const controller = new SuperAdminController(
   getStatisticsUseCase,
   getClinicDocumentUseCase,
   managePatientsUseCase,
+  manageDoctorsUseCase,
 );
 
 export const superAdminRouter = createSuperAdminRouter(controller, {

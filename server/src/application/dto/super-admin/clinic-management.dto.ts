@@ -3,6 +3,8 @@ import type { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 export interface ClinicListQueryDTO {
   page?: unknown;
   limit?: unknown;
+  search?: unknown;
+  status?: unknown;
 }
 
 export interface ClinicSummaryDTO {
@@ -39,7 +41,7 @@ export interface ClinicListResultDTO {
   totalPages: number;
 }
 
-export interface PatientListQueryDTO { page?: unknown; limit?: unknown; }
+export interface PatientListQueryDTO { page?: unknown; limit?: unknown; search?: unknown; status?: unknown; }
 export interface PatientListResultDTO {
   patients: Array<{ id: string; name: string; email: string; status: string; createdAt: Date }>;
   page: number;
@@ -47,6 +49,22 @@ export interface PatientListResultDTO {
   totalItems: number;
   totalPages: number;
 }
+
+export interface DoctorListQueryDTO { page?: unknown; limit?: unknown; search?: unknown; status?: unknown; }
+export interface DoctorListResultDTO {
+  doctors: Array<{ id: string; name: string; email: string | null; clinicName: string | null; professionalTitle: string | null; verificationStatus: string; specializations: string[]; consultationFee: number | null }>;
+  page: number; limit: number; totalItems: number; totalPages: number;
+}
+export interface DoctorDetailDTO {
+  name: string; email: string | null; clinicName: string | null; professionalTitle: string | null;
+  qualifications: string[]; yearsOfExperience: number | null; registrationNumber: string | null;
+  registrationAuthority: string | null; verificationStatus: string; rejectionReason: string | null;
+  specializations: string[]; procedures: string[]; consultationFee: number | null;
+  workingHours: Array<{ day: string; isOpen: boolean; startTime: string; endTime: string }>;
+  documents: Array<{ documentType: string; status: string; uploadedAt: Date; rejectionReason: string | null }>;
+  createdAt: Date; updatedAt: Date;
+}
+export type PatientDetailDTO = PatientListResultDTO["patients"][number] & { updatedAt: Date; avatar: string | null };
 
 export interface UpdateClinicStatusDTO {
   clinicId: string;

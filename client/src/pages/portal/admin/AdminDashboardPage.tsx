@@ -15,7 +15,7 @@ export default function AdminDashboardPage() {
   const dispatch = useAppDispatch();
   const { summary, error, message } = useAdminClinics();
   const pendingCount = useAppSelector((s) => s.adminClinics.summary.pending);
-  useEffect(() => { void dispatch(loadAdminClinics(1)); }, [dispatch]);
+  useEffect(() => { void dispatch(loadAdminClinics({ page: 1 })); }, [dispatch]);
   return (
     <>
       <Notices error={error} message={message} />

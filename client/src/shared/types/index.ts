@@ -17,7 +17,7 @@ export type RegisterResult = {
 };
 
 export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
-export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; reviewHistory?: Array<{ decision: 'APPROVED' | 'REJECTED'; reason: string | null; reviewerId: string | null; reviewedAt: string }>; doctors?: Array<{ name: string; professionalTitle: string | null; verificationStatus: string; specializations: string[] }>; staff?: Array<{ name: string; role: 'CLINIC_ADMIN' | 'STAFF'; status: string }>; isActive?: boolean; createdAt?: string; updatedAt?: string };
+export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; reviewHistory?: Array<{ decision: 'APPROVED' | 'REJECTED'; reason: string | null; reviewedAt: string }>; doctors?: Array<{ name: string; professionalTitle: string | null; verificationStatus: string; specializations: string[] }>; staff?: Array<{ name: string; role: 'CLINIC_ADMIN' | 'STAFF'; status: string }>; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
 export type SuperAdminDoctorStatistics = {
   total: number;
@@ -44,7 +44,7 @@ export type WorkingHour = { day: string; isOpen: boolean; startTime: string; end
 export type ClinicDocument = { documentType: string; documentKey?: string; uploadedAt: string };
 export type ClinicProfile = {
   id: string; name: string; description?: string | null; address: string | null; city: string | null; state: string | null;
-  pincode: string | null; phone: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail: string | null;
+  pincode: string | null; phone: string | null; ownerName?: string | null; contactEmail: string | null;
   registrationNumber: string | null; clinicType?: string | null; specializations: string[];
   workingHours: WorkingHour[]; documents: ClinicDocument[]; status: ClinicStatus; setupStatus?: string;
   rejectionReason?: string | null;

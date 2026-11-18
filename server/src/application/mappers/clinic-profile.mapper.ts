@@ -11,7 +11,6 @@ export const toClinicProfileDTO = (clinic: Clinic): ClinicProfileDTO => ({
   phone: clinic.phone ?? null,
   contactEmail: clinic.contactEmail ?? null,
   registrationNumber: clinic.registrationNumber ?? null,
-  ownerAdminId: clinic.ownerAdminId,
   status: clinic.status,
   specializations: clinic.specializations,
   workingHours: clinic.workingHours,

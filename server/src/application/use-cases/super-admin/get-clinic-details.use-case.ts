@@ -41,7 +41,7 @@ export class GetClinicDetailsUseCase implements IGetClinicDetailsUseCase {
         documentType: doc.documentType,
         uploadedAt: doc.uploadedAt,
       })),
-      reviewHistory: clinic.reviewHistory,
+      reviewHistory: clinic.reviewHistory.map(({ decision, reason, reviewedAt }) => ({ decision, reason, reviewedAt })),
       doctors: doctors.map((doctor) => ({ ...doctor })),
       staff: staff.map((member) => ({ ...member })),
     };

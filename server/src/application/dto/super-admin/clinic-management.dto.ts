@@ -11,7 +11,6 @@ export interface ClinicSummaryDTO {
   address: string | null;
   phone: string | null;
   contactEmail: string | null;
-  ownerAdminId: string | null;
   status: ClinicStatus;
   setupStatus: string;
   createdAt: Date;
@@ -27,7 +26,7 @@ export interface ClinicDetailsDTO extends ClinicSummaryDTO {
   specializations: string[];
   workingHours: Array<{ day: string; isOpen: boolean; startTime: string; endTime: string }>;
   documents: Array<{ documentType: string; uploadedAt: Date }>;
-  reviewHistory: Array<{ decision: "APPROVED" | "REJECTED"; reason: string | null; reviewerId: string | null; reviewedAt: Date }>;
+  reviewHistory: Array<{ decision: "APPROVED" | "REJECTED"; reason: string | null; reviewedAt: Date }>;
   doctors: Array<{ name: string; professionalTitle: string | null; verificationStatus: string; specializations: string[] }>;
   staff: Array<{ name: string; role: "CLINIC_ADMIN" | "STAFF"; status: string }>;
 }

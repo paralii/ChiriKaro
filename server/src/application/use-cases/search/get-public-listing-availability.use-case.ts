@@ -1,6 +1,7 @@
 import type { DatedDoctorAvailabilityDTO } from "@application/dto/doctor/doctor-availability.dto.ts";
 import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
 import type { IDoctorRepository } from "@application/interfaces/repositories/IDoctorRepository.ts";
+import type { IAppointmentRepository } from "@application/interfaces/repositories/IAppointmentRepository.ts";
 import type { IPublicListingIdService } from "@application/interfaces/services/IPublicListingIdService.ts";
 import type { IGetPublicListingAvailabilityUseCase } from "@application/interfaces/use-cases/search/IGetPublicListingAvailabilityUseCase.ts";
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
@@ -16,6 +17,7 @@ export class GetPublicListingAvailabilityUseCase implements IGetPublicListingAva
     private readonly _listingIdService: IPublicListingIdService,
     private readonly _clinicRepository: IClinicRepository,
     private readonly _doctorRepository: IDoctorRepository,
+    private readonly _appointmentRepository: IAppointmentRepository,
   ) {}
 
   async execute(listingId: string, date: string): Promise<DatedDoctorAvailabilityDTO> {
@@ -38,7 +40,7 @@ export class GetPublicListingAvailabilityUseCase implements IGetPublicListingAva
     const daysAhead = Math.floor((requested.getTime() - todayUtc.getTime()) / 86_400_000);
     if (daysAhead < 0 || daysAhead > MAX_BOOKING_HORIZON_DAYS) throw new BadRequestError(`Choose a date from today through the next ${MAX_BOOKING_HORIZON_DAYS} days`);
 
-    const slots = generateDatedSlots({
+    const generatedSlots = generateDatedSlots({
       date,
       timeZone: clinic.timeZone,
       clinicHours: clinic.workingHours,
@@ -47,6 +49,18 @@ export class GetPublicListingAvailabilityUseCase implements IGetPublicListingAva
       slotDurationMinutes: doctor.slotDurationMinutes,
       bufferTimeMinutes: doctor.bufferTimeMinutes,
     });
+    const now = new Date();
+    const overlaps = generatedSlots.length
+      ? await this._appointmentRepository.findActiveOverlaps(
+        claims.clinicId,
+        claims.doctorUserId,
+        date,
+        generatedSlots[0]!.startAt,
+        generatedSlots[generatedSlots.length - 1]!.endAt,
+        now,
+      )
+      : [];
+    const slots = generatedSlots.filter((slot) => !overlaps.some((reserved) => reserved.startsAt < slot.endAt && reserved.endsAt > slot.startAt));
     return { clinicTimeZone: clinic.timeZone, localDate: date, slots };
   }
 }

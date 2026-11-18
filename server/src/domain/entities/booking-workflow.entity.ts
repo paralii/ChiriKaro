@@ -10,6 +10,8 @@ export interface BookingSlot {
   timezone: string;
   startsAt: Date;
   endsAt: Date;
+  localStartTime: string;
+  localEndTime: string;
 }
 
 /** Appointment captures patient, clinic, doctor, and the quoted fee historically. */
@@ -18,10 +20,14 @@ export interface AppointmentRecord {
   patientUserId: string;
   clinicId: string;
   doctorUserId: string;
+  clinicNameSnapshot: string;
+  doctorNameSnapshot: string;
   slot: BookingSlot;
   feeSnapshot: { amountMinor: number; currency: string };
   status: AppointmentStatus;
   idempotencyKey: string;
+  requestFingerprint: string;
+  holdExpiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }

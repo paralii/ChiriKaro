@@ -9,6 +9,7 @@ import { doctorRouter } from "@container/doctor.container.ts";
 import { invitationRouter } from "@container/invitation.container.ts";
 import { roleDashboardRouter } from "@container/role-dashboard.container.ts";
 import { publicDirectoryRouter } from "@container/public-directory.container.ts";
+import { patientAppointmentsRouter } from "@container/patient-appointments.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
@@ -58,6 +59,7 @@ export class App {
   private initializeRoutes(): void {
     this.instance.use(API_ROUTES.AUTH.BASE, authRouter);
     this.instance.use(API_ROUTES.SEARCH.BASE, publicDirectoryRouter);
+    this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentsRouter);
     this.instance.use(API_ROUTES.SUPER_ADMIN.BASE, superAdminRouter);
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicRouter);
     this.instance.use(API_ROUTES.DOCTOR.BASE, doctorRouter);

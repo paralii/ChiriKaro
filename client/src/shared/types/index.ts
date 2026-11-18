@@ -33,6 +33,23 @@ export type PublicDirectoryListing = {
 };
 export type PublicDirectoryPage = { items: PublicDirectoryListing[]; page: number; limit: number; totalItems: number; totalPages: number };
 export type DatedAvailability = { clinicTimeZone: string; localDate: string; slots: Array<{ startAt: string; endAt: string; localStartTime: string; localEndTime: string }> };
+export type PatientAppointment = {
+  appointmentId: string;
+  clinicName: string;
+  doctorName: string;
+  localDate: string;
+  timeZone: string;
+  startsAt: string;
+  endsAt: string;
+  localStartTime: string;
+  localEndTime: string;
+  feeAmountMinor: number;
+  feeCurrency: string;
+  status: 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+  holdExpiresAt: string;
+  holdExpired: boolean;
+  createdAt: string;
+};
 export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; reviewHistory?: Array<{ decision: 'APPROVED' | 'REJECTED'; reason: string | null; reviewedAt: string }>; doctors?: Array<{ name: string; professionalTitle: string | null; verificationStatus: string; specializations: string[] }>; staff?: Array<{ name: string; role: 'CLINIC_ADMIN' | 'STAFF'; status: string }>; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
 export type SuperAdminPatient = { id: string; name: string; email: string; status: 'ACTIVE' | 'SUSPENDED'; createdAt: string; updatedAt?: string; avatar?: string | null };

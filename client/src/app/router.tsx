@@ -27,6 +27,7 @@ import PatientPortalLayout from '@/pages/portal/patient/PatientPortalLayout';
 import PatientDashboardPage from '@/pages/portal/patient/PatientDashboardPage';
 import PatientProfilePage from '@/pages/portal/patient/PatientProfilePage';
 import PatientClinicsPage from '@/pages/portal/patient/PatientClinicsPage';
+import PatientAppointmentsPage from '@/pages/portal/patient/PatientAppointmentsPage';
 
 export default function AppRouter() {
   return (
@@ -45,6 +46,7 @@ export default function AppRouter() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<PatientDashboardPage />} />
           <Route path="clinics" element={<PatientClinicsPage />} />
+          <Route path="appointments" element={<PatientAppointmentsPage />} />
           <Route path="profile" element={<PatientProfilePage />} />
         </Route>
       </Route>

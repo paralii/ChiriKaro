@@ -1,11 +1,13 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Input } from '@/components/atoms/Input';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { getErrorMessage } from '@/shared/lib/http';
 import { publicDirectoryService, type PublicDirectoryFilters } from '@/features/patient/services/publicDirectoryService';
-import type { PublicDirectoryPage } from '@/shared/types';
+import { appointmentService } from '@/features/patient/services/appointmentService';
+import type { PatientAppointment, PublicDirectoryPage } from '@/shared/types';
 import type { DatedAvailability } from '@/shared/types';
 
 const EMPTY_PAGE: PublicDirectoryPage = { items: [], page: 1, limit: 12, totalItems: 0, totalPages: 0 };
@@ -20,6 +22,14 @@ export default function PatientClinicsPage() {
   const [availability, setAvailability] = useState<Record<string, DatedAvailability>>({});
   const [availabilityError, setAvailabilityError] = useState('');
   const [loadingListingId, setLoadingListingId] = useState('');
+  const [selection, setSelection] = useState<{
+    listingId: string; date: string; startsAt: string; localStartTime: string; localEndTime: string;
+    timeZone: string; clinicName: string; doctorName: string; amountMinor: number; currency: string;
+  } | null>(null);
+  const [booking, setBooking] = useState(false);
+  const [bookingError, setBookingError] = useState('');
+  const [appointment, setAppointment] = useState<PatientAppointment | null>(null);
+  const idempotencyKeys = useRef<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
@@ -37,6 +47,8 @@ export default function PatientClinicsPage() {
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSelection(null);
+    setAvailability({});
     const next: PublicDirectoryFilters = { page: 1, limit: 12 };
     if (draft.q.trim()) next.q = draft.q.trim();
     if (draft.city.trim()) next.city = draft.city.trim();
@@ -57,9 +69,39 @@ export default function PatientClinicsPage() {
     }
   };
 
+  const createAppointment = async () => {
+    if (!selection) return;
+    const chosen = selection;
+    const key = `${chosen.listingId}:${chosen.date}:${chosen.startsAt}`;
+    const idempotencyKey = idempotencyKeys.current[key] ?? crypto.randomUUID();
+    idempotencyKeys.current[key] = idempotencyKey;
+    setBooking(true);
+    setBookingError('');
+    try {
+      const created = await appointmentService.create({ listingId: chosen.listingId, date: chosen.date, startsAt: chosen.startsAt }, idempotencyKey);
+      delete idempotencyKeys.current[key];
+      setAppointment(created);
+      setSelection(null);
+      setAvailability((current) => {
+        const listing = current[chosen.listingId];
+        if (!listing) return current;
+        return { ...current, [chosen.listingId]: { ...listing, slots: listing.slots.filter((slot) => slot.startAt !== created.startsAt) } };
+      });
+    } catch (reason) {
+      setBookingError(getErrorMessage(reason, 'Could not hold this appointment time. Refresh availability and try again.'));
+      setAvailability((current) => {
+        const updated = { ...current };
+        delete updated[selection.listingId];
+        return updated;
+      });
+    } finally {
+      setBooking(false);
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
-      <SectionHeading title="Find a clinic or doctor" description="Browse approved clinics and verified doctors. Live appointment availability will appear in a later booking step." />
+      <SectionHeading title="Find a clinic or doctor" description="Browse approved clinics and verified doctors, check a date, and request a payment hold." />
       <div className="p-[18px]">
         <form onSubmit={submit} className="grid gap-3 rounded-lg border border-[#e8e9ef] bg-[#fafbff] p-4 md:grid-cols-4">
           <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Clinic or doctor
@@ -80,10 +122,16 @@ export default function PatientClinicsPage() {
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Appointment date <span className="font-normal text-[#777d8a]">Selected in each clinic’s timezone</span>
-            <Input type="date" value={date} onChange={(event) => { setDate(event.target.value); setAvailability({}); setAvailabilityError(''); }} />
+            <Input type="date" value={date} onChange={(event) => { setDate(event.target.value); setAvailability({}); setAvailabilityError(''); setSelection(null); }} />
           </label>
         </div>
         {availabilityError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{availabilityError}</p> : null}
+        {bookingError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{bookingError}</p> : null}
+        {appointment ? <div role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+          <strong>Appointment held pending payment</strong>
+          <p className="mb-0 mt-1">Appointment {appointment.appointmentId} is not confirmed yet. Complete required payment within 10 minutes, by {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))} clinic time. Payment checkout will be available in the next phase.</p>
+          <Link className="mt-2 inline-block font-semibold underline" to="/patient/appointments">View appointments</Link>
+        </div> : null}
         {error ? <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
         {!error && !loading && result.items.length === 0 ? <p className="mt-4 rounded-md bg-[#f7f8fb] p-4 text-sm text-[#686e7b]">No verified listings matched those filters. Try a different name, city, or specialization.</p> : null}
         <div className="mt-3 grid gap-3 lg:grid-cols-2">
@@ -113,7 +161,7 @@ export default function PatientClinicsPage() {
                   {availability[listing.listingId]?.localDate === date ? <div className="mt-3">
                     <p className="m-0 text-xs text-[#686e7b]">Clinic local time ({availability[listing.listingId]?.clinicTimeZone})</p>
                     {availability[listing.listingId]?.slots.length ? <div className="mt-2 flex flex-wrap gap-2">
-                      {availability[listing.listingId]?.slots.map((slot) => <span key={slot.startAt} className="rounded-md border border-[#dce2f1] bg-white px-2.5 py-1.5 text-xs font-semibold text-brand-deep">{slot.localStartTime}–{slot.localEndTime}</span>)}
+                      {availability[listing.listingId]?.slots.map((slot) => <Button key={slot.startAt} type="button" size="sm" variant={selection?.listingId === listing.listingId && selection.startsAt === slot.startAt ? 'primary' : 'secondary'} onClick={() => { setBookingError(''); setSelection({ listingId: listing.listingId, date, startsAt: slot.startAt, localStartTime: slot.localStartTime, localEndTime: slot.localEndTime, timeZone: availability[listing.listingId]?.clinicTimeZone ?? '', clinicName: listing.clinicName, doctorName: listing.doctorName, amountMinor: Math.round(listing.consultationFee * 100), currency: listing.currency }); }}>{slot.localStartTime}–{slot.localEndTime}</Button>)}
                     </div> : <p className="mt-2 mb-0 text-xs text-[#777d8a]">No schedule slots are available on this date.</p>}
                     <p className="mt-2 mb-0 text-[10px] text-[#8a6870]">Times are generated from schedules; booking will recheck availability.</p>
                   </div> : null}
@@ -122,6 +170,13 @@ export default function PatientClinicsPage() {
             </article>
           ))}
         </div>
+        {selection ? <section className="mt-5 rounded-lg border border-[#dce2f1] bg-[#f8f9ff] p-4" aria-labelledby="booking-review-title">
+          <h2 id="booking-review-title" className="m-0 text-sm font-semibold">Review appointment request</h2>
+          <p className="mb-0 mt-2 text-sm">{selection.clinicName} · {selection.doctorName}</p>
+          <p className="mb-0 mt-1 text-xs text-[#686e7b]">{selection.date}, {selection.localStartTime}–{selection.localEndTime} ({selection.timeZone})</p>
+          <p className="mb-3 mt-1 text-xs text-[#686e7b]">Required payment: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: selection.currency }).format(selection.amountMinor / 100)}</p>
+          <Button type="button" disabled={booking} onClick={() => void createAppointment()}>{booking ? 'Holding appointment…' : 'Request appointment hold'}</Button>
+        </section> : null}
         {result.totalPages > 1 ? <nav aria-label="Search result pages" className="mt-5 flex items-center justify-center gap-3">
           <Button size="sm" variant="secondary" disabled={loading || result.page <= 1} onClick={() => setFilters({ ...filters, page: result.page - 1 })}>Previous</Button>
           <span className="text-xs text-[#686e7b]">Page {result.page} of {result.totalPages}</span>

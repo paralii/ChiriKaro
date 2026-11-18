@@ -32,4 +32,30 @@ export class PatientAppointmentsController {
       ApiResponse.success(res, "Patient appointment retrieved", await this._appointmentsUseCase.get(appointmentId, req.user!.sub));
     } catch (error) { next(error); }
   };
+
+  cancel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
+      const appointment = await this._appointmentsUseCase.cancel(appointmentId, req.user!.sub);
+      ApiResponse.success(res, appointment.cancellationRefundReviewStatus === "PENDING_REVIEW"
+        ? "Appointment cancelled. The paid cancellation is pending manual refund review."
+        : "Appointment cancelled", appointment);
+    } catch (error) { next(error); }
+  };
+
+  reschedule = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
+      const appointment = await this._appointmentsUseCase.reschedule({
+        appointmentId,
+        patientUserId: req.user!.sub,
+        listingId: req.body?.listingId,
+        date: req.body?.date,
+        startsAt: req.body?.startsAt,
+      });
+      ApiResponse.success(res, "Appointment rescheduled", appointment);
+    } catch (error) { next(error); }
+  };
 }

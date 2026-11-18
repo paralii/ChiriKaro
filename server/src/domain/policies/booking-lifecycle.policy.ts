@@ -14,6 +14,8 @@ const PAYMENT_TRANSITIONS: Record<PaymentStatus, readonly PaymentStatus[]> = {
   [PaymentStatus.SUCCEEDED]: [PaymentStatus.REFUNDED],
   [PaymentStatus.FAILED]: [PaymentStatus.PENDING],
   [PaymentStatus.REFUNDED]: [],
+  // A late provider capture can arrive after a local order was cancelled; it is recorded and flagged for manual review.
+  [PaymentStatus.CANCELLED]: [PaymentStatus.SUCCEEDED],
 };
 
 const QUEUE_TRANSITIONS: Record<QueueEntryStatus, readonly QueueEntryStatus[]> = {

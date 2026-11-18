@@ -129,7 +129,7 @@ export default function PatientClinicsPage() {
         {bookingError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{bookingError}</p> : null}
         {appointment ? <div role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <strong>Appointment held pending payment</strong>
-          <p className="mb-0 mt-1">Appointment {appointment.appointmentId} is not confirmed yet. Complete required payment within 10 minutes, by {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))} clinic time. Payment checkout will be available in the next phase.</p>
+          <p className="mb-0 mt-1">Appointment {appointment.appointmentId} is not confirmed yet. Complete required payment within 10 minutes, by {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))} clinic time. You can pay from My appointments.</p>
           <Link className="mt-2 inline-block font-semibold underline" to="/patient/appointments">View appointments</Link>
         </div> : null}
         {error ? <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}

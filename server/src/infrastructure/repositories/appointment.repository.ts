@@ -46,7 +46,7 @@ export class AppointmentRepository implements IAppointmentRepository {
             startsAt: reservation.startsAt,
             endsAt: reservation.endsAt,
             holdExpiresAt: reservation.holdExpiresAt,
-            status: "PENDING_PAYMENT",
+            status: reservation.status ?? "PENDING_PAYMENT",
           },
         },
       }, { returnDocument: "after" }).exec();
@@ -60,9 +60,54 @@ export class AppointmentRepository implements IAppointmentRepository {
   async releaseSlot(reservation: AppointmentSlotReservation): Promise<void> {
     const allocationId = this.allocationId(reservation.clinicId, reservation.doctorUserId, reservation.localDate);
     await AppointmentDayAllocationModel.updateOne(
-      { _id: allocationId, "reservations.appointmentId": new Types.ObjectId(reservation.appointmentId) },
+      { _id: allocationId, reservations: { $elemMatch: { appointmentId: new Types.ObjectId(reservation.appointmentId), startsAt: reservation.startsAt } } },
       { $set: { "reservations.$.status": "RELEASED" } },
     ).exec();
+  }
+
+  async cancelOwned(appointmentId: string, patientUserId: string, now: Date, cutoff: Date): Promise<AppointmentRecord | null> {
+    const ids = { _id: new Types.ObjectId(appointmentId), patientUserId: new Types.ObjectId(patientUserId) };
+    const current = await AppointmentModel.findOne(ids).exec();
+    if (!current) return null;
+    const doc = await AppointmentModel.findOneAndUpdate({
+      ...ids,
+      startsAt: { $eq: current.startsAt, $gt: cutoff },
+      $or: [
+        { status: AppointmentStatus.CONFIRMED },
+        { status: AppointmentStatus.PENDING_PAYMENT, holdExpiresAt: { $gt: now } },
+      ],
+    }, {
+      $set: { status: AppointmentStatus.CANCELLED },
+      $push: { changeHistory: { type: "CANCELLED", previousLocalDate: current.localDate, previousStartsAt: current.startsAt, previousEndsAt: current.endsAt, previousLocalStartTime: current.localStartTime, previousLocalEndTime: current.localEndTime, changedAt: now } },
+    }, { returnDocument: "after" }).exec();
+    return doc ? this.toDomain(doc) : null;
+  }
+
+  async rescheduleOwned(appointmentId: string, patientUserId: string, now: Date, cutoff: Date, slot: AppointmentRecord["slot"]): Promise<AppointmentRecord | null> {
+    const ids = { _id: new Types.ObjectId(appointmentId), patientUserId: new Types.ObjectId(patientUserId) };
+    const current = await AppointmentModel.findOne(ids).exec();
+    if (!current) return null;
+    const doc = await AppointmentModel.findOneAndUpdate({
+      ...ids,
+      startsAt: { $eq: current.startsAt, $gt: cutoff },
+      status: { $in: [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING_PAYMENT] },
+      $or: [
+        { status: AppointmentStatus.CONFIRMED, $or: [{ rescheduleCount: { $lt: 1 } }, { rescheduleCount: { $exists: false } }] },
+        { status: AppointmentStatus.PENDING_PAYMENT, holdExpiresAt: { $gt: now }, $or: [{ rescheduleCount: { $lt: 1 } }, { rescheduleCount: { $exists: false } }] },
+      ],
+    }, {
+      $set: {
+        localDate: slot.localDate,
+        timeZone: slot.timezone,
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        localStartTime: slot.localStartTime,
+        localEndTime: slot.localEndTime,
+        rescheduleCount: (current.rescheduleCount ?? 0) + 1,
+      },
+      $push: { changeHistory: { type: "RESCHEDULED", previousLocalDate: current.localDate, previousStartsAt: current.startsAt, previousEndsAt: current.endsAt, previousLocalStartTime: current.localStartTime, previousLocalEndTime: current.localEndTime, changedAt: now } },
+    }, { returnDocument: "after" }).exec();
+    return doc ? this.toDomain(doc) : null;
   }
 
   async create(appointment: AppointmentRecord): Promise<AppointmentRecord> {
@@ -154,6 +199,8 @@ export class AppointmentRepository implements IAppointmentRepository {
       idempotencyKey: doc.idempotencyKey,
       requestFingerprint: doc.requestFingerprint,
       holdExpiresAt: doc.holdExpiresAt,
+      rescheduleCount: doc.rescheduleCount ?? 0,
+      changeHistory: doc.changeHistory ?? [],
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     };

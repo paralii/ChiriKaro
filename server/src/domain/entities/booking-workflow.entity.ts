@@ -28,8 +28,20 @@ export interface AppointmentRecord {
   idempotencyKey: string;
   requestFingerprint: string;
   holdExpiresAt: Date;
+  rescheduleCount: number;
+  changeHistory: AppointmentChangeRecord[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface AppointmentChangeRecord {
+  type: "CANCELLED" | "RESCHEDULED";
+  previousLocalDate: string;
+  previousStartsAt: Date;
+  previousEndsAt: Date;
+  previousLocalStartTime: string;
+  previousLocalEndTime: string;
+  changedAt: Date;
 }
 
 /** Payment is attached to one appointment; provider references are reconciliation data. */

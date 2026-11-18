@@ -11,6 +11,7 @@ export interface IAppointmentPaymentDocument extends Document {
   providerOrderId: string | null;
   providerPaymentId: string | null;
   lastWebhookEventId: string | null;
+  refundReviewStatus: "NOT_REQUIRED" | "PENDING_REVIEW";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +25,7 @@ const schema = new Schema<IAppointmentPaymentDocument>({
   providerOrderId: { type: String, default: null },
   providerPaymentId: { type: String, default: null },
   lastWebhookEventId: { type: String, default: null },
+  refundReviewStatus: { type: String, required: true, enum: ["NOT_REQUIRED", "PENDING_REVIEW"], default: "NOT_REQUIRED" },
 }, { timestamps: true, versionKey: false });
 
 schema.index({ appointmentId:  1 }, { unique: true, name: "uniq_payment_per_appointment" });

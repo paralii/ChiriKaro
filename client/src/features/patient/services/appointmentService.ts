@@ -5,7 +5,7 @@ import type { PatientAppointment } from '@/shared/types';
 type ApiEnvelope<T> = { data?: T };
 
 export type PaymentOrder = { appointmentId: string; orderId: string; amountMinor: number; currency: string; keyId: string; status: string };
-export type AppointmentPaymentStatus = { appointmentId: string; paymentStatus: string; appointmentStatus: PatientAppointment['status'] };
+export type AppointmentPaymentStatus = { appointmentId: string; paymentStatus: string; appointmentStatus: PatientAppointment['status']; refundReviewStatus?: 'NOT_REQUIRED' | 'PENDING_REVIEW' };
 
 export const appointmentService = {
   create: async (input: { listingId: string; date: string; startsAt: string }, idempotencyKey: string) => {
@@ -38,6 +38,16 @@ export const appointmentService = {
   getPaymentStatus: async (appointmentId: string) => {
     const response = await http.get<ApiEnvelope<AppointmentPaymentStatus>>(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_STATUS(appointmentId));
     if (!response.data.data) throw new Error('Payment status was not returned.');
+    return response.data.data;
+  },
+  cancel: async (appointmentId: string) => {
+    const response = await http.post<ApiEnvelope<PatientAppointment>>(API_ROUTES.PATIENT.APPOINTMENT_CANCEL(appointmentId));
+    if (!response.data.data) throw new Error('Cancelled appointment was not returned.');
+    return response.data.data;
+  },
+  reschedule: async (appointmentId: string, input: { listingId: string; date: string; startsAt: string }) => {
+    const response = await http.post<ApiEnvelope<PatientAppointment>>(API_ROUTES.PATIENT.APPOINTMENT_RESCHEDULE(appointmentId), input);
+    if (!response.data.data) throw new Error('Rescheduled appointment was not returned.');
     return response.data.data;
   },
 };

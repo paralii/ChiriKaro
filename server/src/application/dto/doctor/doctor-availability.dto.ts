@@ -33,3 +33,14 @@ export interface DoctorAvailabilitySlotsDTO {
   doctorId: string;
   slots: DoctorAvailabilitySlot[];
 }
+
+export interface DatedDoctorAvailabilityDTO {
+  clinicTimeZone: string;
+  localDate: string;
+  slots: Array<{
+    startAt: Date;
+    endAt: Date;
+    localStartTime: string;
+    localEndTime: string;
+  }>;
+}

@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import type { ISearchPublicDirectoryUseCase } from "@application/interfaces/use-cases/search/ISearchPublicDirectoryUseCase.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { ValidationError } from "@shared/errors/index.ts";
+import type { IGetPublicListingAvailabilityUseCase } from "@application/interfaces/use-cases/search/IGetPublicListingAvailabilityUseCase.ts";
 
 function parseQueryString(value: unknown, field: string): string | undefined {
   if (value === undefined) return undefined;
@@ -18,7 +19,10 @@ function parseInteger(value: unknown, fallback: number, field: string): number {
 }
 
 export class PublicDirectoryController {
-  constructor(private readonly _searchUseCase: ISearchPublicDirectoryUseCase) {}
+  constructor(
+    private readonly _searchUseCase: ISearchPublicDirectoryUseCase,
+    private readonly _availabilityUseCase: IGetPublicListingAvailabilityUseCase,
+  ) {}
 
   search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -38,6 +42,17 @@ export class PublicDirectoryController {
         totalItems: result.totalItems,
         totalPages: result.totalPages,
       });
+    } catch (error) { next(error); }
+  };
+
+  availability = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const listingId = req.params.listingId;
+      if (typeof listingId !== "string") throw new ValidationError("Directory listing is required");
+      const date = parseQueryString(req.query.date, "date");
+      if (!date) throw new ValidationError("date is required");
+      const result = await this._availabilityUseCase.execute(listingId, date);
+      ApiResponse.success(res, "Date-specific availability retrieved", result);
     } catch (error) { next(error); }
   };
 }

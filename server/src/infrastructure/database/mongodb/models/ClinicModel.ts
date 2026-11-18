@@ -35,6 +35,7 @@ export interface IClinicDocument extends Document {
   ownerAdminId?: Types.ObjectId | null;
   services: string[];
   workingHours: IClinicWorkingHour[];
+  timeZone: string;
   documents: IClinicDocumentData[];
   status: ClinicStatus;
   setupStatus: ClinicSetupStatus;
@@ -121,6 +122,7 @@ const clinicSchema = new Schema<IClinicDocument>(
     },
     services: { type: [String], default: [] },
     workingHours: { type: [clinicWorkingHourSchema], default: [] },
+    timeZone: { type: String, trim: true, default: "Asia/Kolkata" },
     documents: { type: [clinicDocumentSchema], default: [] },
     status: {
       type: String,

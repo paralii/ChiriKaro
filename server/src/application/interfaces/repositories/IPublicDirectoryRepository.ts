@@ -1,4 +1,7 @@
 import type { PublicDirectoryListingDTO } from "@application/dto/search/public-directory.dto.ts";
+import type { PublicListingClaims } from "@application/interfaces/services/IPublicListingIdService.ts";
+
+export interface PublicDirectoryCandidateDTO extends Omit<PublicDirectoryListingDTO, "listingId">, PublicListingClaims {}
 
 export interface PublicDirectoryRepositoryQuery {
   query?: string;
@@ -9,7 +12,7 @@ export interface PublicDirectoryRepositoryQuery {
 }
 
 export interface PublicDirectoryRepositoryPage {
-  items: PublicDirectoryListingDTO[];
+  items: PublicDirectoryCandidateDTO[];
   totalItems: number;
 }
 

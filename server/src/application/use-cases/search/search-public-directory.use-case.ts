@@ -1,12 +1,16 @@
 import type { PublicDirectorySearchInput, PublicDirectorySearchResultDTO } from "@application/dto/search/public-directory.dto.ts";
 import type { IPublicDirectoryRepository } from "@application/interfaces/repositories/IPublicDirectoryRepository.ts";
 import type { ISearchPublicDirectoryUseCase } from "@application/interfaces/use-cases/search/ISearchPublicDirectoryUseCase.ts";
+import type { IPublicListingIdService } from "@application/interfaces/services/IPublicListingIdService.ts";
 import { ValidationError } from "@shared/errors/index.ts";
 
 const MAX_QUERY_LENGTH = 100;
 
 export class SearchPublicDirectoryUseCase implements ISearchPublicDirectoryUseCase {
-  constructor(private readonly _repository: IPublicDirectoryRepository) {}
+  constructor(
+    private readonly _repository: IPublicDirectoryRepository,
+    private readonly _listingIdService: IPublicListingIdService,
+  ) {}
 
   async execute(input: PublicDirectorySearchInput): Promise<PublicDirectorySearchResultDTO> {
     for (const [field, value] of Object.entries({ query: input.query, city: input.city, specialization: input.specialization })) {
@@ -26,7 +30,10 @@ export class SearchPublicDirectoryUseCase implements ISearchPublicDirectoryUseCa
     });
 
     return {
-      items: page.items,
+      items: page.items.map(({ clinicId, doctorUserId, ...listing }) => ({
+        ...listing,
+        listingId: this._listingIdService.create({ clinicId, doctorUserId }),
+      })),
       page: input.page,
       limit: input.limit,
       totalItems: page.totalItems,

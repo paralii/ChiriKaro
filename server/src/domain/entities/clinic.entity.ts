@@ -36,6 +36,7 @@ export interface ClinicProps {
   status: ClinicStatus;
   specializations: string[];
   workingHours: ClinicWorkingHour[];
+  timeZone: string;
   documents: ClinicDocumentData[];
   setupStatus: ClinicSetupStatus;
   reviewHistory: ClinicReviewDecision[];
@@ -59,6 +60,7 @@ type NewClinicProps = Pick<ClinicProps, "name"> &
       | "status"
       | "specializations"
       | "workingHours"
+      | "timeZone"
       | "documents"
       | "setupStatus"
       | "reviewHistory"
@@ -147,6 +149,7 @@ export class Clinic {
       status,
       specializations: props.specializations ?? [],
       workingHours: props.workingHours ?? [],
+      timeZone: props.timeZone ?? "Asia/Kolkata",
       documents: props.documents ?? [],
       setupStatus: props.setupStatus ?? ClinicSetupStatus.IN_PROGRESS,
       reviewHistory: (props.reviewHistory ?? []).map((entry) => ({ ...entry, reviewedAt: new Date(entry.reviewedAt) })),
@@ -280,6 +283,17 @@ export class Clinic {
     this.touch();
   }
 
+  updateTimeZone(value: string): void {
+    const timeZone = value.trim();
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone }).format(new Date());
+    } catch {
+      throw new InvalidClinicDataError("Clinic timezone must be a valid IANA timezone");
+    }
+    this.props.timeZone = timeZone;
+    this.touch();
+  }
+
   addDocument(document: ClinicDocumentData): void {
     const documentType = requireNonBlank(document.documentType, "documentType");
     const documentKey = requireNonBlank(document.documentKey, "documentKey");
@@ -356,6 +370,7 @@ export class Clinic {
   }
   get specializations() { return [...this.props.specializations]; }
   get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
+  get timeZone() { return this.props.timeZone; }
   get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
   get setupStatus() { return this.props.setupStatus; }
   get reviewHistory() { return this.props.reviewHistory.map((entry) => ({ ...entry, reviewedAt: new Date(entry.reviewedAt) })); }

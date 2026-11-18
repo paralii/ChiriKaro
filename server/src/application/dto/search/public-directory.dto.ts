@@ -7,6 +7,7 @@ export interface PublicDirectorySearchInput {
 }
 
 export interface PublicDirectoryListingDTO {
+  listingId: string;
   clinicName: string;
   address: string | null;
   city: string | null;

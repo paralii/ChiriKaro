@@ -24,7 +24,7 @@ export class UpdateClinicSetupUseCase implements IUpdateClinicSetupUseCase {
       throw new ConflictError("Clinic application details cannot be edited while review is pending");
     }
     const data = updates as Record<string, unknown>;
-    const allowed = ["location", "specializations", "workingHours"];
+    const allowed = ["location", "specializations", "workingHours", "timeZone"];
     if (!Object.keys(data).length || Object.keys(data).some((key) => !allowed.includes(key))) {
       throw new ValidationError("Provide only location, specializations, or workingHours");
     }
@@ -61,6 +61,10 @@ export class UpdateClinicSetupUseCase implements IUpdateClinicSetupUseCase {
           .filter((doctor) => doctor.clinicId === clinicId)
           .find((doctor) => findWorkingHoursOutsideClinic(doctor.workingHours, clinic.workingHours));
         if (conflict) throw new ConflictError("Clinic hours conflict with a doctor schedule. Update doctor hours before changing clinic hours.");
+      }
+      if (data.timeZone !== undefined) {
+        if (typeof data.timeZone !== "string") throw new ValidationError("timeZone must be an IANA timezone string");
+        clinic.updateTimeZone(data.timeZone);
       }
     } catch (error) {
       if (error instanceof DomainError) throw new ValidationError(error.message);

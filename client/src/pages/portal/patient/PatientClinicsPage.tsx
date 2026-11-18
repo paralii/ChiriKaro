@@ -6,6 +6,7 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { getErrorMessage } from '@/shared/lib/http';
 import { publicDirectoryService, type PublicDirectoryFilters } from '@/features/patient/services/publicDirectoryService';
 import type { PublicDirectoryPage } from '@/shared/types';
+import type { DatedAvailability } from '@/shared/types';
 
 const EMPTY_PAGE: PublicDirectoryPage = { items: [], page: 1, limit: 12, totalItems: 0, totalPages: 0 };
 
@@ -15,6 +16,10 @@ export default function PatientClinicsPage() {
   const [result, setResult] = useState(EMPTY_PAGE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [date, setDate] = useState(() => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
+  const [availability, setAvailability] = useState<Record<string, DatedAvailability>>({});
+  const [availabilityError, setAvailabilityError] = useState('');
+  const [loadingListingId, setLoadingListingId] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -39,6 +44,19 @@ export default function PatientClinicsPage() {
     setFilters(next);
   };
 
+  const loadAvailability = async (listingId: string) => {
+    setLoadingListingId(listingId);
+    setAvailabilityError('');
+    try {
+      const response = await publicDirectoryService.availability(listingId, date);
+      setAvailability((current) => ({ ...current, [listingId]: response }));
+    } catch (reason) {
+      setAvailabilityError(getErrorMessage(reason, 'Could not load availability for this date.'));
+    } finally {
+      setLoadingListingId('');
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <SectionHeading title="Find a clinic or doctor" description="Browse approved clinics and verified doctors. Live appointment availability will appear in a later booking step." />
@@ -60,6 +78,12 @@ export default function PatientClinicsPage() {
           <h2 className="m-0 text-sm font-semibold">Clinic and doctor listings</h2>
           <span className="text-xs text-[#777d8a]">{loading ? 'Searching…' : `${result.totalItems} results`}</span>
         </div>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Appointment date <span className="font-normal text-[#777d8a]">Selected in each clinic’s timezone</span>
+            <Input type="date" value={date} onChange={(event) => { setDate(event.target.value); setAvailability({}); setAvailabilityError(''); }} />
+          </label>
+        </div>
+        {availabilityError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{availabilityError}</p> : null}
         {error ? <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
         {!error && !loading && result.items.length === 0 ? <p className="mt-4 rounded-md bg-[#f7f8fb] p-4 text-sm text-[#686e7b]">No verified listings matched those filters. Try a different name, city, or specialization.</p> : null}
         <div className="mt-3 grid gap-3 lg:grid-cols-2">
@@ -82,6 +106,18 @@ export default function PatientClinicsPage() {
                   {listing.specializations.map((specialization) => <span key={specialization} className="rounded-full bg-[#eef5f2] px-2.5 py-1 text-[10px] text-[#376b59]">{specialization}</span>)}
                 </div>
                 {listing.phone ? <a className="mt-3 inline-block text-xs font-semibold text-brand-deep" href={`tel:${listing.phone}`}>Contact clinic: {listing.phone}</a> : null}
+                <div className="mt-3 border-t border-[#eff0f4] pt-3">
+                  <Button size="sm" variant="secondary" disabled={!date || loadingListingId === listing.listingId} onClick={() => void loadAvailability(listing.listingId)}>
+                    {loadingListingId === listing.listingId ? 'Loading times…' : `Show times for ${date || 'selected date'}`}
+                  </Button>
+                  {availability[listing.listingId]?.localDate === date ? <div className="mt-3">
+                    <p className="m-0 text-xs text-[#686e7b]">Clinic local time ({availability[listing.listingId]?.clinicTimeZone})</p>
+                    {availability[listing.listingId]?.slots.length ? <div className="mt-2 flex flex-wrap gap-2">
+                      {availability[listing.listingId]?.slots.map((slot) => <span key={slot.startAt} className="rounded-md border border-[#dce2f1] bg-white px-2.5 py-1.5 text-xs font-semibold text-brand-deep">{slot.localStartTime}–{slot.localEndTime}</span>)}
+                    </div> : <p className="mt-2 mb-0 text-xs text-[#777d8a]">No schedule slots are available on this date.</p>}
+                    <p className="mt-2 mb-0 text-[10px] text-[#8a6870]">Times are generated from schedules; booking will recheck availability.</p>
+                  </div> : null}
+                </div>
               </div>
             </article>
           ))}

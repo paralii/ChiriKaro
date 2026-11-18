@@ -1,6 +1,7 @@
 export const API_ROUTES = {
   SEARCH: {
     DIRECTORY: "/search/directory",
+    DIRECTORY_AVAILABILITY: (listingId: string) => `/search/directory/${encodeURIComponent(listingId)}/availability`,
   },
 
   AUTH: {

@@ -1,0 +1,43 @@
+import type { Request, Response, NextFunction } from "express";
+import type { ISearchPublicDirectoryUseCase } from "@application/interfaces/use-cases/search/ISearchPublicDirectoryUseCase.ts";
+import { ApiResponse } from "@shared/utils/ApiResponse.ts";
+import { ValidationError } from "@shared/errors/index.ts";
+
+function parseQueryString(value: unknown, field: string): string | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") throw new ValidationError(`${field} must be a single string`);
+  return value;
+}
+
+function parseInteger(value: unknown, fallback: number, field: string): number {
+  if (value === undefined) return fallback;
+  if (typeof value !== "string" || !/^\d+$/.test(value)) throw new ValidationError(`${field} must be a positive integer`);
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed)) throw new ValidationError(`${field} must be a positive integer`);
+  return parsed;
+}
+
+export class PublicDirectoryController {
+  constructor(private readonly _searchUseCase: ISearchPublicDirectoryUseCase) {}
+
+  search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const query = parseQueryString(req.query.q, "q");
+      const city = parseQueryString(req.query.city, "city");
+      const specialization = parseQueryString(req.query.specialization, "specialization");
+      const result = await this._searchUseCase.execute({
+        ...(query !== undefined ? { query } : {}),
+        ...(city !== undefined ? { city } : {}),
+        ...(specialization !== undefined ? { specialization } : {}),
+        page: parseInteger(req.query.page, 1, "page"),
+        limit: parseInteger(req.query.limit, 12, "limit"),
+      });
+      ApiResponse.paginated(res, "Directory results retrieved", result.items, {
+        page: result.page,
+        limit: result.limit,
+        totalItems: result.totalItems,
+        totalPages: result.totalPages,
+      });
+    } catch (error) { next(error); }
+  };
+}

@@ -9,13 +9,15 @@ import { useAppSelector } from '@/store/hooks';
 
 const items = [
   { path: '/patient/dashboard', label: 'Overview' },
+  { path: '/patient/clinics', label: 'Find care' },
   { path: '/patient/profile', label: 'My profile' },
 ];
 
 export default function PatientPortalLayout() {
   const user = useAppSelector((state) => state.auth.user)!;
   const { pathname } = useLocation();
-  const title = pathname.split('/')[2] === 'profile' ? 'My profile' : 'Overview';
+  const page = pathname.split('/')[2];
+  const title = page === 'profile' ? 'My profile' : page === 'clinics' ? 'Find care' : 'Overview';
   const logout = useLogout();
 
   return (

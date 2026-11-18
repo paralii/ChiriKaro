@@ -7,6 +7,7 @@ export const BOOKING_CONCURRENCY_POLICY = {
   idempotency: "unique-client-key-per-patient-operation",
   paymentProcessing: "unique-provider-event-and-order-reference",
   queueToken: "unique-clinic-local-date-and-sequence",
+  queueRegistrationIdempotency: "unique-clinic-key-with-request-fingerprint",
   redisIsAuthoritative: false,
 } as const;
 

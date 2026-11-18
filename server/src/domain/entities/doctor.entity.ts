@@ -44,6 +44,19 @@ export interface DoctorDocumentData {
   rejectionReason: string | null;
 }
 
+export type FeeChangeRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
+export interface DoctorFeeChangeRequest {
+  id: string;
+  currentFeeAtRequest: number | null;
+  requestedFee: number;
+  reason: string | null;
+  status: FeeChangeRequestStatus;
+  reviewerId: string | null;
+  reviewReason: string | null;
+  requestedAt: Date;
+  reviewedAt: Date | null;
+}
+
 export interface DoctorProps {
   id: string | null;
   userId: string;
@@ -66,6 +79,7 @@ export interface DoctorProps {
   verificationStatus: DoctorVerificationStatus;
   rejectionReason: string | null;
   consultationFee: number | null;
+  feeChangeRequests: DoctorFeeChangeRequest[];
   documents: DoctorDocumentData[];
   createdAt: Date;
   updatedAt: Date;
@@ -133,6 +147,7 @@ export class Doctor {
       verificationStatus: props.verificationStatus ?? "NOT_STARTED",
       rejectionReason: props.rejectionReason ?? null,
       consultationFee: props.consultationFee ?? null,
+      feeChangeRequests: (props.feeChangeRequests ?? []).map((request) => ({ ...request, requestedAt: new Date(request.requestedAt), reviewedAt: request.reviewedAt ? new Date(request.reviewedAt) : null })),
       documents: (props.documents ?? []).map((document) => ({ ...document })),
       createdAt: props.createdAt ? new Date(props.createdAt) : now,
       updatedAt: props.updatedAt ? new Date(props.updatedAt) : new Date(now),
@@ -345,6 +360,49 @@ export class Doctor {
     this.props.updatedAt = new Date();
   }
 
+  requestConsultationFeeChange(id: string, requestedFee: number, reason: string | null): DoctorFeeChangeRequest {
+    if (!id.trim()) throw new InvalidDoctorDataError("Fee change request id is required");
+    if (!Number.isFinite(requestedFee) || requestedFee < 0 || Math.abs(requestedFee * 100 - Math.round(requestedFee * 100)) > 1e-8) {
+      throw new InvalidDoctorDataError("Requested consultation fee must be a non-negative amount with at most two decimal places");
+    }
+    if (this.props.feeChangeRequests.some((request) => request.status === "PENDING")) {
+      throw new InvalidDoctorDataError("A fee change request is already pending review");
+    }
+    const normalizedFee = Number(requestedFee.toFixed(2));
+    if (this.props.consultationFee === normalizedFee) throw new InvalidDoctorDataError("Requested fee matches the current consultation fee");
+    const normalizedReason = reason?.trim() || null;
+    if (normalizedReason && normalizedReason.length > 1000) throw new InvalidDoctorDataError("Fee change reason cannot exceed 1000 characters");
+    const request: DoctorFeeChangeRequest = {
+      id,
+      currentFeeAtRequest: this.props.consultationFee,
+      requestedFee: normalizedFee,
+      reason: normalizedReason,
+      status: "PENDING",
+      reviewerId: null,
+      reviewReason: null,
+      requestedAt: new Date(),
+      reviewedAt: null,
+    };
+    this.props.feeChangeRequests.push(request);
+    this.props.updatedAt = new Date();
+    return { ...request };
+  }
+
+  reviewConsultationFeeChange(id: string, decision: "APPROVED" | "REJECTED", reviewerId: string, reason: string | null = null): DoctorFeeChangeRequest {
+    const request = this.props.feeChangeRequests.find((item) => item.id === id);
+    if (!request) throw new InvalidDoctorDataError("Fee change request was not found");
+    if (request.status !== "PENDING") throw new InvalidDoctorDataError("Fee change request has already been reviewed");
+    const normalizedReason = reason?.trim() || null;
+    if (normalizedReason && normalizedReason.length > 1000) throw new InvalidDoctorDataError("Review reason cannot exceed 1000 characters");
+    if (decision === "APPROVED") this.updateConsultationFee(request.requestedFee);
+    request.status = decision;
+    request.reviewerId = reviewerId;
+    request.reviewReason = normalizedReason;
+    request.reviewedAt = new Date();
+    this.props.updatedAt = new Date();
+    return { ...request };
+  }
+
   private normalizeWorkingHours(values: DoctorWorkingHour[]): DoctorWorkingHour[] {
     if (!Array.isArray(values) || values.length !== DAYS.length) throw new InvalidDoctorDataError("workingHours must include all seven days");
     const seen = new Set<string>();
@@ -402,6 +460,7 @@ export class Doctor {
   get verificationStatus() { return this.props.verificationStatus; }
   get rejectionReason() { return this.props.rejectionReason; }
   get consultationFee() { return this.props.consultationFee; }
+  get feeChangeRequests() { return this.props.feeChangeRequests.map((request) => ({ ...request, requestedAt: new Date(request.requestedAt), reviewedAt: request.reviewedAt ? new Date(request.reviewedAt) : null })); }
   get documents() { return this.props.documents.map((document) => ({ ...document, uploadedAt: new Date(document.uploadedAt) })); }
   get createdAt() { return new Date(this.props.createdAt); }
   get updatedAt() { return new Date(this.props.updatedAt); }

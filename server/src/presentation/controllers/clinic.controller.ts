@@ -21,6 +21,7 @@ import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfac
 import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
 import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
 import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
+import type { IManageDoctorFeeChangeRequestsUseCase } from "@application/interfaces/use-cases/doctor/IManageDoctorFeeChangeRequestsUseCase.ts";
 
 export class ClinicController {
   constructor(
@@ -42,6 +43,7 @@ export class ClinicController {
     private readonly _updateDoctorSpecializationsUseCase: IUpdateClinicDoctorSpecializationsUseCase,
     private readonly _listDoctorSchedulesUseCase: IListClinicDoctorSchedulesUseCase,
     private readonly _updateDoctorWorkingHoursUseCase: IConfigureClinicDoctorWorkingHoursUseCase,
+    private readonly _feeChangeRequestsUseCase: IManageDoctorFeeChangeRequestsUseCase,
   ) {}
 
   public register = async (
@@ -203,6 +205,30 @@ export class ClinicController {
     } catch (error) {
       next(error);
     }
+  };
+
+  listDoctorFeeChangeRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this._feeChangeRequestsUseCase.listPendingForClinic(req.user!.clinicId!);
+      ApiResponse.success(res, "Pending consultation fee change requests retrieved", result);
+    } catch (error) { next(error); }
+  };
+
+  reviewDoctorFeeChangeRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      const requestId = req.params.requestId;
+      if (typeof doctorId !== "string" || typeof requestId !== "string") throw new ValidationError("Doctor and request are required");
+      const result = await this._feeChangeRequestsUseCase.review({
+        doctorId,
+        requestId,
+        clinicId: req.user!.clinicId!,
+        reviewerId: req.user!.sub,
+        decision: req.body?.decision,
+        reason: req.body?.reason,
+      });
+      ApiResponse.success(res, "Consultation fee change request reviewed", result);
+    } catch (error) { next(error); }
   };
 
   listDoctorSpecializations = async (

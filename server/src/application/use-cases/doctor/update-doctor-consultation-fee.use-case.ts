@@ -2,7 +2,7 @@ import { DomainError } from "@domain/error/DomainError.ts";
 import type { IDoctorRepository } from "@application/interfaces/repositories/IDoctorRepository.ts";
 import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
 import type { DoctorConsultationFeeDTO, UpdateDoctorConsultationFeeDTO } from "@application/dto/doctor/doctor-consultation-fee.dto.ts";
-import { BadRequestError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
+import { BadRequestError, ConflictError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
 import { toDoctorConsultationFeeDTO } from "@application/mappers/doctor-consultation-fee.mapper.ts";
 
 export class UpdateDoctorConsultationFeeUseCase implements IUpdateDoctorConsultationFeeUseCase {
@@ -17,6 +17,12 @@ export class UpdateDoctorConsultationFeeUseCase implements IUpdateDoctorConsulta
     }
     const doctor = await this.doctorRepository.findByIdAndClinic(dto.doctorId, dto.clinicId);
     if (!doctor) throw new NotFoundError("Doctor profile");
+    if (doctor.consultationFee !== null) {
+      throw new ConflictError("An active consultation fee can only be changed by approving a doctor fee request");
+    }
+    if (doctor.feeChangeRequests.some((request) => request.status === "PENDING")) {
+      throw new ConflictError("The initial consultation fee cannot be set while a fee request is pending");
+    }
     try {
       doctor.updateConsultationFee(dto.consultationFee);
     } catch (error) {

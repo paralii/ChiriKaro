@@ -29,6 +29,8 @@ import { ConfigureDoctorAvailabilityUseCase } from "@application/use-cases/docto
 import type { IConfigureDoctorAvailabilityUseCase } from "@application/interfaces/use-cases/doctor/IConfigureDoctorAvailabilityUseCase.ts";
 import { GenerateDoctorAvailabilitySlotsUseCase } from "@application/use-cases/doctor/generate-doctor-availability-slots.use-case.ts";
 import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
+import { ManageDoctorFeeChangeRequestsUseCase } from "@application/use-cases/doctor/manage-doctor-fee-change-requests.use-case.ts";
+import { IdGenerator } from "@infrastructure/services/UuidGenerator.ts";
 
 const doctorRepository = new DoctorRepository();
 const clinicRepository = new ClinicRepository();
@@ -56,6 +58,7 @@ const configureDoctorAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase =
   new ConfigureDoctorAvailabilityUseCase(doctorRepository, clinicRepository);
 const generateDoctorAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase =
   new GenerateDoctorAvailabilitySlotsUseCase(doctorRepository);
+const feeChangeRequestsUseCase = new ManageDoctorFeeChangeRequestsUseCase(doctorRepository, new IdGenerator());
 
 const controller = new DoctorController(
   getDoctorOnboardingUseCase,
@@ -68,6 +71,7 @@ const controller = new DoctorController(
   getDoctorAvailabilityUseCase,
   configureDoctorAvailabilityUseCase,
   generateDoctorAvailabilitySlotsUseCase,
+  feeChangeRequestsUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({

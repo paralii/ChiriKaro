@@ -77,6 +77,9 @@ export const API_ROUTES = {
 
     DOCTOR_CONSULTATION_FEE: (id: string) =>
       `/clinic/doctors/${encodeURIComponent(id)}/consultation-fee`,
+    DOCTOR_FEE_CHANGE_REQUESTS: "/clinic/doctor-fee-requests",
+    DOCTOR_FEE_CHANGE_REQUEST: (doctorId: string, requestId: string) =>
+      `/clinic/doctor-fee-requests/${encodeURIComponent(doctorId)}/${encodeURIComponent(requestId)}`,
 
     DOCTOR_APPROVE: (id: string) =>
       `/clinic/doctors/${encodeURIComponent(id)}/approve`,
@@ -98,6 +101,7 @@ export const API_ROUTES = {
       `/doctor/onboarding/documents/${encodeURIComponent(documentType)}`,
 
     CONSULTATION_FEE: "/doctor/consultation-fee",
+    CONSULTATION_FEE_REQUESTS: "/doctor/consultation-fee/requests",
 
     AVAILABILITY: "/doctor/availability",
     AVAILABILITY_SLOTS: "/doctor/availability/slots",

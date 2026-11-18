@@ -121,6 +121,7 @@ export type ClinicDoctorSpecialization = {
   specializations: string[];
 };
 export type DoctorConsultationFee = { doctorId: string; consultationFee: number | null; updatedAt: string };
+export type DoctorFeeChangeRequest = { requestId: string; doctorId: string; doctorName?: string; currentFeeAtRequest: number | null; requestedFee: number; reason: string | null; status: 'PENDING' | 'APPROVED' | 'REJECTED'; reviewReason: string | null; requestedAt: string; reviewedAt: string | null };
 export type SlotConfig = { slotDuration: number; bufferMinutes: number; consultationFee: number | null };
 export type Slot = { day: string; startTime: string; endTime: string };
 export type DoctorSummary = {

@@ -6,6 +6,7 @@ import type {
   ClinicDoctorSchedule,
   DoctorAvailability,
   DoctorConsultationFee,
+  DoctorFeeChangeRequest,
   DoctorDetail,
   DoctorOnboardingDTO,
   DoctorSummary,
@@ -177,6 +178,10 @@ export const clinicService = {
       ),
       "Updated consultation fee was not returned.",
     ),
+  listDoctorFeeChangeRequests: () =>
+    responseData(api.get<ApiEnvelope<DoctorFeeChangeRequest[]>>(API_ROUTES.CLINIC.DOCTOR_FEE_CHANGE_REQUESTS), "Fee change requests were not returned."),
+  reviewDoctorFeeChangeRequest: (doctorId: string, requestId: string, decision: 'APPROVED' | 'REJECTED', reason?: string) =>
+    responseData(api.patch<ApiEnvelope<DoctorFeeChangeRequest>>(API_ROUTES.CLINIC.DOCTOR_FEE_CHANGE_REQUEST(doctorId, requestId), { decision, ...(reason ? { reason } : {}) }), "Fee change review was not returned."),
   listDoctors: () => api.get<DoctorSummary[]>(API_ROUTES.CLINIC.DOCTORS),
   getDoctor: (id: string) =>
     api.get<DoctorDetail>(API_ROUTES.CLINIC.DOCTOR_DETAILS(id)),

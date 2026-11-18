@@ -42,6 +42,18 @@ export interface IDentistDocumentMeta {
   rejectionReason?: string | null;
 }
 
+export interface IDoctorFeeChangeRequest {
+  requestId: string;
+  currentFeeAtRequest: number | null;
+  requestedFee: number;
+  reason: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  reviewerId: Types.ObjectId | null;
+  reviewReason: string | null;
+  requestedAt: Date;
+  reviewedAt: Date | null;
+}
+
 export interface IDentistProfile extends Document {
   _id: Types.ObjectId;
 
@@ -71,6 +83,7 @@ export interface IDentistProfile extends Document {
   verificationStatus: DentistVerificationStatus;
   rejectionReason?: string | null;
   consultationFee?: number | null;
+  feeChangeRequests: IDoctorFeeChangeRequest[];
   documents: IDentistDocumentMeta[];
 
   createdAt: Date;
@@ -152,6 +165,18 @@ const dentistBreakSchema = new Schema<IDentistBreak>(
   },
   { _id: false },
 );
+
+const doctorFeeChangeRequestSchema = new Schema<IDoctorFeeChangeRequest>({
+  requestId: { type: String, required: true, trim: true },
+  currentFeeAtRequest: { type: Number, default: null, min: 0 },
+  requestedFee: { type: Number, required: true, min: 0 },
+  reason: { type: String, default: null, trim: true, maxlength: 1000 },
+  status: { type: String, enum: ["PENDING", "APPROVED", "REJECTED"], default: "PENDING", required: true },
+  reviewerId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+  reviewReason: { type: String, default: null, trim: true, maxlength: 1000 },
+  requestedAt: { type: Date, default: Date.now, required: true },
+  reviewedAt: { type: Date, default: null },
+}, { _id: false });
 
 const dentistProfileSchema = new Schema<IDentistProfile>(
   {
@@ -278,6 +303,7 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
         message: "Consultation fee must have at most two decimal places",
       },
     },
+    feeChangeRequests: { type: [doctorFeeChangeRequestSchema], default: [] },
 
     documents: {
       type: [dentistDocumentSchema],

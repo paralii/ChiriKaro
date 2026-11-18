@@ -51,6 +51,8 @@ import { ListClinicDoctorSchedulesUseCase } from "@application/use-cases/clinic/
 import type { IListClinicDoctorSchedulesUseCase } from "@application/interfaces/use-cases/clinic/IListClinicDoctorSchedulesUseCase.ts";
 import { ConfigureDoctorAvailabilityUseCase } from "@application/use-cases/doctor/configure-doctor-availability.use-case.ts";
 import type { IConfigureClinicDoctorWorkingHoursUseCase } from "@application/interfaces/use-cases/doctor/IConfigureClinicDoctorWorkingHoursUseCase.ts";
+import { ManageDoctorFeeChangeRequestsUseCase } from "@application/use-cases/doctor/manage-doctor-fee-change-requests.use-case.ts";
+import { IdGenerator } from "@infrastructure/services/UuidGenerator.ts";
 
 const clinicRepository = new ClinicRepository();
 const userRepository = new MongoUserRepository();
@@ -106,6 +108,7 @@ const listDoctorSchedulesUseCase: IListClinicDoctorSchedulesUseCase =
   new ListClinicDoctorSchedulesUseCase(doctorRepository);
 const updateDoctorWorkingHoursUseCase: IConfigureClinicDoctorWorkingHoursUseCase =
   new ConfigureDoctorAvailabilityUseCase(doctorRepository, clinicRepository);
+const feeChangeRequestsUseCase = new ManageDoctorFeeChangeRequestsUseCase(doctorRepository, new IdGenerator());
 
 export const clinicController = new ClinicController(
   registerClinicUseCase,
@@ -126,6 +129,7 @@ export const clinicController = new ClinicController(
   updateDoctorSpecializationsUseCase,
   listDoctorSchedulesUseCase,
   updateDoctorWorkingHoursUseCase,
+  feeChangeRequestsUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({

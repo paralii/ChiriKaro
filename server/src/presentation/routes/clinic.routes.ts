@@ -111,6 +111,8 @@ export function ClinicRouter(
     authorizeClinicAdmin,
     clinicController.updateConsultationFee,
   );
+  router.get(API_ROUTES.CLINIC.DOCTOR_FEE_CHANGE_REQUESTS, authenticate, authorizeClinicAdmin, clinicController.listDoctorFeeChangeRequests);
+  router.patch(API_ROUTES.CLINIC.DOCTOR_FEE_CHANGE_REQUEST, authenticate, authorizeClinicAdmin, clinicController.reviewDoctorFeeChangeRequest);
   router.get(
     API_ROUTES.CLINIC.DOCTOR_VERIFICATION_DOCUMENT,
     authenticate,

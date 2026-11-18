@@ -44,6 +44,7 @@ export const API_ROUTES = {
     VERIFICATION_SUBMIT: "/verification/submit",
 
     CONSULTATION_FEE: "/consultation-fee",
+    CONSULTATION_FEE_REQUESTS: "/consultation-fee/requests",
 
     AVAILABILITY: "/availability",
     AVAILABILITY_SLOTS: "/availability/slots",
@@ -75,6 +76,8 @@ export const API_ROUTES = {
     PENDING_VERIFICATIONS: "/doctors/pending-verification",
     DOCTOR_VERIFICATION: "/doctors/:doctorId/verification",
     DOCTOR_CONSULTATION_FEE: "/doctors/:doctorId/consultation-fee",
+    DOCTOR_FEE_CHANGE_REQUESTS: "/doctor-fee-requests",
+    DOCTOR_FEE_CHANGE_REQUEST: "/doctor-fee-requests/:doctorId/:requestId",
     DOCTOR_VERIFICATION_DOCUMENT:
       "/doctors/:doctorId/verification/documents/:documentType",
     DOCTOR_VERIFICATION_APPROVE: "/doctors/:doctorId/verification/approve",

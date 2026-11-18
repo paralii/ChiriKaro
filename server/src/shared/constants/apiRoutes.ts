@@ -99,6 +99,10 @@ export const API_ROUTES = {
       "/doctors/:doctorId/verification/documents/:documentType",
     DOCTOR_VERIFICATION_APPROVE: "/doctors/:doctorId/verification/approve",
     DOCTOR_VERIFICATION_REJECT: "/doctors/:doctorId/verification/reject",
+    QUEUE: "/queue",
+    QUEUE_DOCTORS: "/queue/doctors",
+    QUEUE_WALK_INS: "/queue/walk-ins",
+    QUEUE_APPOINTMENT_CHECK_IN: "/queue/appointments/:appointmentId/check-in",
 
     INVITATIONS: "/invitations",
     PENDING_INVITATIONS: "/invitations/pending",

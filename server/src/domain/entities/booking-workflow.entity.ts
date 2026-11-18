@@ -64,10 +64,15 @@ export interface QueueEntryRecord {
   clinicId: string;
   doctorUserId: string;
   localDate: string;
+  kind: "WALK_IN" | "APPOINTMENT";
   appointmentId: string | null;
   patientUserId: string | null;
+  patientNameSnapshot: string;
+  doctorNameSnapshot: string;
   tokenNumber: number;
   status: QueueEntryStatus;
+  idempotencyKey: string;
+  requestFingerprint: string;
   createdAt: Date;
   updatedAt: Date;
 }

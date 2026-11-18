@@ -28,6 +28,7 @@ import PatientDashboardPage from '@/pages/portal/patient/PatientDashboardPage';
 import PatientProfilePage from '@/pages/portal/patient/PatientProfilePage';
 import PatientClinicsPage from '@/pages/portal/patient/PatientClinicsPage';
 import PatientAppointmentsPage from '@/pages/portal/patient/PatientAppointmentsPage';
+import ClinicQueuePage from '@/pages/portal/clinic/ClinicQueuePage';
 
 export default function AppRouter() {
   return (
@@ -57,10 +58,12 @@ export default function AppRouter() {
           <Route path="dashboard" element={<DoctorOnboardingPage />} />
           <Route path="availability" element={<DoctorAvailabilityPage />} />
           <Route path="workspace" element={<TeamAccessPage />} />
+          <Route path="queue" element={<ClinicQueuePage canRegister={false} />} />
         </Route>
       </Route>
       <Route element={<RequireStaff />}>
         <Route path="/staff/dashboard" element={<TeamAccessPage />} />
+        <Route path="/staff/queue" element={<ClinicQueuePage />} />
       </Route>
 
       <Route element={<RequireClinicAdmin />}>
@@ -72,6 +75,7 @@ export default function AppRouter() {
           <Route path="doctors" element={<ClinicInvitationsPage invitee="doctor" />} />
           <Route path="review-doctors" element={<ClinicDoctorReviewPage />} />
           <Route path="staff" element={<ClinicInvitationsPage invitee="staff" />} />
+          <Route path="queue" element={<ClinicQueuePage />} />
         </Route>
       </Route>
 

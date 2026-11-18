@@ -11,6 +11,7 @@ import { useAction } from '@/shared/hooks/useAction';
 import { roleLabels } from '@/shared/constants/roles';
 import type { DoctorConsultationFee, DoctorFeeChangeRequest, RoleDashboard } from '@/shared/types';
 import { useAppSelector } from '@/store/hooks';
+import { Link } from 'react-router-dom';
 
 export default function TeamAccessPage() {
   const user = useAppSelector((state) => state.auth.user)!;
@@ -74,6 +75,7 @@ export default function TeamAccessPage() {
         <SectionHeading title="Workspace details" description={busy ? 'Loading your clinic association...' : 'Information associated with your account'} />
         <DetailList items={details} />
       </Card>
+      {user.role === 'STAFF' ? <Card className="mt-[18px]"><SectionHeading title="Clinic queue" description="Register patients arriving at your clinic and see today’s queue." action={<Link to="/staff/queue" className="text-xs font-semibold text-brand-deep">Open today’s queue →</Link>} /></Card> : null}
       {user.role === 'DOCTOR' ? <Card className="mt-[18px] pb-5">
         <SectionHeading title="Consultation fee" description="The active fee is managed by your Clinic Admin. Request a change for their review." />
         <div className="grid gap-3 px-[18px] pt-4 md:grid-cols-[180px_1fr_auto] md:items-end">

@@ -168,6 +168,12 @@ export class AppointmentRepository implements IAppointmentRepository {
     return doc ? this.toDomain(doc) : null;
   }
 
+  async findConfirmedForQueue(appointmentId: string, clinicId: string): Promise<AppointmentRecord | null> {
+    if (!Types.ObjectId.isValid(appointmentId) || !Types.ObjectId.isValid(clinicId)) return null;
+    const doc = await AppointmentModel.findOne({ _id: new Types.ObjectId(appointmentId), clinicId: new Types.ObjectId(clinicId), status: AppointmentStatus.CONFIRMED }).exec();
+    return doc ? this.toDomain(doc) : null;
+  }
+
   private allocationId(clinicId: string, doctorUserId: string, localDate: string): string {
     return `${clinicId}:${doctorUserId}:${localDate}`;
   }

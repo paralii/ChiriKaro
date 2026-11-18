@@ -11,12 +11,14 @@ const items = [
   { path: '/doctor/dashboard', label: 'Onboarding' },
   // { path: '/doctor/availability', label: 'Availability' },
   { path: '/doctor/workspace', label: 'Workspace details' },
+  { path: '/doctor/queue', label: 'Clinic queue' },
 ];
 
 const titles: Record<string, string> = {
   dashboard: 'Doctor onboarding',
   // availability: 'Availability',
   workspace: 'Workspace details',
+  queue: 'Clinic queue',
 };
 
 export default function DoctorPortalLayout() {

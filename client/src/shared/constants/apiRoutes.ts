@@ -45,6 +45,10 @@ export const API_ROUTES = {
   CLINIC: {
     REGISTER: "/clinic/register",
     DASHBOARD: "/clinic/dashboard",
+    QUEUE: "/clinic/queue",
+    QUEUE_DOCTORS: "/clinic/queue/doctors",
+    QUEUE_WALK_INS: "/clinic/queue/walk-ins",
+    QUEUE_APPOINTMENT_CHECK_IN: (appointmentId: string) => `/clinic/queue/appointments/${encodeURIComponent(appointmentId)}/check-in`,
 
     PROFILE: "/clinic/profile",
     SETUP: "/clinic/setup",

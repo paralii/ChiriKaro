@@ -14,6 +14,7 @@ export const toClinicProfileDTO = (clinic: Clinic): ClinicProfileDTO => ({
   status: clinic.status,
   specializations: clinic.specializations,
   workingHours: clinic.workingHours,
+  timeZone: clinic.timeZone,
   documents: clinic.documents.map(({ documentType, uploadedAt }) => ({ documentType, uploadedAt })),
   setupStatus: clinic.setupStatus,
   rejectionReason: clinic.setupStatus === "REJECTED"

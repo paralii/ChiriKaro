@@ -20,6 +20,7 @@ export interface ClinicProfileDTO {
   status: ClinicStatus;
   specializations: string[];
   workingHours: ClinicWorkingHour[];
+  timeZone: string;
   documents: ClinicDocumentDTO[];
   setupStatus: ClinicSetupStatus;
   rejectionReason: string | null;

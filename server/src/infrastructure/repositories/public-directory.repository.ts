@@ -3,11 +3,11 @@ import { DentistModel } from "@infrastructure/database/mongodb/models/DentistMod
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 import { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
 import type { PipelineStage } from "mongoose";
-import type { IPublicDirectoryRepository, PublicDirectoryRepositoryQuery, PublicDirectoryRepositoryPage } from "@application/interfaces/repositories/IPublicDirectoryRepository.ts";
+import type { IPublicDirectoryRepository, PublicDirectoryCandidateDTO, PublicDirectoryRepositoryQuery, PublicDirectoryRepositoryPage } from "@application/interfaces/repositories/IPublicDirectoryRepository.ts";
 import type { PublicDirectoryListingDTO } from "@application/dto/search/public-directory.dto.ts";
 
 interface PublicDirectoryAggregate {
-  items: PublicDirectoryListingDTO[];
+  items: Array<Omit<PublicDirectoryListingDTO, "listingId"> & { clinicId: string; doctorUserId: string }>;
   total: Array<{ count: number }>;
 }
 
@@ -87,7 +87,7 @@ export class PublicDirectoryRepository implements IPublicDirectoryRepository {
 
     const doctorPipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
       { $match: { ...doctorMatch, $expr: { $eq: ["$clinicId", "$$clinicId"] } } },
-      { $project: { firstName: 1, lastName: 1, professionalTitle: 1, specializations: 1, consultationFee: 1, workingHours: 1 } },
+      { $project: { userId: 1, firstName: 1, lastName: 1, professionalTitle: 1, specializations: 1, consultationFee: 1, workingHours: 1 } },
     ];
     const pipeline: PipelineStage[] = [
       { $match: clinicMatch },
@@ -107,6 +107,8 @@ export class PublicDirectoryRepository implements IPublicDirectoryRepository {
           { $limit: query.limit },
           { $project: {
             _id: 0,
+            clinicId: { $toString: "$_id" },
+            doctorUserId: { $toString: "$doctor.userId" },
             clinicName: "$name",
             address: { $ifNull: ["$address", null] },
             city: { $ifNull: ["$city", null] },
@@ -125,6 +127,11 @@ export class PublicDirectoryRepository implements IPublicDirectoryRepository {
     ];
 
     const [result] = await ClinicModel.aggregate<PublicDirectoryAggregate>(pipeline).exec();
-    return { items: result?.items ?? [], totalItems: result?.total[0]?.count ?? 0 };
+    const items: PublicDirectoryCandidateDTO[] = (result?.items ?? []).map(({ clinicId, doctorUserId, ...listing }) => ({
+      ...listing,
+      clinicId,
+      doctorUserId,
+    }));
+    return { items, totalItems: result?.total[0]?.count ?? 0 };
   }
 }

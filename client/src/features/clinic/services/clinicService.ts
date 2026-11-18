@@ -55,6 +55,7 @@ export const clinicService = {
     location?: Pick<ClinicProfile, "address" | "city" | "state" | "pincode">;
     specializations?: string[];
     workingHours?: WorkingHour[];
+    timeZone?: string;
   }) =>
     responseData(
       api.patch<ApiEnvelope<ClinicProfile>>(API_ROUTES.CLINIC.SETUP, body),

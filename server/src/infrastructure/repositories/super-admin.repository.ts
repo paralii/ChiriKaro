@@ -208,6 +208,7 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
       : null,
     status: doc.status,
     specializations: doc.services ?? [],
+    timeZone: doc.timeZone ?? "Asia/Kolkata",
 
     workingHours: (doc.workingHours ?? []).map((hour) => ({
       day: hour.day,

@@ -1,6 +1,6 @@
 import { api } from '@/shared/lib/http';
 import { API_ROUTES } from '@/shared/constants/apiRoutes';
-import type { PublicDirectoryPage } from '@/shared/types';
+import type { DatedAvailability, PublicDirectoryPage } from '@/shared/types';
 
 export type PublicDirectoryFilters = { q?: string; city?: string; specialization?: string; page?: number; limit?: number };
 
@@ -15,4 +15,9 @@ export const publicDirectoryService = {
       return { items: response.data ?? [], ...response.meta };
     });
   },
+  availability: (listingId: string, date: string) =>
+    api.get<{ success: boolean; message: string; data?: DatedAvailability }>(`${API_ROUTES.SEARCH.DIRECTORY_AVAILABILITY(listingId)}?date=${encodeURIComponent(date)}`).then((response) => {
+      if (!response.data) throw new Error('Date-specific availability was not returned.');
+      return response.data;
+    }),
 };

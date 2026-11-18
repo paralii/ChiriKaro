@@ -2,6 +2,7 @@ export const API_ROUTES = {
   SEARCH: {
     BASE: "/api/search",
     DIRECTORY: "/directory",
+    DIRECTORY_AVAILABILITY: "/directory/:listingId/availability",
   },
 
   AUTH: {

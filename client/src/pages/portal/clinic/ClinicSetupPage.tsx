@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/atoms/Button';
+import { Input } from '@/components/atoms/Input';
 import { Card } from '@/components/atoms/Card';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
@@ -89,6 +90,14 @@ export default function ClinicSetupPage() {
     void run(async () => merge(await clinicService.updateSetup({ workingHours: hours })), { success: 'Clinic working hours saved.', fallback: 'Could not save working hours.' });
   };
 
+  const saveTimeZone = () => {
+    if (!profile?.timeZone.trim()) return setError('Enter a valid IANA timezone, such as Asia/Kolkata.');
+    void run(async () => merge(await clinicService.updateSetup({ timeZone: profile.timeZone.trim() })), {
+      success: 'Clinic timezone saved.',
+      fallback: 'Could not save the clinic timezone.',
+    });
+  };
+
   const saveDoctorHours = (doctorId: string, hours: WorkingHour[]) => {
     const invalid = findInvalidHours(hours);
     if (invalid) return setError(`${invalid.day}: closing time must be later than opening time.`);
@@ -146,6 +155,7 @@ export default function ClinicSetupPage() {
           <Card className="pb-5"><SectionHeading title="Specializations" description={profile.setupStatus === 'VERIFIED' ? 'Manage the services offered by your approved clinic. Assigned specializations must be reassigned before removal.' : 'List the services your clinic provides.'} /><SpecializationsForm initial={profile.specializations} busy={specializationsDisabled} onSave={saveSpecializations} /></Card>
           <Card className="pb-5"><SectionHeading title="Doctor specializations" description="Assign each doctor only specializations offered by this clinic." /><DoctorSpecializationAssignments doctors={doctorAssignments} clinicSpecializations={profile.specializations} busy={busy} onSave={saveDoctorSpecializations} /></Card>
           <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic. Doctor schedules must fit within these hours." /><WorkingHoursForm initial={profile.workingHours} busy={workingHoursDisabled} onSave={saveHours} /></Card>
+          <Card className="pb-5"><SectionHeading title="Clinic timezone" description="Appointment dates and queue days use this IANA timezone. Existing clinics default to Asia/Kolkata." /><div className="flex flex-wrap items-end gap-3 px-[18px] pt-4"><label className="grid min-w-[250px] gap-1.5 text-xs font-semibold text-[#555b69]">Timezone<Input value={profile.timeZone} disabled={busy || reviewPending} onChange={(event) => merge({ timeZone: event.target.value })} placeholder="Asia/Kolkata" /></label><Button size="sm" disabled={busy || reviewPending} onClick={saveTimeZone}>Save timezone</Button></div></Card>
           <Card className="pb-5"><SectionHeading title="Doctor working hours" description="Set schedules for doctors in this clinic. Doctor hours must fit clinic operating hours." /><ClinicDoctorWorkingHours doctors={doctorSchedules} busy={busy} onSave={saveDoctorHours} /></Card>
           <Card className="pb-5">
             <SectionHeading title="Clinic documents" description="Private PDF, JPG, or PNG files up to 10 MB." />

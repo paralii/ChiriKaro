@@ -83,10 +83,10 @@ export const superAdminService = {
     const statistics = await superAdminService.getStatistics();
     return statistics.clinics;
   },
-  updateStatus: async (id: string, status: ClinicStatus) => {
+  updateStatus: async (id: string, status: ClinicStatus, reason?: string) => {
     const response = await api.patch<ApiEnvelope<Clinic>>(
       `${API_ROUTES.SUPER_ADMIN.CLINIC_STATUS(id)}`,
-      { status },
+      { status, ...(reason ? { reason } : {}) },
     );
     if (!response.data)
       throw new Error("Updated clinic details were not returned.");

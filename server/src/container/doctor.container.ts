@@ -37,9 +37,9 @@ const documentStorage: IDoctorDocumentStorage =
   new CloudinaryDoctorDocumentStorage();
 
 const getDoctorOnboardingUseCase: IGetDoctorOnboardingUseCase =
-  new GetDoctorOnboardingUseCase(doctorRepository);
+  new GetDoctorOnboardingUseCase(doctorRepository, clinicRepository);
 const updateDoctorOnboardingUseCase: IUpdateDoctorOnboardingUseCase =
-  new UpdateDoctorOnboardingUseCase(doctorRepository);
+  new UpdateDoctorOnboardingUseCase(doctorRepository, clinicRepository);
 const uploadDoctorDocumentUseCase: IUploadDoctorDocumentUseCase =
   new UploadDoctorDocumentUseCase(doctorRepository, documentStorage);
 const getDoctorDocumentUseCase: IGetDoctorDocumentUseCase =

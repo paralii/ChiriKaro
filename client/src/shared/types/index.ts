@@ -17,7 +17,7 @@ export type RegisterResult = {
 };
 
 export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
-export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; isActive?: boolean; createdAt?: string; updatedAt?: string };
+export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; reviewHistory?: Array<{ decision: 'APPROVED' | 'REJECTED'; reason: string | null; reviewerId: string | null; reviewedAt: string }>; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
 export type SuperAdminDoctorStatistics = {
   total: number;
@@ -47,6 +47,7 @@ export type ClinicProfile = {
   pincode: string | null; phone: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail: string | null;
   registrationNumber: string | null; clinicType?: string | null; specializations: string[];
   workingHours: WorkingHour[]; documents: ClinicDocument[]; status: ClinicStatus; setupStatus?: string;
+  rejectionReason?: string | null;
   createdAt?: string; updatedAt?: string;
 };
 export type ClinicDashboard = { clinic: ClinicProfile; totalDoctors: number; totalStaff: number; totalTeamMembers: number };
@@ -83,7 +84,7 @@ export type DoctorOnboardingProfile = {
   createdAt?: string;
   updatedAt?: string;
 };
-export type DoctorOnboardingDTO = { onboardingStatus: DoctorOnboardingStatus; profile: DoctorOnboardingProfile | null };
+export type DoctorOnboardingDTO = { onboardingStatus: DoctorOnboardingStatus; profile: DoctorOnboardingProfile | null; clinicSpecializations?: string[]; clinicWorkingHours?: WorkingHour[] };
 export type DoctorAvailabilitySlot = { day: DoctorDayOfWeek; startTime: string; endTime: string };
 export type DoctorBreak = { day: DoctorDayOfWeek; startTime: string; endTime: string };
 export type DoctorAvailability = {
@@ -94,6 +95,13 @@ export type DoctorAvailability = {
   bufferTimeMinutes: number;
   updatedAt: string;
 };
+export type ClinicDoctorSchedule = {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  verificationStatus: DoctorOnboardingStatus;
+  workingHours: Array<{ day: DoctorDayOfWeek; isOpen: boolean; startTime: string; endTime: string }>;
+};
 export type DoctorAvailabilitySlots = { doctorId: string; slots: DoctorAvailabilitySlot[] };
 export type DoctorVerificationSummary = {
   doctorId: string;
@@ -103,6 +111,13 @@ export type DoctorVerificationSummary = {
   verificationStatus: DoctorOnboardingStatus;
   updatedAt: string;
   consultationFee?: number | null;
+};
+export type ClinicDoctorSpecialization = {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  verificationStatus: DoctorOnboardingStatus;
+  specializations: string[];
 };
 export type DoctorConsultationFee = { doctorId: string; consultationFee: number | null; updatedAt: string };
 export type SlotConfig = { slotDuration: number; bufferMinutes: number; consultationFee: number | null };

@@ -51,6 +51,7 @@ export function WorkingHoursForm({
                 type="checkbox"
                 className="size-3.5 accent-brand"
                 checked={Boolean(h.isOpen)}
+                disabled={busy}
                 onChange={(e) => patch(i, { isOpen: e.target.checked })}
               />
               <span>{h.day || `Day ${i + 1}`}</span>
@@ -61,7 +62,7 @@ export function WorkingHoursForm({
                 type="time"
                 className={time}
                 value={h.startTime ?? ''}
-                disabled={!h.isOpen}
+                disabled={!h.isOpen || busy}
                 onChange={(e) => patch(i, { startTime: e.target.value })}
               />
             </FormField>
@@ -71,7 +72,7 @@ export function WorkingHoursForm({
                 type="time"
                 className={time}
                 value={h.endTime ?? ''}
-                disabled={!h.isOpen}
+                disabled={!h.isOpen || busy}
                 onChange={(e) => patch(i, { endTime: e.target.value })}
               />
             </FormField>

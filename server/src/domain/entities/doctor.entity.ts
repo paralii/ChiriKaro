@@ -96,6 +96,16 @@ function normalizedList(values: string[], field: string): string[] {
   return [...new Set(normalized)];
 }
 
+function normalizedSpecializations(values: string[]): string[] {
+  if (!Array.isArray(values)) throw new InvalidDoctorDataError("specializations must be a list");
+  const normalized = values.map((value) => requiredText(value, "specialization"));
+  const keys = normalized.map((value) => value.toLocaleLowerCase());
+  if (new Set(keys).size !== keys.length) {
+    throw new InvalidDoctorDataError("Specializations must not contain duplicates");
+  }
+  return normalized;
+}
+
 export class Doctor {
   private constructor(private props: DoctorProps) {}
 
@@ -182,10 +192,18 @@ export class Doctor {
     workingHours?: DoctorWorkingHour[];
   }): void {
     this.ensureEditable();
-    if (updates.specializations !== undefined) this.props.specializations = normalizedList(updates.specializations, "specialization");
+    if (updates.specializations !== undefined) this.props.specializations = normalizedSpecializations(updates.specializations);
     if (updates.procedures !== undefined) this.props.procedures = normalizedList(updates.procedures, "procedure");
     if (updates.workingHours !== undefined) this.props.workingHours = this.normalizeWorkingHours(updates.workingHours);
     this.markInProgress();
+  }
+
+  reassignSpecializations(values: string[]): void {
+    if (!Array.isArray(values) || values.length === 0) {
+      throw new InvalidDoctorDataError("At least one doctor specialization is required");
+    }
+    this.props.specializations = normalizedSpecializations(values);
+    this.props.updatedAt = new Date();
   }
 
   configureAvailability(updates: {
@@ -201,6 +219,9 @@ export class Doctor {
       throw new InvalidDoctorDataError("bufferTimeMinutes must be an integer from 0 to 120");
     }
     const workingHours = this.normalizeWorkingHours(updates.workingHours);
+    if (!workingHours.some((hours) => hours.isOpen)) {
+      throw new InvalidDoctorDataError("At least one doctor working day must be open");
+    }
     const openHours = new Map(workingHours.filter((hours) => hours.isOpen).map((hours) => [hours.day, hours]));
     if (!Array.isArray(updates.breaks)) throw new InvalidDoctorDataError("breaks must be a list");
     const breaks = updates.breaks.map((item) => {

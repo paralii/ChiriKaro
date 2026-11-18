@@ -78,6 +78,7 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
     })),
 
     setupStatus: doc.setupStatus,
+    reviewHistory: (doc.reviewHistory ?? []).map((item) => ({ decision: item.decision, reason: item.reason, reviewerId: item.reviewerId?.toString() ?? null, reviewedAt: item.reviewedAt })),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   });
@@ -101,6 +102,7 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
     documents: clinic.documents,
     status: clinic.status,
     setupStatus: clinic.setupStatus,
+    reviewHistory: clinic.reviewHistory.map((item) => ({ decision: item.decision, reason: item.reason, reviewerId: item.reviewerId ? new Types.ObjectId(item.reviewerId) : null, reviewedAt: item.reviewedAt })),
   };
 }
 }

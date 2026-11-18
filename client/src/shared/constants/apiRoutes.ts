@@ -51,6 +51,12 @@ export const API_ROUTES = {
       `/clinic/invitations/${encodeURIComponent(id)}/resend`,
 
     DOCTORS: "/clinic/doctors",
+    DOCTOR_SPECIALIZATION_ASSIGNMENTS: "/clinic/doctors/specialization-assignments",
+    DOCTOR_SPECIALIZATIONS: (id: string) =>
+      `/clinic/doctors/${encodeURIComponent(id)}/specializations`,
+    DOCTOR_SCHEDULES: "/clinic/doctors/schedules",
+    DOCTOR_WORKING_HOURS: (id: string) =>
+      `/clinic/doctors/${encodeURIComponent(id)}/working-hours`,
     PENDING_DOCTOR_VERIFICATIONS: "/clinic/doctors/pending-verification",
 
     DOCTOR_DETAILS: (id: string) => `/clinic/doctors/${encodeURIComponent(id)}`,

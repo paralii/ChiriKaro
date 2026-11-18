@@ -66,6 +66,10 @@ export const API_ROUTES = {
     SETUP_SUBMIT: "/setup/submit",
 
     DOCTORS: "/doctors",
+    DOCTOR_SPECIALIZATION_ASSIGNMENTS: "/doctors/specialization-assignments",
+    DOCTOR_SPECIALIZATIONS: "/doctors/:doctorId/specializations",
+    DOCTOR_SCHEDULES: "/doctors/schedules",
+    DOCTOR_WORKING_HOURS: "/doctors/:doctorId/working-hours",
     PENDING_VERIFICATIONS: "/doctors/pending-verification",
     DOCTOR_VERIFICATION: "/doctors/:doctorId/verification",
     DOCTOR_CONSULTATION_FEE: "/doctors/:doctorId/consultation-fee",

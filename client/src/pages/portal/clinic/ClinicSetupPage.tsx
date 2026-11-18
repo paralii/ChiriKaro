@@ -3,8 +3,11 @@ import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
+import { Notice } from '@/components/atoms/Notice';
 import { ClinicProfileForm } from '@/features/clinic/components/ClinicProfileForm';
 import { SpecializationsForm } from '@/features/clinic/components/SpecializationsForm';
+import { DoctorSpecializationAssignments } from '@/features/clinic/components/DoctorSpecializationAssignments';
+import { ClinicDoctorWorkingHours } from '@/features/clinic/components/ClinicDoctorWorkingHours';
 import { WorkingHoursForm } from '@/features/clinic/components/WorkingHoursForm';
 import { DocumentUploader } from '@/features/doctor/components/DocumentUploader';
 import { defaultHours } from '@/shared/constants/schedule';
@@ -13,8 +16,8 @@ import { clinicService } from '@/features/clinic/services/clinicService';
 import { openSignedUrl } from '@/services/storageService';
 import { useAppDispatch } from '@/store/hooks';
 import { patchClinic } from '@/features/clinic/store/clinicSlice';
-import { findInvalidHours, parseList } from '@/shared/utils/doctor';
-import type { ClinicProfile } from '@/shared/types';
+import { findClinicHoursConflict, findInvalidHours, parseList, toDoctorWorkingHours } from '@/shared/utils/doctor';
+import type { ClinicDoctorSchedule, ClinicDoctorSpecialization, ClinicProfile, WorkingHour } from '@/shared/types';
 
 const normalizeWorkingHours = (value: unknown): ClinicProfile['workingHours'] => {
   const rows = Array.isArray(value) ? value.filter((row) => row && typeof row === 'object') as Array<Record<string, unknown>> : [];
@@ -35,12 +38,16 @@ const normalizeWorkingHours = (value: unknown): ClinicProfile['workingHours'] =>
 export default function ClinicSetupPage() {
   const dispatch = useAppDispatch();
   const [profile, setProfile] = useState<ClinicProfile | null>(null);
+  const [doctorAssignments, setDoctorAssignments] = useState<ClinicDoctorSpecialization[]>([]);
+  const [doctorSchedules, setDoctorSchedules] = useState<ClinicDoctorSchedule[]>([]);
   const { busy, error, message, setError, run } = useAction();
 
   useEffect(() => {
     void run(async () => {
       const saved = await clinicService.getProfile();
       setProfile({ ...saved, workingHours: normalizeWorkingHours(saved.workingHours) });
+      setDoctorAssignments(await clinicService.listDoctorSpecializationAssignments());
+      setDoctorSchedules(await clinicService.listDoctorSchedules());
     }, { fallback: 'Could not load clinic setup.' });
   }, [run]);
 
@@ -63,10 +70,30 @@ export default function ClinicSetupPage() {
     void run(async () => merge(await clinicService.updateSetup({ specializations })), { success: 'Clinic specializations saved.', fallback: 'Could not save specializations.' });
   };
 
+  const saveDoctorSpecializations = (doctorId: string, specializations: string[]) => void run(async () => {
+    const updated = await clinicService.updateDoctorSpecializations(doctorId, specializations);
+    setDoctorAssignments((current) => current.map((doctor) => doctor.doctorId === doctorId ? updated : doctor));
+  }, { success: 'Doctor specializations saved.', fallback: 'Could not save doctor specializations.' });
+
   const saveHours = (hours: ClinicProfile['workingHours']) => {
     const invalid = findInvalidHours(hours);
     if (invalid) return setError(`${invalid.day}: closing time must be later than opening time.`);
     void run(async () => merge(await clinicService.updateSetup({ workingHours: hours })), { success: 'Clinic working hours saved.', fallback: 'Could not save working hours.' });
+  };
+
+  const saveDoctorHours = (doctorId: string, hours: WorkingHour[]) => {
+    const invalid = findInvalidHours(hours);
+    if (invalid) return setError(`${invalid.day}: closing time must be later than opening time.`);
+    if (!hours.some((hour) => hour.isOpen)) return setError('Open at least one doctor working day.');
+    if (!profile) return;
+    const conflict = findClinicHoursConflict(hours, profile.workingHours);
+    if (conflict) return setError(`${conflict.day}: doctor hours must fit within the clinic working hours.`);
+    void run(async () => {
+      const updated = await clinicService.updateDoctorWorkingHours(doctorId, toDoctorWorkingHours(hours));
+      setDoctorSchedules((current) => current.map((doctor) => doctor.doctorId === doctorId
+        ? { ...doctor, workingHours: updated.workingHours }
+        : doctor));
+    }, { success: 'Doctor working hours saved.', fallback: 'Could not save doctor working hours.' });
   };
 
   const upload = (type: string, file: File) =>
@@ -94,6 +121,8 @@ export default function ClinicSetupPage() {
       documentType: document.documentType.replaceAll('_', ' '),
     }))
     : [];
+  const reviewPending = profile?.setupStatus === 'PENDING_VERIFICATION';
+  const editingDisabled = busy || reviewPending;
 
   return (
     <div className="grid gap-[18px] [&>section]:mt-0">
@@ -101,12 +130,16 @@ export default function ClinicSetupPage() {
       {!profile && busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading clinic setup...</Card> : null}
       {profile ? (
         <>
-          <Card className="pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={busy} onSave={saveProfile} setupOnly /></Card>
-          <Card className="pb-5"><SectionHeading title="Specializations" description="List the services your clinic provides." /><SpecializationsForm initial={profile.specializations} busy={busy} onSave={saveSpecializations} /></Card>
-          <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic." /><WorkingHoursForm initial={profile.workingHours} busy={busy} onSave={saveHours} /></Card>
+          {profile.rejectionReason ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason}</p></Notice> : null}
+          {reviewPending ? <Notice tone="warning">Your application is under review. Editing and document uploads are disabled until a decision is made.</Notice> : null}
+          <Card className="pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={editingDisabled} onSave={saveProfile} setupOnly /></Card>
+          <Card className="pb-5"><SectionHeading title="Specializations" description="List the services your clinic provides." /><SpecializationsForm initial={profile.specializations} busy={editingDisabled} onSave={saveSpecializations} /></Card>
+          <Card className="pb-5"><SectionHeading title="Doctor specializations" description="Assign each doctor only specializations offered by this clinic." /><DoctorSpecializationAssignments doctors={doctorAssignments} clinicSpecializations={profile.specializations} busy={busy} onSave={saveDoctorSpecializations} /></Card>
+          <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic." /><WorkingHoursForm initial={profile.workingHours} busy={editingDisabled} onSave={saveHours} /></Card>
+          <Card className="pb-5"><SectionHeading title="Doctor working hours" description="Set schedules for doctors in this clinic. Doctor hours must fit clinic operating hours." /><ClinicDoctorWorkingHours doctors={doctorSchedules} busy={busy} onSave={saveDoctorHours} /></Card>
           <Card className="pb-5">
             <SectionHeading title="Clinic documents" description="Private PDF, JPG, or PNG files up to 10 MB." />
-            <DocumentUploader types={['Clinic registration', 'Operating license', 'Insurance certificate', 'Other']} documents={documents} busy={busy} onUpload={upload} onOpen={open} />
+            <DocumentUploader types={['Clinic registration', 'Operating license', 'Insurance certificate', 'Other']} documents={documents} busy={editingDisabled} onUpload={upload} onOpen={open} />
           </Card>
           <Card className="flex flex-wrap items-center justify-between gap-4 p-[18px]">
             <div><strong className="text-sm">Setup status: {profile.setupStatus?.replaceAll('_', ' ') ?? 'IN PROGRESS'}</strong><p className="mt-1 text-xs text-[#777b89]">Submit completed clinic information and documents for verification.</p></div>

@@ -26,6 +26,7 @@ export interface ClinicDetailsDTO extends ClinicSummaryDTO {
   specializations: string[];
   workingHours: Array<{ day: string; isOpen: boolean; startTime: string; endTime: string }>;
   documents: Array<{ documentType: string; uploadedAt: Date }>;
+  reviewHistory: Array<{ decision: "APPROVED" | "REJECTED"; reason: string | null; reviewerId: string | null; reviewedAt: Date }>;
 }
 
 export interface ClinicListResultDTO {
@@ -39,4 +40,6 @@ export interface ClinicListResultDTO {
 export interface UpdateClinicStatusDTO {
   clinicId: string;
   status: unknown;
+  reason?: unknown;
+  reviewerId?: string | null;
 }

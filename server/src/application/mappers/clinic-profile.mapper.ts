@@ -17,6 +17,9 @@ export const toClinicProfileDTO = (clinic: Clinic): ClinicProfileDTO => ({
   workingHours: clinic.workingHours,
   documents: clinic.documents.map(({ documentType, uploadedAt }) => ({ documentType, uploadedAt })),
   setupStatus: clinic.setupStatus,
+  rejectionReason: clinic.setupStatus === "REJECTED"
+    ? [...clinic.reviewHistory].reverse().find((decision) => decision.decision === "REJECTED")?.reason ?? null
+    : null,
   createdAt: clinic.createdAt,
   updatedAt: clinic.updatedAt,
 });

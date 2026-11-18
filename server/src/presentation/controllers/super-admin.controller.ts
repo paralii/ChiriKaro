@@ -68,6 +68,8 @@ export class SuperAdminController {
       const clinic = await this._updateClinicStatusUseCase.execute({
         clinicId: req.params.id as string,
         status: req.body?.status,
+        reason: req.body?.reason,
+        reviewerId: req.user!.sub,
       });
       ApiResponse.success(res, "Clinic status updated successfully", clinic);
     } catch (error) {

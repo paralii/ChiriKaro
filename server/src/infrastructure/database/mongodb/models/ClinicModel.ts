@@ -15,6 +15,13 @@ export interface IClinicDocumentData {
   uploadedAt: Date;
 }
 
+export interface IClinicReviewDecision {
+  decision: "APPROVED" | "REJECTED";
+  reason: string | null;
+  reviewerId: Types.ObjectId | null;
+  reviewedAt: Date;
+}
+
 export interface IClinicDocument extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -31,6 +38,7 @@ export interface IClinicDocument extends Document {
   documents: IClinicDocumentData[];
   status: ClinicStatus;
   setupStatus: ClinicSetupStatus;
+  reviewHistory: IClinicReviewDecision[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +61,13 @@ const clinicDocumentSchema = new Schema<IClinicDocumentData>(
   },
   { _id: false },
 );
+
+const clinicReviewDecisionSchema = new Schema<IClinicReviewDecision>({
+  decision: { type: String, enum: ["APPROVED", "REJECTED"], required: true },
+  reason: { type: String, default: null, trim: true, maxlength: 1000 },
+  reviewerId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+  reviewedAt: { type: Date, required: true },
+}, { _id: false });
 
 const clinicSchema = new Schema<IClinicDocument>(
   {
@@ -117,6 +132,7 @@ const clinicSchema = new Schema<IClinicDocument>(
       enum: Object.values(ClinicSetupStatus),
       default: ClinicSetupStatus.IN_PROGRESS,
     },
+    reviewHistory: { type: [clinicReviewDecisionSchema], default: [] },
   },
   {
     timestamps: true,

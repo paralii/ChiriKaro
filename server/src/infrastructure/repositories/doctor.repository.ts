@@ -28,6 +28,11 @@ export class DoctorRepository implements IDoctorRepository {
     return documents.map((document) => this.toDomain(document));
   }
 
+  async findByClinic(clinicId: string): Promise<Doctor[]> {
+    const documents = await DentistModel.find({ clinicId: new Types.ObjectId(clinicId) }).sort({ createdAt: -1 }).exec();
+    return documents.map((document) => this.toDomain(document));
+  }
+
   async save(doctor: Doctor): Promise<Doctor> {
     const document = await DentistModel.findOneAndUpdate(
       { userId: new Types.ObjectId(doctor.userId) },

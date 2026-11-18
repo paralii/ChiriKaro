@@ -19,8 +19,8 @@ export const loadAdminClinics = createAsyncThunk<{ clinics: ClinicPage; statisti
   return { clinics, statistics };
 });
 
-export const changeClinicStatus = createAsyncThunk('adminClinics/changeStatus', async ({ id, status }: { id: string; status: ClinicStatus }) => {
-  const clinic = await superAdminService.updateStatus(id, status);
+export const changeClinicStatus = createAsyncThunk('adminClinics/changeStatus', async ({ id, status, reason }: { id: string; status: ClinicStatus; reason?: string }) => {
+  const clinic = await superAdminService.updateStatus(id, status, reason);
   return { clinic, statistics: await superAdminService.getStatistics() };
 });
 

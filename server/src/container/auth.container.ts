@@ -93,6 +93,7 @@ const getProfileUseCase: IGetProfileUseCase = new GetProfileUseCase(
 
 const refreshTokenUseCase: IRefreshTokenUseCase = new RefreshTokenUseCase(
   userRepository,
+  clinicRepository,
   tokenService,
 );
 

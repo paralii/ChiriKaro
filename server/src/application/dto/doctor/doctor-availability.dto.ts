@@ -1,4 +1,4 @@
-import type { DoctorAvailabilitySlot, DoctorBreak, DoctorWorkingHour } from "@domain/entities/doctor.entity.ts";
+import type { DoctorAvailabilitySlot, DoctorBreak, DoctorVerificationStatus, DoctorWorkingHour } from "@domain/entities/doctor.entity.ts";
 
 export interface DoctorAvailabilityDTO {
   doctorId: string;
@@ -13,6 +13,20 @@ export interface ConfigureDoctorAvailabilityInput {
   userId: string;
   clinicId: string;
   updates: unknown;
+}
+
+export interface ConfigureClinicDoctorWorkingHoursInput {
+  clinicId: string;
+  doctorId: string;
+  workingHours: unknown;
+}
+
+export interface ClinicDoctorScheduleDTO {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  verificationStatus: DoctorVerificationStatus;
+  workingHours: DoctorWorkingHour[];
 }
 
 export interface DoctorAvailabilitySlotsDTO {

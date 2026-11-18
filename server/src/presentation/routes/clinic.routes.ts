@@ -70,6 +70,30 @@ export function ClinicRouter(
   );
 
   router.get(
+    API_ROUTES.CLINIC.DOCTOR_SPECIALIZATION_ASSIGNMENTS,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.listDoctorSpecializations,
+  );
+  router.patch(
+    API_ROUTES.CLINIC.DOCTOR_SPECIALIZATIONS,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.updateDoctorSpecializations,
+  );
+  router.get(
+    API_ROUTES.CLINIC.DOCTOR_SCHEDULES,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.listDoctorSchedules,
+  );
+  router.patch(
+    API_ROUTES.CLINIC.DOCTOR_WORKING_HOURS,
+    authenticate,
+    authorizeClinicAdmin,
+    clinicController.updateDoctorWorkingHours,
+  );
+  router.get(
     API_ROUTES.CLINIC.PENDING_VERIFICATIONS,
     authenticate,
     authorizeClinicAdmin,

@@ -57,17 +57,16 @@ export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?
               <dl className="grid grid-cols-[130px_minmax(0,1fr)] gap-x-4 gap-y-3 px-[18px] py-4 text-xs">
                 <dt className="text-[#777c8a]">Status</dt><dd className="m-0">{selectedClinic.status}</dd>
                 <dt className="text-[#777c8a]">Setup review</dt><dd className="m-0">{selectedClinic.setupStatus?.replaceAll('_', ' ') ?? 'Not submitted'}</dd>
-                <dt className="text-[#777c8a]">Clinic ID</dt><dd className="m-0 break-all">{selectedClinic.id}</dd>
-                <dt className="text-[#777c8a]">Admin ID</dt><dd className="m-0 break-all">{selectedClinic.ownerAdminId ?? '—'}</dd>
                 <dt className="text-[#777c8a]">Address</dt><dd className="m-0">{selectedClinic.address ?? 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">City / State</dt><dd className="m-0">{[selectedClinic.city, selectedClinic.state, selectedClinic.pincode].filter(Boolean).join(', ') || 'Not provided'}</dd>
-                {/* <dt className="text-[#777c8a]">Phone</dt><dd className="m-0">{selectedClinic.phone ?? 'Not provided'}</dd> */}
-                {/* <dt className="text-[#777c8a]">Contact email</dt><dd className="m-0">{selectedClinic.contactEmail ?? 'Not provided'}</dd> */}
-                {/* <dt className="text-[#777c8a]">Registration no.</dt><dd className="m-0">{selectedClinic.registrationNumber ?? 'Not provided'}</dd> */}
+                <dt className="text-[#777c8a]">Phone</dt><dd className="m-0">{selectedClinic.phone ?? 'Not provided'}</dd>
+                <dt className="text-[#777c8a]">Contact email</dt><dd className="m-0">{selectedClinic.contactEmail ?? 'Not provided'}</dd>
+                <dt className="text-[#777c8a]">Registration no.</dt><dd className="m-0">{selectedClinic.registrationNumber ?? 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">Specializations</dt><dd className="m-0">{selectedClinic.specializations?.join(', ') || 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">Working hours</dt><dd className="m-0">{reviewHours.filter((hour) => hour.isOpen).map((hour) => `${hour.day}: ${hour.startTime || '—'}–${hour.endTime || '—'}`).join('; ') || 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">Documents</dt><dd className="m-0">{reviewDocuments.length ? <ul className="m-0 grid list-none gap-2 p-0">{reviewDocuments.map((doc) => <li key={doc.documentType} className="flex flex-wrap items-center justify-between gap-2"><span>{doc.documentType.replaceAll('_', ' ')} · {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : 'Date unavailable'}</span><Button size="xs" variant="ghost" disabled={detailBusy} onClick={() => openDocument(selectedClinic.id, doc.documentType)}>Review file</Button></li>)}</ul> : 'No valid documents submitted'}</dd>
                 <dt className="text-[#777c8a]">Registered</dt><dd className="m-0">{selectedClinic.createdAt ? new Date(selectedClinic.createdAt).toLocaleDateString() : '—'}</dd>
+                <dt className="text-[#777c8a]">Review history</dt><dd className="m-0">{selectedClinic.reviewHistory?.length ? <ul className="m-0 grid list-none gap-1 p-0">{selectedClinic.reviewHistory.map((entry, index) => <li key={`${entry.reviewedAt}-${index}`}>{entry.decision} · {new Date(entry.reviewedAt).toLocaleString()}{entry.reason ? ` · ${entry.reason}` : ''}</li>)}</ul> : 'No review decisions recorded'}</dd>
               </dl>
             </Card>
           </div>

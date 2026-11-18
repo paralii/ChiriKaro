@@ -2,6 +2,9 @@ import { api, http } from "@/shared/lib/http";
 import type {
   ClinicDashboard,
   ClinicProfile,
+  ClinicDoctorSpecialization,
+  ClinicDoctorSchedule,
+  DoctorAvailability,
   DoctorConsultationFee,
   DoctorDetail,
   DoctorOnboardingDTO,
@@ -105,6 +108,34 @@ export const clinicService = {
         API_ROUTES.CLINIC.PENDING_DOCTOR_VERIFICATIONS,
       ),
       "Pending doctor verifications were not returned.",
+    ),
+  listDoctorSpecializationAssignments: () =>
+    responseData(
+      api.get<ApiEnvelope<ClinicDoctorSpecialization[]>>(
+        API_ROUTES.CLINIC.DOCTOR_SPECIALIZATION_ASSIGNMENTS,
+      ),
+      "Clinic doctor specialization assignments were not returned.",
+    ),
+  updateDoctorSpecializations: (id: string, specializations: string[]) =>
+    responseData(
+      api.patch<ApiEnvelope<ClinicDoctorSpecialization>>(
+        API_ROUTES.CLINIC.DOCTOR_SPECIALIZATIONS(id),
+        { specializations },
+      ),
+      "Updated doctor specializations were not returned.",
+    ),
+  listDoctorSchedules: () =>
+    responseData(
+      api.get<ApiEnvelope<ClinicDoctorSchedule[]>>(API_ROUTES.CLINIC.DOCTOR_SCHEDULES),
+      "Clinic doctor schedules were not returned.",
+    ),
+  updateDoctorWorkingHours: (id: string, workingHours: ClinicDoctorSchedule["workingHours"]) =>
+    responseData(
+      api.patch<ApiEnvelope<DoctorAvailability>>(
+        API_ROUTES.CLINIC.DOCTOR_WORKING_HOURS(id),
+        { workingHours },
+      ),
+      "Updated doctor working hours were not returned.",
     ),
   getDoctorVerification: (id: string) =>
     responseData(

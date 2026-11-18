@@ -34,6 +34,7 @@ export class GetClinicDetailsUseCase implements IGetClinicDetailsUseCase {
         documentType: doc.documentType,
         uploadedAt: doc.uploadedAt,
       })),
+      reviewHistory: clinic.reviewHistory,
     };
   }
 }

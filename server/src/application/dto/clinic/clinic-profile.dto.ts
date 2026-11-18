@@ -23,6 +23,7 @@ export interface ClinicProfileDTO {
   workingHours: ClinicWorkingHour[];
   documents: ClinicDocumentDTO[];
   setupStatus: ClinicSetupStatus;
+  rejectionReason: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

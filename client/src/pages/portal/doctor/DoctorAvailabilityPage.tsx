@@ -6,7 +6,6 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { WorkingHoursForm } from '@/features/clinic/components/WorkingHoursForm';
 import { DoctorAvailabilityStep } from '@/features/doctor/components/DoctorAvailabilityStep';
 import { DoctorBreaksForm } from '@/features/doctor/components/DoctorBreaksForm';
-import { clinicService } from '@/features/clinic/services/clinicService';
 import { doctorService } from '@/features/doctor/services/doctorService';
 import { defaultHours } from '@/shared/constants/schedule';
 import { useAction } from '@/shared/hooks/useAction';
@@ -23,9 +22,9 @@ export default function DoctorAvailabilityPage() {
 
   useEffect(() => {
     void run(async () => {
-      const [saved, clinic] = await Promise.all([doctorService.getAvailability(), clinicService.getProfile()]);
+      const [saved, onboarding] = await Promise.all([doctorService.getAvailability(), doctorService.getOnboarding()]);
       setAvailability(saved);
-      setClinicHours(clinic.workingHours ?? []);
+      setClinicHours(onboarding.clinicWorkingHours ?? []);
       return saved;
     }, { fallback: 'Could not load doctor availability.' });
   }, [run]);

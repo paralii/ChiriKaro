@@ -3,6 +3,7 @@ import type {
   DoctorGender,
   DoctorVerificationStatus,
 } from "@domain/entities/doctor.entity.ts";
+import type { ClinicWorkingHour } from "@domain/entities/clinic.entity.ts";
 
 export type DoctorOnboardingStep = "basic" | "professional" | "practice";
 
@@ -41,6 +42,8 @@ export interface DoctorOnboardingProfileDTO {
 export interface DoctorOnboardingDTO {
   onboardingStatus: DoctorVerificationStatus | "NOT_STARTED";
   profile: DoctorOnboardingProfileDTO | null;
+  clinicSpecializations?: string[];
+  clinicWorkingHours?: ClinicWorkingHour[];
 }
 
 export interface UpdateDoctorOnboardingDTO {

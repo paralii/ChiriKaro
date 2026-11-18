@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/atoms/Card';
+import { Notice } from '@/components/atoms/Notice';
 import { Notices } from '@/components/molecules/Notices';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { ClinicProfileForm } from '@/features/clinic/components/ClinicProfileForm';
@@ -42,10 +43,12 @@ export default function ClinicProfilePage() {
   return (
     <>
       <Notices error={error} message={message} />
+      {profile?.rejectionReason ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason}</p></Notice> : null}
+      {profile?.setupStatus === 'PENDING_VERIFICATION' ? <Notice tone="warning">Your application is under review. Profile edits are disabled until a decision is made.</Notice> : null}
       {profile ? (
         <Card className="pb-5">
           <SectionHeading title="Clinic profile" description="Manage the contact and registration details for your clinic." />
-          <ClinicProfileForm initial={profile} busy={busy} onSave={saveProfile} profileOnly />
+          <ClinicProfileForm initial={profile} busy={busy || profile.setupStatus === 'PENDING_VERIFICATION'} onSave={saveProfile} profileOnly />
         </Card>
       ) : busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading clinic profile...</Card> : null}
     </>

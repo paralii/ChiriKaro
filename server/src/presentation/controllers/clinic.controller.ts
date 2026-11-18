@@ -12,6 +12,10 @@ import type { ISubmitClinicSetupUseCase } from "@application/interfaces/use-case
 import type { IUploadClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IUploadClinicDocumentUseCase.ts";
 import type { IGetClinicDocumentUseCase } from "@application/interfaces/use-cases/clinic/IGetClinicDocumentUseCase.ts";
 import type { IUpdateDoctorConsultationFeeUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorConsultationFeeUseCase.ts";
+import type { IListClinicDoctorSpecializationsUseCase } from "@application/interfaces/use-cases/clinic/IListClinicDoctorSpecializationsUseCase.ts";
+import type { IUpdateClinicDoctorSpecializationsUseCase } from "@application/interfaces/use-cases/clinic/IUpdateClinicDoctorSpecializationsUseCase.ts";
+import type { IListClinicDoctorSchedulesUseCase } from "@application/interfaces/use-cases/clinic/IListClinicDoctorSchedulesUseCase.ts";
+import type { IConfigureClinicDoctorWorkingHoursUseCase } from "@application/interfaces/use-cases/doctor/IConfigureClinicDoctorWorkingHoursUseCase.ts";
 import type { IListPendingDoctorVerificationsUseCase } from "@application/interfaces/use-cases/doctor/IListPendingDoctorVerificationsUseCase.ts";
 import type { IGetDoctorVerificationDetailsUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorVerificationDetailsUseCase.ts";
 import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IApproveDoctorVerificationUseCase.ts";
@@ -34,6 +38,10 @@ export class ClinicController {
     private readonly _rejectVerificationUseCase: IRejectDoctorVerificationUseCase,
     private readonly _getClinicDoctorDocumentUseCase: IGetClinicDoctorDocumentUseCase,
     private readonly _updateConsultationFeeUseCase: IUpdateDoctorConsultationFeeUseCase,
+    private readonly _listDoctorSpecializationsUseCase: IListClinicDoctorSpecializationsUseCase,
+    private readonly _updateDoctorSpecializationsUseCase: IUpdateClinicDoctorSpecializationsUseCase,
+    private readonly _listDoctorSchedulesUseCase: IListClinicDoctorSchedulesUseCase,
+    private readonly _updateDoctorWorkingHoursUseCase: IConfigureClinicDoctorWorkingHoursUseCase,
   ) {}
 
   public register = async (
@@ -192,6 +200,70 @@ export class ClinicController {
         consultationFee: req.body?.consultationFee,
       });
       ApiResponse.success(res, "Doctor consultation fee updated", result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  listDoctorSpecializations = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const result = await this._listDoctorSpecializationsUseCase.execute(req.user!.clinicId!);
+      ApiResponse.success(res, "Clinic doctor specializations retrieved", result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateDoctorSpecializations = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      const result = await this._updateDoctorSpecializationsUseCase.execute({
+        clinicId: req.user!.clinicId!,
+        doctorId,
+        specializations: req.body?.specializations,
+      });
+      ApiResponse.success(res, "Doctor specializations updated", result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  listDoctorSchedules = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const result = await this._listDoctorSchedulesUseCase.execute(req.user!.clinicId!);
+      ApiResponse.success(res, "Clinic doctor schedules retrieved", result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateDoctorWorkingHours = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const doctorId = req.params.doctorId;
+      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      const result = await this._updateDoctorWorkingHoursUseCase.executeForClinicAdmin({
+        clinicId: req.user!.clinicId!,
+        doctorId,
+        workingHours: req.body?.workingHours,
+      });
+      ApiResponse.success(res, "Doctor working hours updated", result);
     } catch (error) {
       next(error);
     }

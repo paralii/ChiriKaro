@@ -76,6 +76,9 @@ export class App {
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicRouter);
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicQueueRouter);
     this.instance.use(API_ROUTES.DOCTOR.BASE, doctorRouter);
+    // The router also serves authenticated clinic invitation endpoints.
+    this.instance.use(API_ROUTES.CLINIC.BASE, invitationRouter);
+    // Public token validation and acceptance use /api/invitation/*.
     this.instance.use(API_ROUTES.INVITATION.BASE, invitationRouter);
     this.instance.use("/api", roleDashboardRouter);
   }

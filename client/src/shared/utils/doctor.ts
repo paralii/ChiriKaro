@@ -19,7 +19,8 @@ export function toDisplayWorkingHours(profileHours: DoctorOnboardingProfile['wor
   const rows = Array.isArray(profileHours) ? profileHours : [];
   return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
     const canonical = day.toUpperCase() as DoctorDayOfWeek;
-    const hour = rows.find((row) => String(row?.day ?? '').trim().toUpperCase() === canonical);
+    const dayIndex = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].indexOf(canonical);
+    const hour = rows.find((row) => String(row?.day ?? '').trim().toUpperCase() === canonical) ?? rows[dayIndex];
     return {
       day,
       isOpen: Boolean(hour?.isOpen),
@@ -30,18 +31,16 @@ export function toDisplayWorkingHours(profileHours: DoctorOnboardingProfile['wor
 }
 
 export function hasCompleteDoctorHours(profileHours: DoctorOnboardingProfile['workingHours']): boolean {
-  if (!Array.isArray(profileHours) || profileHours.length !== 7) return false;
-  const expectedDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-  const storedDays = new Set(profileHours.map((hour) => String(hour?.day ?? '').trim().toUpperCase()));
-  if (storedDays.size !== 7 || expectedDays.some((day) => !storedDays.has(day))) return false;
-  const displayHours = toDisplayWorkingHours(profileHours);
-  return displayHours.some((hour) => hour.isOpen) && !findInvalidHours(displayHours);
+  // The API validates all seven rows and clinic-hour boundaries before saving.
+  // At the review gate, only confirm that the saved schedule includes an open day.
+  return Array.isArray(profileHours) && profileHours.some((hour) => hour?.isOpen === true);
 }
 
 export function findResumeStep(profile: DoctorOnboardingProfile): number {
   if (!profile.firstName || !profile.lastName) return 0;
   if (!profile.professionalTitle || !profile.qualifications?.length || profile.yearsOfExperience === null || !profile.registrationNumber || !profile.registrationAuthority) return 1;
   if (!profile.specializations?.length || !profile.procedures?.length) return 2;
+  if (!hasCompleteDoctorHours(profile.workingHours)) return 3;
   if (!profile.documents?.some((document) => document && typeof document.documentType === 'string' && document.documentType.trim())) return 4;
   return 5;
 }

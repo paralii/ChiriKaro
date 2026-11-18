@@ -4,7 +4,7 @@ import type { PatientAppointment } from '@/shared/types';
 
 type ApiEnvelope<T> = { data?: T };
 
-export type PaymentOrder = { appointmentId: string; orderId: string; amountMinor: number; currency: string; keyId: string; status: string };
+export type PaymentOrder = { appointmentId: string; orderId: string; amountMinor: number; currency: string; keyId: string; mode: 'MOCK' | 'RAZORPAY'; status: string };
 export type AppointmentPaymentStatus = { appointmentId: string; paymentStatus: string; appointmentStatus: PatientAppointment['status']; refundReviewStatus?: 'NOT_REQUIRED' | 'PENDING_REVIEW' };
 
 export const appointmentService = {
@@ -33,6 +33,11 @@ export const appointmentService = {
   verifyPayment: async (appointmentId: string, payload: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
     const response = await http.post<ApiEnvelope<AppointmentPaymentStatus>>(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_VERIFY(appointmentId), payload);
     if (!response.data.data) throw new Error('Payment status was not returned.');
+    return response.data.data;
+  },
+  confirmTestPayment: async (appointmentId: string) => {
+    const response = await http.post<ApiEnvelope<AppointmentPaymentStatus>>(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_TEST_CONFIRM(appointmentId));
+    if (!response.data.data) throw new Error('Test payment status was not returned.');
     return response.data.data;
   },
   getPaymentStatus: async (appointmentId: string) => {

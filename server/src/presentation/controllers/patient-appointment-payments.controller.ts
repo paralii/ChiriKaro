@@ -30,6 +30,14 @@ export class PatientAppointmentPaymentsController {
     } catch (error) { next(error); }
   };
 
+  confirmTestPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
+      ApiResponse.success(res, "Test payment completed", await this.payments.confirmTestPayment({ appointmentId, patientUserId: req.user!.sub }));
+    } catch (error) { next(error); }
+  };
+
   status = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const appointmentId = req.params.appointmentId;

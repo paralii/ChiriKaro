@@ -10,14 +10,14 @@ import { useAppSelector } from '@/store/hooks';
 
 const items = [
   { path: '/doctor/dashboard', label: 'Onboarding' },
-  // { path: '/doctor/availability', label: 'Availability' },
+  { path: '/doctor/availability', label: 'Availability and slots' },
   { path: '/doctor/workspace', label: 'Workspace details' },
   { path: '/doctor/queue', label: 'Clinic queue' },
 ];
 
 const titles: Record<string, string> = {
   dashboard: 'Doctor onboarding',
-  // availability: 'Availability',
+  availability: 'Availability and slots',
   workspace: 'Workspace details',
   queue: 'Clinic queue',
 };

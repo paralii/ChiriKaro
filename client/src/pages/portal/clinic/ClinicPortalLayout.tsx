@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { BrandLockup } from '@/components/atoms/BrandLockup';
 import { PageHeading } from '@/components/molecules/PageHeading';
@@ -13,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 const items = [
   { path: '/clinic/dashboard', label: 'Overview' },
+  { path: '/clinic/setup', label: 'Services and schedules' },
   { path: '/clinic/doctors', label: 'Doctor invitations' },
   { path: '/clinic/review-doctors', label: 'Doctor verification' },
   { path: '/clinic/staff', label: 'Staff invitations' },
@@ -32,7 +32,6 @@ export default function ClinicPortalLayout() {
 
   const approved = clinic?.status === 'APPROVED';
   const visibleItems = approved ? items : items.filter((item) => item.path === '/clinic/dashboard' || item.path === '/clinic/setup');
-  if (approved && pathname === '/clinic/setup') return <Navigate to="/clinic/dashboard" replace />;
   if (!approved && clinic && !['/clinic/dashboard', '/clinic/setup', '/clinic/profile'].includes(pathname)) return <Navigate to="/clinic/dashboard" replace />;
 
   return (

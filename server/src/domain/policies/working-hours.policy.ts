@@ -10,7 +10,9 @@ export function findWorkingHoursOutsideClinic(
   return doctorHours.find((doctorHour) => {
     if (!doctorHour.isOpen) return false;
     if (!TIME.test(doctorHour.startTime) || !TIME.test(doctorHour.endTime) || doctorHour.startTime >= doctorHour.endTime) return true;
-    const clinicHour = clinicHours.find((hour) => hour.day.trim().toUpperCase() === doctorHour.day);
+    const clinicHour = clinicHours.find((hour) =>
+      typeof hour?.day === "string" && hour.day.trim().toUpperCase() === doctorHour.day
+    );
     return !clinicHour?.isOpen ||
       !TIME.test(clinicHour.startTime) ||
       !TIME.test(clinicHour.endTime) ||

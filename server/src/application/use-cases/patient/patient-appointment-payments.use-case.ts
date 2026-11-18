@@ -50,6 +50,19 @@ export class PatientAppointmentPaymentsUseCase implements IPatientAppointmentPay
     return this.getStatus(appointment._id.toString(), input.patientUserId);
   }
 
+  async confirmTestPayment(input: { appointmentId: string; patientUserId: string }): Promise<PaymentStatusDTO> {
+    if (this.razorpay.getMode() !== "MOCK") throw new BadRequestError("Test payments are not enabled");
+    const { appointment } = await this.loadOwnedAppointment(input.appointmentId, input.patientUserId);
+    if (appointment.status !== AppointmentStatus.PENDING_PAYMENT || appointment.holdExpiresAt <= new Date()) {
+      throw new ConflictError("The appointment payment hold has expired or is no longer payable");
+    }
+    const payment = await AppointmentPaymentModel.findOne({ appointmentId: appointment._id, patientUserId: appointment.patientUserId }).exec();
+    if (!payment?.providerOrderId?.startsWith("test_order_")) throw new ConflictError("A test payment order was not created for this appointment");
+    const testPaymentId = `test_payment_${appointment._id.toString()}`;
+    await this.recordCaptured(payment, appointment, testPaymentId);
+    return this.getStatus(appointment._id.toString(), input.patientUserId);
+  }
+
   async handleWebhook(rawBody: Buffer, signature: string, eventId?: string): Promise<void> {
     if (!this.razorpay.verifyWebhookSignature(rawBody, signature)) throw new BadRequestError("Webhook signature is invalid");
     let event: { event?: string; payload?: { payment?: { entity?: { id?: string; order_id?: string; amount?: number; currency?: string } } } };
@@ -101,7 +114,8 @@ export class PatientAppointmentPaymentsUseCase implements IPatientAppointmentPay
   }
 
   private orderDTO(appointmentId: string, orderId: string, amountMinor: number, currency: string, status: string): PaymentOrderDTO {
-    return { appointmentId, orderId, amountMinor, currency, keyId: this.razorpay.getPublicKeyId(), status };
+    const mode = orderId.startsWith("test_order_") ? "MOCK" : "RAZORPAY";
+    return { appointmentId, orderId, amountMinor, currency, keyId: mode === "MOCK" ? "" : this.razorpay.getPublicKeyId(), mode, status };
   }
 
   private statusDTO(appointmentId: string, paymentStatus: string, appointmentStatus: string, refundReviewStatus?: "NOT_REQUIRED" | "PENDING_REVIEW"): PaymentStatusDTO {

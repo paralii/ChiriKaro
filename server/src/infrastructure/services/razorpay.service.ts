@@ -18,6 +18,14 @@ interface RazorpayPayment {
 }
 
 export class RazorpayService {
+  getMode(): "MOCK" | "RAZORPAY" {
+    if (process.env.PAYMENT_MODE?.trim().toUpperCase() !== "MOCK") return "RAZORPAY";
+    if (process.env.NODE_ENV === "production") {
+      throw new InternalServerError("Mock payments are disabled in production");
+    }
+    return "MOCK";
+  }
+
   private credentials(): { keyId: string; keySecret: string } {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -30,6 +38,9 @@ export class RazorpayService {
   }
 
   async createOrder(amount: number, currency: string, receipt: string): Promise<RazorpayOrder> {
+    if (this.getMode() === "MOCK") {
+      return { id: `test_order_${receipt}_${Date.now()}`, amount, currency, status: "created" };
+    }
     const credentials = this.credentials();
     const response = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",

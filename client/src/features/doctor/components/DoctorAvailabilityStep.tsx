@@ -27,7 +27,7 @@ export function DoctorAvailabilityStep({ slotDurationMinutes, bufferTimeMinutes,
         <Button variant="secondary" className="min-w-[155px] max-md:w-full" disabled={busy}>{busy ? 'Saving...' : 'Save slot settings'}</Button>
       </Form>
       <div className="px-[19px] pt-1">
-        <p className="mb-3 text-xs text-[#777b89]">Generated times are a preview of your configured availability. Appointment booking is not included.</p>
+        <p className="mb-3 text-xs text-[#777b89]">This preview checks your weekly slots. Patient booking uses date-specific slots after your clinic approves your profile and sets your consultation fee.</p>
         <Button type="button" disabled={busy} onClick={onGenerate}>{busy ? 'Working...' : 'Generate availability preview'}</Button>
       </div>
       {slots.length ? (

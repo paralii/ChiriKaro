@@ -103,6 +103,15 @@ export default function PatientAppointmentsPage() {
     setError('');
     try {
       const order = await appointmentService.createPaymentOrder(appointment.appointmentId);
+      if (order.mode === 'MOCK') {
+        const payment = await appointmentService.confirmTestPayment(appointment.appointmentId);
+        const updated = await appointmentService.get(appointment.appointmentId);
+        setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
+        setPaymentStatuses((current) => ({ ...current, [appointment.appointmentId]: payment.paymentStatus }));
+        setPaymentMessage('Test payment completed. Appointment confirmed; no real payment was charged.');
+        setPaymentBusy('');
+        return;
+      }
       if (!await loadRazorpay() || !window.Razorpay) throw new Error('Secure checkout could not be loaded. Please try again.');
       const checkout = new window.Razorpay({
         key: order.keyId,
@@ -161,7 +170,7 @@ export default function PatientAppointmentsPage() {
         <div className="mt-3 border-t border-[#eff0f4] pt-3">
           <p className="m-0 text-sm font-semibold">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: appointment.feeCurrency }).format(appointment.feeAmountMinor / 100)}</p>
           {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">Payment is required before this appointment is confirmed. The slot hold expires {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}.</p> : null}
-          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Button size="sm" className="mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void payForAppointment(appointment)}>{paymentBusy === appointment.appointmentId ? 'Checking payment…' : 'Pay securely'}</Button> : null}
+          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Button size="sm" className="mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void payForAppointment(appointment)}>{paymentBusy === appointment.appointmentId ? 'Processing payment…' : 'Continue to payment'}</Button> : null}
           {['PENDING_PAYMENT', 'CANCELLED'].includes(appointment.status) ? <Button size="sm" variant="secondary" className="ml-2 mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void refreshPaymentStatus(appointment.appointmentId)}>Check payment status{paymentStatuses[appointment.appointmentId] ? ` · ${paymentStatuses[appointment.appointmentId].toLowerCase()}` : ''}</Button> : null}
           {appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">This payment hold expired. Start a new booking to request another slot.</p> : null}
           {appointment.cancellationRefundReviewStatus === 'PENDING_REVIEW' ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">Paid cancellation is pending manual refund review. No automatic refund has been issued.</p> : null}

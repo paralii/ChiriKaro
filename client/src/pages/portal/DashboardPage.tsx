@@ -14,10 +14,10 @@ import PatientDashboardPage from './patient/PatientDashboardPage';
 export default function DashboardPage() {
   const user = useAppSelector((s) => s.auth.user)!;
   switch (user.role) {
-    case 'super_admin': return <AdminDashboardPage />;
-    case 'clinic_admin': return <ClinicDashboardPage />;
-    case 'doctor': return <DoctorOnboardingPage />;
-    case 'patient': return <PatientDashboardPage />;
+    case 'SUPER_ADMIN': return <AdminDashboardPage />;
+    case 'CLINIC_ADMIN': return <ClinicDashboardPage />;
+    case 'DOCTOR': return <DoctorOnboardingPage />;
+    case 'PATIENT': return <PatientDashboardPage />;
     default:
       return (
         <>

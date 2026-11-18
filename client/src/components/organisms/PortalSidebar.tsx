@@ -1,5 +1,6 @@
 import { BrandLockup } from '@/components/atoms/BrandLockup';
-import { NavItem, SideMark, sideLinkClass } from '@/components/molecules/NavItem';
+import { NavItem, SideMark } from '@/components/molecules/NavItem';
+import { sideLinkClass } from '@shared/utils/sideLinkClass';
 import { roleLabels } from '@/shared/constants/roles';
 import type { NavEntry } from '@/shared/constants/navigation';
 import type { Role } from '@/features/auth/store/authSlice';

@@ -54,7 +54,7 @@ export default function AdminDoctorsPage() {
       </Form>
       {busy && !doctors.length ? <div className="p-4 text-xs text-[#777c8a]">Loading doctors...</div> : !doctors.length ? <EmptyState>No doctors match these filters.</EmptyState> : <DataTable headers={['DOCTOR', 'EMAIL', 'CLINIC', 'SPECIALTIES', 'STATUS', 'ACTIONS']}>
         {doctors.map((doctor) => <tr key={doctor.id}>
-          <td className={tdClass}><CellTitle title={doctor.name} subtitle={doctor.professionalTitle ?? undefined} /></td>
+          <td className={tdClass}><CellTitle title={doctor.name} lines={doctor.professionalTitle ? [doctor.professionalTitle] : []} /></td>
           <td className={tdClass}>{doctor.email ?? '—'}</td>
           <td className={tdClass}>{doctor.clinicName ?? '—'}</td>
           <td className={tdClass}>{doctor.specializations.length ? doctor.specializations.join(', ') : '—'}</td>

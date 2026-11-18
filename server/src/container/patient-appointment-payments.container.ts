@@ -1,7 +1,6 @@
 import { Role } from "@domain/value-objects/Role.ts";
 import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
 import { ClinicRepository } from "@infrastructure/repositories/clinic.repository.ts";
-import { AppointmentRepository } from "@infrastructure/repositories/appointment.repository.ts";
 import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts";
 import { RazorpayService } from "@infrastructure/services/razorpay.service.ts";
 import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";

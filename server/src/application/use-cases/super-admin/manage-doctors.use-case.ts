@@ -33,6 +33,7 @@ export class ManageDoctorsUseCase implements IManageDoctorsUseCase {
     const doctor = await this.repository.findDoctorDetails(doctorId);
     if (!doctor) throw new NotFoundError("Doctor");
     const { id: _internalId, ...details } = doctor;
+    void _internalId;
     return details;
   }
 

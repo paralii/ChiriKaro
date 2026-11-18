@@ -33,8 +33,6 @@ export default function PatientClinicsPage() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError('');
     void publicDirectoryService.search(filters).then((page) => {
       if (active) setResult(page);
     }).catch((reason: unknown) => {
@@ -45,6 +43,12 @@ export default function PatientClinicsPage() {
     return () => { active = false; };
   }, [filters]);
 
+  const updateFilters = (next: PublicDirectoryFilters) => {
+    setLoading(true);
+    setError('');
+    setFilters(next);
+  };
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSelection(null);
@@ -53,7 +57,7 @@ export default function PatientClinicsPage() {
     if (draft.q.trim()) next.q = draft.q.trim();
     if (draft.city.trim()) next.city = draft.city.trim();
     if (draft.specialization.trim()) next.specialization = draft.specialization.trim();
-    setFilters(next);
+    updateFilters(next);
   };
 
   const loadAvailability = async (listingId: string) => {
@@ -178,9 +182,9 @@ export default function PatientClinicsPage() {
           <Button type="button" disabled={booking} onClick={() => void createAppointment()}>{booking ? 'Holding appointment…' : 'Request appointment hold'}</Button>
         </section> : null}
         {result.totalPages > 1 ? <nav aria-label="Search result pages" className="mt-5 flex items-center justify-center gap-3">
-          <Button size="sm" variant="secondary" disabled={loading || result.page <= 1} onClick={() => setFilters({ ...filters, page: result.page - 1 })}>Previous</Button>
+          <Button size="sm" variant="secondary" disabled={loading || result.page <= 1} onClick={() => updateFilters({ ...filters, page: result.page - 1 })}>Previous</Button>
           <span className="text-xs text-[#686e7b]">Page {result.page} of {result.totalPages}</span>
-          <Button size="sm" variant="secondary" disabled={loading || result.page >= result.totalPages} onClick={() => setFilters({ ...filters, page: result.page + 1 })}>Next</Button>
+          <Button size="sm" variant="secondary" disabled={loading || result.page >= result.totalPages} onClick={() => updateFilters({ ...filters, page: result.page + 1 })}>Next</Button>
         </nav> : null}
       </div>
     </Card>

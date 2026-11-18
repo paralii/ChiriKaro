@@ -8,7 +8,6 @@ import type { IQueueClinicContext } from "@application/interfaces/services/IQueu
 import type { ICheckInAppointmentUseCase } from "@application/interfaces/use-cases/clinic/ICheckInAppointmentUseCase.ts";
 import type { CheckInAppointmentInput, QueueEntryDTO } from "@application/dto/clinic/queue.dto.ts";
 import type { QueueEntryRecord } from "@domain/entities/booking-workflow.entity.ts";
-import { AppointmentStatus } from "@domain/enum/appointment-status.enum.ts";
 import { QueueEntryStatus } from "@domain/enum/queue-entry-status.enum.ts";
 import { Role } from "@domain/value-objects/Role.ts";
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";

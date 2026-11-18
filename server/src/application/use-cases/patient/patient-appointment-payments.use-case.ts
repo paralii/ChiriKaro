@@ -78,8 +78,15 @@ export class PatientAppointmentPaymentsUseCase implements IPatientAppointmentPay
   private async recordCaptured(payment: InstanceType<typeof AppointmentPaymentModel>, appointment: InstanceType<typeof AppointmentModel>, providerPaymentId: string, eventId?: string): Promise<void> {
     const now = new Date();
     const confirmed = await AppointmentModel.findOneAndUpdate({ _id: appointment._id, status: AppointmentStatus.PENDING_PAYMENT, holdExpiresAt: { $gt: now } }, { $set: { status: AppointmentStatus.CONFIRMED } }, { returnDocument: "after" }).exec();
-    const needsRefundReview = appointment.status === AppointmentStatus.CANCELLED || (appointment.status === AppointmentStatus.PENDING_PAYMENT && appointment.holdExpiresAt <= now);
-    await AppointmentPaymentModel.updateOne({ _id: payment._id, status: { $ne: PaymentStatus.SUCCEEDED } }, { $set: { status: PaymentStatus.SUCCEEDED, providerPaymentId, ...(needsRefundReview ? { refundReviewStatus: "PENDING_REVIEW" } : {}), ...(eventId ? { lastWebhookEventId: eventId } : {}) } }).exec();
+    await AppointmentPaymentModel.updateOne({ _id: payment._id, status: { $ne: PaymentStatus.SUCCEEDED } }, { $set: { status: PaymentStatus.SUCCEEDED, providerPaymentId, ...(eventId ? { lastWebhookEventId: eventId } : {}) } }).exec();
+    // Re-read after recording capture: cancellation can race both the initial appointment read
+    // and the conditional confirmation above. A captured payment for a cancelled or expired
+    // hold must remain visible for manual refund reconciliation.
+    const latestAppointment = await AppointmentModel.findById(appointment._id).select({ status: 1, holdExpiresAt: 1 }).exec();
+    if (latestAppointment?.status === AppointmentStatus.CANCELLED ||
+      (latestAppointment?.status === AppointmentStatus.PENDING_PAYMENT && latestAppointment.holdExpiresAt <= now)) {
+      await AppointmentPaymentModel.updateOne({ _id: payment._id, status: PaymentStatus.SUCCEEDED }, { $set: { refundReviewStatus: "PENDING_REVIEW" } }).exec();
+    }
     if (!confirmed) return; // Late captured payment remains recorded for reconciliation, without confirming an expired or reallocated slot.
     const allocationId = `${appointment.clinicId.toString()}:${appointment.doctorUserId.toString()}:${appointment.localDate}`;
     await AppointmentDayAllocationModel.updateOne({ _id: allocationId, "reservations.appointmentId": appointment._id, "reservations.status": "PENDING_PAYMENT" }, { $set: { "reservations.$.status": "CONFIRMED" } }).exec();

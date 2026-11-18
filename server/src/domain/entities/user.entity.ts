@@ -187,7 +187,11 @@ export class User {
   }
 
   toSafeObject(): Omit<UserProps, "passwordHash"> {
-    const { passwordHash: _omitted, ...rest } = this.props;
+    const rest = ((props) => {
+      const { passwordHash, ...safeProps } = props;
+      void passwordHash;
+      return safeProps;
+    })(this.props);
     return { ...rest, createdAt: this.createdAt, updatedAt: this.updatedAt };
   }
 }

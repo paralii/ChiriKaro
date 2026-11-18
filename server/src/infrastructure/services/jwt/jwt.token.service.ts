@@ -53,7 +53,7 @@ export class TokenService implements ITokenService {
     return this.verifyToken(token, jwtConfig.refreshSecret);
   }
 
-  async revokeRefreshToken(_refreshToken: string): Promise<void> {}
+  async revokeRefreshToken(): Promise<void> {}
 
   private verifyToken(token: string, secret: string): TokenPayload {
     const decoded = Jwt.verify(token, secret);

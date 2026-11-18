@@ -1,4 +1,8 @@
 export const API_ROUTES = {
+  SEARCH: {
+    DIRECTORY: "/search/directory",
+  },
+
   AUTH: {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",

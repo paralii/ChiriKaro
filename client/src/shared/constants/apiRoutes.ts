@@ -131,6 +131,9 @@ export const API_ROUTES = {
     PROFILE: "/patient/profile",
     APPOINTMENTS: "/patient/appointments",
     APPOINTMENT_BY_ID: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}`,
+    APPOINTMENT_PAYMENT_ORDER: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/order`,
+    APPOINTMENT_PAYMENT_VERIFY: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/verify`,
+    APPOINTMENT_PAYMENT_STATUS: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/status`,
   },
 
   STAFF: {

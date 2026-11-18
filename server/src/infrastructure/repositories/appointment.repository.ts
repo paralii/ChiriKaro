@@ -23,6 +23,23 @@ export class AppointmentRepository implements IAppointmentRepository {
       if (!this.isDuplicateKey(error)) throw error;
     }
 
+    const now = new Date();
+    const conflictingAppointment = await AppointmentModel.exists({
+      clinicId: new Types.ObjectId(reservation.clinicId),
+      doctorUserId: new Types.ObjectId(reservation.doctorUserId),
+      localDate: reservation.localDate,
+      _id: { $ne: new Types.ObjectId(reservation.appointmentId) },
+      startsAt: { $lt: reservation.endsAt },
+      endsAt: { $gt: reservation.startsAt },
+      $or: [
+        { status: AppointmentStatus.CONFIRMED },
+        { status: AppointmentStatus.PENDING_PAYMENT, holdExpiresAt: { $gt: now } },
+      ],
+    }).exec();
+    if (conflictingAppointment) return false;
+
+    await this.releaseStaleReservations(allocationId, now);
+
     try {
       const updated = await AppointmentDayAllocationModel.findOneAndUpdate({
         _id: allocationId,
@@ -33,7 +50,7 @@ export class AppointmentRepository implements IAppointmentRepository {
               endsAt: { $gt: reservation.startsAt },
               $or: [
                 { status: "CONFIRMED" },
-                { status: "PENDING_PAYMENT", holdExpiresAt: { $gt: new Date() } },
+                { status: "PENDING_PAYMENT", holdExpiresAt: { $gt: now } },
               ],
             },
           },
@@ -176,6 +193,35 @@ export class AppointmentRepository implements IAppointmentRepository {
 
   private allocationId(clinicId: string, doctorUserId: string, localDate: string): string {
     return `${clinicId}:${doctorUserId}:${localDate}`;
+  }
+
+  private async releaseStaleReservations(allocationId: string, now: Date): Promise<void> {
+    const allocation = await AppointmentDayAllocationModel.findById(allocationId).exec();
+    if (!allocation) return;
+    const activeReservations = allocation.reservations.filter((reservation) => reservation.status !== "RELEASED");
+    if (!activeReservations.length) return;
+
+    const appointments = await AppointmentModel.find({
+      _id: { $in: activeReservations.map((reservation) => reservation.appointmentId) },
+    }).select({ status: 1, startsAt: 1, endsAt: 1, holdExpiresAt: 1 }).exec();
+    const appointmentById = new Map(appointments.map((appointment) => [appointment._id.toString(), appointment]));
+
+    for (const reservation of activeReservations) {
+      const appointment = appointmentById.get(reservation.appointmentId.toString());
+      const stale = appointment
+        ? appointment.status === AppointmentStatus.CANCELLED ||
+          appointment.status === AppointmentStatus.COMPLETED ||
+          (appointment.status === AppointmentStatus.PENDING_PAYMENT && appointment.holdExpiresAt <= now) ||
+          appointment.startsAt.getTime() !== reservation.startsAt.getTime() ||
+          appointment.endsAt.getTime() !== reservation.endsAt.getTime()
+        : reservation.status === "PENDING_PAYMENT" && reservation.holdExpiresAt <= now;
+      if (!stale) continue;
+
+      await AppointmentDayAllocationModel.updateOne({
+        _id: allocationId,
+        reservations: { $elemMatch: { appointmentId: reservation.appointmentId, startsAt: reservation.startsAt, status: reservation.status } },
+      }, { $set: { "reservations.$.status": "RELEASED" } }).exec();
+    }
   }
 
   private isDuplicateKey(error: unknown): boolean {

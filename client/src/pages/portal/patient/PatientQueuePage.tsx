@@ -32,7 +32,13 @@ export default function PatientQueuePage() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    void patientQueueService.list().then((result) => {
+      setEntries(result);
+      setError('');
+      setLastUpdated(new Date());
+    }).catch((reason: unknown) => {
+      setError(getErrorMessage(reason, 'Could not load your queue status.'));
+    }).finally(() => setLoading(false));
     const timer = window.setInterval(() => { void refresh(true); }, 15_000);
     return () => window.clearInterval(timer);
   }, [refresh]);

@@ -4,5 +4,5 @@ import PatientClinicsPage from './patient/PatientClinicsPage';
 
 export default function ClinicsPage() {
   const role = useAppSelector((s) => s.auth.user?.role);
-  return role === 'super_admin' ? <AdminClinicsPage /> : <PatientClinicsPage />;
+  return role === 'SUPER_ADMIN' ? <AdminClinicsPage /> : <PatientClinicsPage />;
 }

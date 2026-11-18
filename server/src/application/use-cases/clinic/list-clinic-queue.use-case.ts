@@ -4,7 +4,7 @@ import type { IQueueClinicContext } from "@application/interfaces/services/IQueu
 import type { IListClinicQueueUseCase, ListClinicQueueInput } from "@application/interfaces/use-cases/clinic/IListClinicQueueUseCase.ts";
 import type { QueueDayDTO, QueueEntryDTO } from "@application/dto/clinic/queue.dto.ts";
 import { Role } from "@domain/value-objects/Role.ts";
-import { BadRequestError, ForbiddenError } from "@shared/errors/index.ts";
+import { ForbiddenError } from "@shared/errors/index.ts";
 
 function toDTO(entry: QueueEntryRecord): QueueEntryDTO {
   return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, doctorName: entry.doctorNameSnapshot, clinicName: entry.clinicNameSnapshot, timeZone: entry.timeZone, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };

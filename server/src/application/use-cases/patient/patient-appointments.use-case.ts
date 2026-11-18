@@ -33,6 +33,7 @@ function toDTO(appointment: AppointmentRecord, listingIdService: IPublicListingI
     status: appointment.status,
     holdExpiresAt: appointment.holdExpiresAt,
     holdExpired: appointment.holdExpiresAt <= new Date(),
+    changeWindowOpen: appointment.slot.startsAt.getTime() > Date.now() + APPOINTMENT_CHANGE_POLICY.cutoffHours * 60 * 60_000,
     createdAt: appointment.createdAt,
     rescheduleCount: appointment.rescheduleCount,
     changeHistory: appointment.changeHistory,

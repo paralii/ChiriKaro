@@ -8,7 +8,7 @@ export class ListQueueDoctorsUseCase implements IListQueueDoctorsUseCase {
   constructor(private readonly context: IQueueClinicContext) {}
 
   async execute(input: { clinicId: string; actorUserId: string; actorRole: string }): Promise<QueueDoctorDTO[]> {
-    const clinic = await this.context.getOperationalClinic(input.clinicId);
+    await this.context.getOperationalClinic(input.clinicId);
     if (input.actorRole === Role.DOCTOR) {
       const doctor = await this.context.getVerifiedDoctor(input.clinicId, input.actorUserId);
       if (!doctor.userId) throw new ForbiddenError("Doctor account is not linked to this queue");

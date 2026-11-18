@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc --noEmit --ignoreDeprecations 5.0 && esbuild src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server.js",
     "start": "node dist/server.js",
     "seed:admin": "tsx src/scripts/seed-super-admin.ts",
     "lint": "eslint .",
@@ -39,6 +39,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.1",
     "@types/nodemailer": "^8.0.1",
+    "esbuild": "^0.28.1",
     "eslint": "^9.39.5",
     "globals": "^17.13.0",
     "jiti": "^2.7.0",
@@ -48,3 +49,4 @@
     "typescript-eslint": "^8.72.0"
   }
 }
+

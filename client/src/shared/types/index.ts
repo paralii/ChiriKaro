@@ -49,6 +49,7 @@ export type PatientAppointment = {
   status: 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
   holdExpiresAt: string;
   holdExpired: boolean;
+  changeWindowOpen: boolean;
   createdAt: string;
   rescheduleCount: number;
   changeHistory: Array<{ type: 'CANCELLED' | 'RESCHEDULED'; previousLocalDate: string; previousStartsAt: string; previousEndsAt: string; previousLocalStartTime: string; previousLocalEndTime: string; changedAt: string }>;

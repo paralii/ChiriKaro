@@ -3,7 +3,7 @@ import type { IClinicDocument } from "@infrastructure/database/mongodb/models/Cl
 import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel.ts";
 import { DentistModel } from "@infrastructure/database/mongodb/models/DentistModel.ts";
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
-import type { ISuperAdminClinicRepository, SuperAdminPatientSummary, SuperAdminDoctorSummary, SuperAdminDoctorDetails, SuperAdminClinicDoctorSummary } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
+import type { ISuperAdminClinicRepository, SuperAdminPatientSummary, SuperAdminDoctorSummary, SuperAdminDoctorDetails } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
 import type { ISuperAdminStatisticsRepository } from "@application/interfaces/repositories/ISuperAdminStatisticsRepository.ts";
 import type { SuperAdminStatisticsDTO } from "@application/dto/super-admin/statistics.dto.ts";
 import { Clinic } from "@domain/entities/clinic.entity.ts";

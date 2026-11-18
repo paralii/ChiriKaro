@@ -24,6 +24,7 @@ export interface AppointmentDTO {
   status: AppointmentStatus;
   holdExpiresAt: Date;
   holdExpired: boolean;
+  changeWindowOpen: boolean;
   createdAt: Date;
   rescheduleCount: number;
   changeHistory: Array<{ type: "CANCELLED" | "RESCHEDULED"; previousLocalDate: string; previousStartsAt: Date; previousEndsAt: Date; previousLocalStartTime: string; previousLocalEndTime: string; changedAt: Date }>;

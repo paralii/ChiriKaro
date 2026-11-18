@@ -20,6 +20,8 @@ export interface IAppointmentDocument extends Document {
   idempotencyKey: string;
   requestFingerprint: string;
   holdExpiresAt: Date;
+  rescheduleCount: number;
+  changeHistory: Array<{ type: "CANCELLED" | "RESCHEDULED"; previousLocalDate: string; previousStartsAt: Date; previousEndsAt: Date; previousLocalStartTime: string; previousLocalEndTime: string; changedAt: Date }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +44,16 @@ const appointmentSchema = new Schema<IAppointmentDocument>({
   idempotencyKey: { type: String, required: true, maxlength: 128 },
   requestFingerprint: { type: String, required: true },
   holdExpiresAt: { type: Date, required: true },
+  rescheduleCount: { type: Number, required: true, default: 0, min: 0, max: 1 },
+  changeHistory: { type: [{
+    type: { type: String, enum: ["CANCELLED", "RESCHEDULED"], required: true },
+    previousLocalDate: { type: String, required: true },
+    previousStartsAt: { type: Date, required: true },
+    previousEndsAt: { type: Date, required: true },
+    previousLocalStartTime: { type: String, required: true },
+    previousLocalEndTime: { type: String, required: true },
+    changedAt: { type: Date, required: true },
+  }], default: [] },
 }, { timestamps: true, versionKey: false });
 
 appointmentSchema.index({ patientUserId: 1, idempotencyKey: 1 }, { unique: true, name: "uniq_patient_idempotency_key" });

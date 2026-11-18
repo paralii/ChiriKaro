@@ -66,6 +66,8 @@ export const API_ROUTES = {
     DASHBOARD: "/dashboard",
     APPOINTMENTS: "/appointments",
     APPOINTMENT_BY_ID: "/appointments/:appointmentId",
+    APPOINTMENT_CANCEL: "/appointments/:appointmentId/cancel",
+    APPOINTMENT_RESCHEDULE: "/appointments/:appointmentId/reschedule",
     APPOINTMENT_PAYMENT_ORDER: "/appointments/:appointmentId/payment/order",
     APPOINTMENT_PAYMENT_VERIFY: "/appointments/:appointmentId/payment/verify",
     APPOINTMENT_PAYMENT_STATUS: "/appointments/:appointmentId/payment/status",

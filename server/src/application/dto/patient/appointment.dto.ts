@@ -10,6 +10,7 @@ export interface CreateAppointmentInput {
 
 export interface AppointmentDTO {
   appointmentId: string;
+  listingId: string;
   clinicName: string;
   doctorName: string;
   localDate: string;
@@ -24,4 +25,15 @@ export interface AppointmentDTO {
   holdExpiresAt: Date;
   holdExpired: boolean;
   createdAt: Date;
+  rescheduleCount: number;
+  changeHistory: Array<{ type: "CANCELLED" | "RESCHEDULED"; previousLocalDate: string; previousStartsAt: Date; previousEndsAt: Date; previousLocalStartTime: string; previousLocalEndTime: string; changedAt: Date }>;
+  cancellationRefundReviewStatus?: "NOT_REQUIRED" | "PENDING_REVIEW";
+}
+
+export interface RescheduleAppointmentInput {
+  patientUserId: string;
+  appointmentId: string;
+  listingId: string;
+  date: unknown;
+  startsAt: unknown;
 }

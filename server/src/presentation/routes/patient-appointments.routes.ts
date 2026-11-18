@@ -11,5 +11,7 @@ export function PatientAppointmentsRouter(
   router.post(API_ROUTES.PATIENT.APPOINTMENTS, middleware.authenticate, middleware.authorizePatient, controller.create);
   router.get(API_ROUTES.PATIENT.APPOINTMENTS, middleware.authenticate, middleware.authorizePatient, controller.list);
   router.get(API_ROUTES.PATIENT.APPOINTMENT_BY_ID, middleware.authenticate, middleware.authorizePatient, controller.get);
+  router.post(API_ROUTES.PATIENT.APPOINTMENT_CANCEL, middleware.authenticate, middleware.authorizePatient, controller.cancel);
+  router.post(API_ROUTES.PATIENT.APPOINTMENT_RESCHEDULE, middleware.authenticate, middleware.authorizePatient, controller.reschedule);
   return router;
 }

@@ -10,6 +10,7 @@ import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import AdminPortalLayout from '@/pages/portal/admin/AdminPortalLayout';
 import AdminDashboardPage from '@/pages/portal/admin/AdminDashboardPage';
 import AdminClinicsPage from '@/pages/portal/admin/AdminClinicsPage';
+import AdminPatientsPage from '@/pages/portal/admin/AdminPatientsPage';
 import ClinicPortalLayout from '@/pages/portal/clinic/ClinicPortalLayout';
 import ClinicDashboardPage from '@/pages/portal/clinic/ClinicDashboardPage';
 import ClinicProfilePage from '@/pages/portal/clinic/ClinicProfilePage';
@@ -74,6 +75,7 @@ export default function AppRouter() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="clinics" element={<AdminClinicsPage />} />
+          <Route path="patients" element={<AdminPatientsPage />} />
           <Route path="pending" element={<AdminClinicsPage pendingOnly />} />
         </Route>
       </Route>

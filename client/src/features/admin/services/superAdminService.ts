@@ -4,6 +4,7 @@ import type {
   ClinicStatus,
   ClinicSummary,
   SuperAdminStatistics,
+  SuperAdminPatient,
 } from "@/shared/types";
 import { API_ROUTES } from "@/shared/constants/apiRoutes";
 
@@ -23,6 +24,7 @@ export type ClinicPage = {
   totalItems: number;
   totalPages: number;
 };
+export type PatientPage = { items: SuperAdminPatient[]; page: number; limit: number; totalItems: number; totalPages: number };
 type SuperAdminStatisticsResponse = {
   clinics: {
     total: number;
@@ -34,6 +36,15 @@ type SuperAdminStatisticsResponse = {
 };
 
 export const superAdminService = {
+  listPatients: async (page = 1, limit = 20): Promise<PatientPage> => {
+    const response = await api.get<ApiEnvelope<SuperAdminPatient[]>>(`${API_ROUTES.SUPER_ADMIN.PATIENTS}?page=${page}&limit=${limit}`);
+    return { items: response.data ?? [], page: response.meta?.page ?? page, limit: response.meta?.limit ?? limit, totalItems: response.meta?.totalItems ?? 0, totalPages: response.meta?.totalPages ?? 0 };
+  },
+  updatePatientStatus: async (id: string, status: SuperAdminPatient['status']): Promise<SuperAdminPatient> => {
+    const response = await api.patch<ApiEnvelope<SuperAdminPatient>>(API_ROUTES.SUPER_ADMIN.PATIENT_STATUS(id), { status });
+    if (!response.data) throw new Error('Updated patient status was not returned.');
+    return response.data;
+  },
   listClinics: async (page = 1, limit = 20): Promise<ClinicPage> => {
     const response = await api.get<ApiEnvelope<Clinic[]>>(
       `${API_ROUTES.SUPER_ADMIN.CLINICS}?page=${page}&limit=${limit}`,

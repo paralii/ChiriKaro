@@ -42,5 +42,7 @@ export function createSuperAdminRouter(
     authorizeSuperAdmin,
     superAdminController.getStatistics,
   );
+  router.get(API_ROUTES.SUPER_ADMIN.PATIENTS, authenticate, authorizeSuperAdmin, superAdminController.listPatients);
+  router.patch(API_ROUTES.SUPER_ADMIN.PATIENT_STATUS, authenticate, authorizeSuperAdmin, superAdminController.updatePatientStatus);
   return router;
 }

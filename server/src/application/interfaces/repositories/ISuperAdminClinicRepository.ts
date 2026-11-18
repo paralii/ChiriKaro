@@ -13,6 +13,14 @@ export interface SuperAdminClinicTeamMemberSummary {
   status: string;
 }
 
+export interface SuperAdminPatientSummary {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  createdAt: Date;
+}
+
 export interface ISuperAdminClinicRepository {
   findById(id: string): Promise<Clinic | null>;
   findOwnerName(ownerId: string): Promise<string | null>;
@@ -23,4 +31,6 @@ export interface ISuperAdminClinicRepository {
     totalItems: number;
   }>;
   save(clinic: Clinic): Promise<Clinic>;
+  findPatientsPage(options: { skip: number; limit: number }): Promise<{ patients: SuperAdminPatientSummary[]; totalItems: number }>;
+  updatePatientStatus(patientId: string, status: "ACTIVE" | "SUSPENDED"): Promise<SuperAdminPatientSummary | null>;
 }

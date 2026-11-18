@@ -30,6 +30,8 @@ export const API_ROUTES = {
       `/super-admin/clinics/${encodeURIComponent(id)}/status`,
 
     STATISTICS: "/super-admin/statistics",
+    PATIENTS: "/super-admin/patients",
+    PATIENT_STATUS: (id: string) => `/super-admin/patients/${encodeURIComponent(id)}/status`,
   },
 
   CLINIC: {

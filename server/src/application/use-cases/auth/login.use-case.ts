@@ -1,4 +1,5 @@
 import { UnauthorizedError } from "@shared/errors/index.ts";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 
 import type { LoginDto, LoginResult } from "@application/dto/auth/login.dto.ts";
 
@@ -21,6 +22,9 @@ export class LoginUseCase implements ILoginUseCase {
     const user = await this._userRepository.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedError("Invalid email");
+    }
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedError("This account is not active");
     }
     if (!user.isEmailVerified) {
       throw new UnauthorizedError("Email not verified");

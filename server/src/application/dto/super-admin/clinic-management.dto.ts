@@ -39,6 +39,15 @@ export interface ClinicListResultDTO {
   totalPages: number;
 }
 
+export interface PatientListQueryDTO { page?: unknown; limit?: unknown; }
+export interface PatientListResultDTO {
+  patients: Array<{ id: string; name: string; email: string; status: string; createdAt: Date }>;
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export interface UpdateClinicStatusDTO {
   clinicId: string;
   status: unknown;

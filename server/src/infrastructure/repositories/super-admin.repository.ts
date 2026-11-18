@@ -3,7 +3,7 @@ import type { IClinicDocument } from "@infrastructure/database/mongodb/models/Cl
 import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel.ts";
 import { DentistModel } from "@infrastructure/database/mongodb/models/DentistModel.ts";
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
-import type { ISuperAdminClinicRepository } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
+import type { ISuperAdminClinicRepository, SuperAdminPatientSummary } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
 import type { ISuperAdminStatisticsRepository } from "@application/interfaces/repositories/ISuperAdminStatisticsRepository.ts";
 import type { SuperAdminStatisticsDTO } from "@application/dto/super-admin/statistics.dto.ts";
 import { Clinic } from "@domain/entities/clinic.entity.ts";
@@ -79,6 +79,27 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
       { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     ).exec();
     return this.toDomain(doc!);
+  }
+
+  async findPatientsPage(options: { skip: number; limit: number }): Promise<{ patients: SuperAdminPatientSummary[]; totalItems: number }> {
+    const query = { role: "PATIENT" };
+    const [patients, totalItems] = await Promise.all([
+      UserModel.find(query).select("name email status createdAt").sort({ createdAt: -1, _id: -1 }).skip(options.skip).limit(options.limit).lean().exec(),
+      UserModel.countDocuments(query).exec(),
+    ]);
+    return {
+      patients: patients.map((patient) => ({ id: patient._id.toString(), name: patient.name, email: patient.email, status: patient.status, createdAt: patient.createdAt })),
+      totalItems,
+    };
+  }
+
+  async updatePatientStatus(patientId: string, status: "ACTIVE" | "SUSPENDED"): Promise<SuperAdminPatientSummary | null> {
+    const patient = await UserModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(patientId), role: "PATIENT" },
+      { $set: { status } },
+      { returnDocument: "after", runValidators: true },
+    ).select("name email status createdAt").lean().exec();
+    return patient ? { id: patient._id.toString(), name: patient.name, email: patient.email, status: patient.status, createdAt: patient.createdAt } : null;
   }
 
   private toDomain(doc: IClinicDocument): Clinic {

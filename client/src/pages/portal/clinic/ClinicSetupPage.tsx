@@ -66,7 +66,14 @@ export default function ClinicSetupPage() {
   };
 
   const saveSpecializations = (text: string) => {
-    const specializations = parseList(text);
+    const values = parseList(text);
+    const seen = new Set<string>();
+    const specializations = values.filter((value) => {
+      const key = value.toLocaleLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     if (!specializations.length) return setError('Add at least one clinic specialization.');
     void run(async () => merge(await clinicService.updateSetup({ specializations })), { success: 'Clinic specializations saved.', fallback: 'Could not save specializations.' });
   };
@@ -123,7 +130,8 @@ export default function ClinicSetupPage() {
     }))
     : [];
   const reviewPending = profile?.setupStatus === 'PENDING_VERIFICATION';
-  const editingDisabled = busy || reviewPending;
+  const editingDisabled = busy || reviewPending || profile?.setupStatus === 'VERIFIED';
+  const specializationsDisabled = busy || reviewPending;
 
   return (
     <div className="grid gap-[18px] [&>section]:mt-0">
@@ -134,7 +142,7 @@ export default function ClinicSetupPage() {
           {isRejected ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason || 'Update the requested details and resubmit your application.'}</p></Notice> : null}
           {reviewPending ? <Notice tone="warning">Your application is under review. Editing and document uploads are disabled until a decision is made.</Notice> : null}
           <Card className="pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={editingDisabled} onSave={saveProfile} setupOnly /></Card>
-          <Card className="pb-5"><SectionHeading title="Specializations" description="List the services your clinic provides." /><SpecializationsForm initial={profile.specializations} busy={editingDisabled} onSave={saveSpecializations} /></Card>
+          <Card className="pb-5"><SectionHeading title="Specializations" description={profile.setupStatus === 'VERIFIED' ? 'Manage the services offered by your approved clinic. Assigned specializations must be reassigned before removal.' : 'List the services your clinic provides.'} /><SpecializationsForm initial={profile.specializations} busy={specializationsDisabled} onSave={saveSpecializations} /></Card>
           <Card className="pb-5"><SectionHeading title="Doctor specializations" description="Assign each doctor only specializations offered by this clinic." /><DoctorSpecializationAssignments doctors={doctorAssignments} clinicSpecializations={profile.specializations} busy={busy} onSave={saveDoctorSpecializations} /></Card>
           <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic." /><WorkingHoursForm initial={profile.workingHours} busy={editingDisabled} onSave={saveHours} /></Card>
           <Card className="pb-5"><SectionHeading title="Doctor working hours" description="Set schedules for doctors in this clinic. Doctor hours must fit clinic operating hours." /><ClinicDoctorWorkingHours doctors={doctorSchedules} busy={busy} onSave={saveDoctorHours} /></Card>

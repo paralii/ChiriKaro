@@ -4,6 +4,9 @@ import type { PatientAppointment } from '@/shared/types';
 
 type ApiEnvelope<T> = { data?: T };
 
+export type PaymentOrder = { appointmentId: string; orderId: string; amountMinor: number; currency: string; keyId: string; status: string };
+export type AppointmentPaymentStatus = { appointmentId: string; paymentStatus: string; appointmentStatus: PatientAppointment['status'] };
+
 export const appointmentService = {
   create: async (input: { listingId: string; date: string; startsAt: string }, idempotencyKey: string) => {
     const response = await http.post<ApiEnvelope<PatientAppointment>>(API_ROUTES.PATIENT.APPOINTMENTS, input, {
@@ -20,6 +23,21 @@ export const appointmentService = {
   get: async (appointmentId: string) => {
     const response = await http.get<ApiEnvelope<PatientAppointment>>(API_ROUTES.PATIENT.APPOINTMENT_BY_ID(appointmentId));
     if (!response.data.data) throw new Error('Appointment was not returned.');
+    return response.data.data;
+  },
+  createPaymentOrder: async (appointmentId: string) => {
+    const response = await http.post<ApiEnvelope<PaymentOrder>>(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_ORDER(appointmentId));
+    if (!response.data.data) throw new Error('Payment order was not returned.');
+    return response.data.data;
+  },
+  verifyPayment: async (appointmentId: string, payload: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+    const response = await http.post<ApiEnvelope<AppointmentPaymentStatus>>(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_VERIFY(appointmentId), payload);
+    if (!response.data.data) throw new Error('Payment status was not returned.');
+    return response.data.data;
+  },
+  getPaymentStatus: async (appointmentId: string) => {
+    const response = await http.get<ApiEnvelope<AppointmentPaymentStatus>>(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_STATUS(appointmentId));
+    if (!response.data.data) throw new Error('Payment status was not returned.');
     return response.data.data;
   },
 };

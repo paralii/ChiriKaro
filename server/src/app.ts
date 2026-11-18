@@ -10,6 +10,7 @@ import { invitationRouter } from "@container/invitation.container.ts";
 import { roleDashboardRouter } from "@container/role-dashboard.container.ts";
 import { publicDirectoryRouter } from "@container/public-directory.container.ts";
 import { patientAppointmentsRouter } from "@container/patient-appointments.container.ts";
+import { patientAppointmentPaymentsRouter } from "@container/patient-appointment-payments.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
@@ -34,7 +35,14 @@ export class App {
       }),
     );
 
-    this.instance.use(express.json({ limit: "10mb" }));
+    this.instance.use(express.json({
+      limit: "10mb",
+      verify: (req, _res, buffer) => {
+        if ((req.url ?? "").includes("/payments/razorpay/webhook")) {
+          (req as typeof req & { rawBody?: Buffer }).rawBody = Buffer.from(buffer);
+        }
+      },
+    }));
 
     this.instance.use(
       express.urlencoded({
@@ -60,6 +68,7 @@ export class App {
     this.instance.use(API_ROUTES.AUTH.BASE, authRouter);
     this.instance.use(API_ROUTES.SEARCH.BASE, publicDirectoryRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentsRouter);
+    this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentPaymentsRouter);
     this.instance.use(API_ROUTES.SUPER_ADMIN.BASE, superAdminRouter);
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicRouter);
     this.instance.use(API_ROUTES.DOCTOR.BASE, doctorRouter);

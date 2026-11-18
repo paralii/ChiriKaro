@@ -3,6 +3,7 @@ import { databaseConfig } from "@infrastructure/database/mongodb/database.config
 import { logger } from "@infrastructure/logger/logger.js";
 import { AppointmentModel } from "@infrastructure/database/mongodb/models/AppointmentModel.ts";
 import { AppointmentDayAllocationModel } from "@infrastructure/database/mongodb/models/AppointmentDayAllocationModel.ts";
+import { AppointmentPaymentModel } from "@infrastructure/database/mongodb/models/AppointmentPaymentModel.ts";
 
 export class MongoDatabase {
   private isConnecting = false;
@@ -24,7 +25,7 @@ export class MongoDatabase {
       mongoose.set("strictQuery", true);
 
       await mongoose.connect(databaseConfig.uri);
-      await Promise.all([AppointmentModel.init(), AppointmentDayAllocationModel.init()]);
+      await Promise.all([AppointmentModel.init(), AppointmentDayAllocationModel.init(), AppointmentPaymentModel.init()]);
       logger.info("MongoDB connected successfully");
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));

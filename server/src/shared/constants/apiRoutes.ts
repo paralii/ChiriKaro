@@ -64,6 +64,8 @@ export const API_ROUTES = {
 
     PROFILE: "/profile",
     DASHBOARD: "/dashboard",
+    APPOINTMENTS: "/appointments",
+    APPOINTMENT_BY_ID: "/appointments/:appointmentId",
   },
 
   CLINIC: {

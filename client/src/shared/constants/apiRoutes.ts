@@ -129,6 +129,8 @@ export const API_ROUTES = {
   PATIENT: {
     DASHBOARD: "/patient/dashboard",
     PROFILE: "/patient/profile",
+    APPOINTMENTS: "/patient/appointments",
+    APPOINTMENT_BY_ID: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}`,
   },
 
   STAFF: {

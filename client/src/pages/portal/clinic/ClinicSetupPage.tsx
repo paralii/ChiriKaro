@@ -41,6 +41,7 @@ export default function ClinicSetupPage() {
   const [doctorAssignments, setDoctorAssignments] = useState<ClinicDoctorSpecialization[]>([]);
   const [doctorSchedules, setDoctorSchedules] = useState<ClinicDoctorSchedule[]>([]);
   const { busy, error, message, setError, run } = useAction();
+  const isRejected = profile?.status === 'REJECTED' || profile?.setupStatus === 'REJECTED';
 
   useEffect(() => {
     void run(async () => {
@@ -59,7 +60,7 @@ export default function ClinicSetupPage() {
       const updated = await clinicService.updateSetup({
         location: { address: v.address?.trim() ?? null, city: v.city?.trim() ?? null, state: v.state?.trim() ?? null, pincode: v.pincode?.trim() ?? null },
       });
-      merge(updated);
+      setProfile((current) => current ? { ...current, ...updated, workingHours: current.workingHours } : updated);
       dispatch(patchClinic({ address: updated.address }));
     }, { success: 'Clinic location saved.', fallback: 'Could not save the clinic location.' });
   };
@@ -130,7 +131,7 @@ export default function ClinicSetupPage() {
       {!profile && busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading clinic setup...</Card> : null}
       {profile ? (
         <>
-          {profile.rejectionReason ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason}</p></Notice> : null}
+          {isRejected ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason || 'Update the requested details and resubmit your application.'}</p></Notice> : null}
           {reviewPending ? <Notice tone="warning">Your application is under review. Editing and document uploads are disabled until a decision is made.</Notice> : null}
           <Card className="pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={editingDisabled} onSave={saveProfile} setupOnly /></Card>
           <Card className="pb-5"><SectionHeading title="Specializations" description="List the services your clinic provides." /><SpecializationsForm initial={profile.specializations} busy={editingDisabled} onSave={saveSpecializations} /></Card>

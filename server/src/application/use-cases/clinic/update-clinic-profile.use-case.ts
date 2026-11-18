@@ -64,6 +64,9 @@ export class UpdateClinicProfileUseCase implements IUpdateClinicProfileUseCase {
     if (clinic.setupStatus === ClinicSetupStatus.PENDING_VERIFICATION) {
       throw new ConflictError("Clinic application details cannot be edited while review is pending");
     }
+    if (clinic.setupStatus === ClinicSetupStatus.VERIFIED) {
+      throw new ConflictError("Verified clinic profile cannot be edited");
+    }
 
     try {
       clinic.updateProfile(normalizeUpdates(dto.updates));

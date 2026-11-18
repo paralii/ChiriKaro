@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Badge } from '@components/atoms/Badge';
 import { statusTone } from '@shared/utils/statusTones';
 import { Button } from '@components/atoms/Button';
@@ -6,8 +7,12 @@ import { CellTitle, DataTable, tdClass } from '@components/molecules/DataTable';
 import type { Clinic, ClinicStatus } from '@shared/types';
 
 export function ClinicTable({ clinics, onStatus, onDetails, busy }: { clinics: Clinic[]; onStatus: (id: string, status: ClinicStatus, reason?: string) => void; onDetails?: (id: string) => void; busy: boolean }) {
+  const [rejectingClinic, setRejectingClinic] = useState<Clinic | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+
   if (!clinics.length) return <EmptyState>No clinics to show yet.</EmptyState>;
   return (
+    <>
     <DataTable headers={['CLINIC', 'OWNER', 'STATUS', 'CONTACT', 'ACTIONS']}>
       {clinics.map((c) => (
         <tr key={c.id}>
@@ -20,7 +25,7 @@ export function ClinicTable({ clinics, onStatus, onDetails, busy }: { clinics: C
               {c.status === 'PENDING' && c.setupStatus === 'PENDING_VERIFICATION' ? (
                 <>
                   <Button size="xs" variant="ghost" disabled={busy} onClick={() => onStatus(c.id, 'APPROVED')}>Approve</Button>
-                  <Button size="xs" variant="ghost" disabled={busy} onClick={() => { const reason = window.prompt(`Reason for rejecting ${c.name}?`); if (reason?.trim()) onStatus(c.id, 'REJECTED', reason.trim()); }}>Reject</Button>
+                  <Button size="xs" variant="ghost" disabled={busy} onClick={() => { setRejectingClinic(c); setRejectionReason(''); }}>Reject</Button>
                 </>
               ) : c.status === 'PENDING' ? (
                 <span className="text-[9px] text-[#777c8a]">Awaiting clinic submission</span>
@@ -43,5 +48,20 @@ export function ClinicTable({ clinics, onStatus, onDetails, busy }: { clinics: C
         </tr>
       ))}
     </DataTable>
+    {rejectingClinic ? (
+      <div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-[#17203a66] p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setRejectingClinic(null); }}>
+        <section role="dialog" aria-modal="true" aria-labelledby="clinic-rejection-title" className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+          <h2 id="clinic-rejection-title" className="m-0 text-base font-semibold text-[#292d38]">Reject {rejectingClinic.name}</h2>
+          <p className="mt-2 text-xs text-[#656a79]">Give the clinic a reason so they know what to correct before resubmitting.</p>
+          <label htmlFor="clinic-rejection-reason" className="mb-1 block text-xs font-medium text-[#393d49]">Rejection reason</label>
+          <textarea id="clinic-rejection-reason" value={rejectionReason} onChange={(event) => setRejectionReason(event.target.value)} maxLength={1000} required rows={4} className="w-full rounded border border-[#dce2f1] p-2 text-sm" />
+          <div className="mt-3 flex justify-end gap-2">
+            <Button size="xs" variant="ghost" disabled={busy} onClick={() => setRejectingClinic(null)}>Cancel</Button>
+            <Button size="xs" disabled={busy || !rejectionReason.trim() || rejectionReason.trim().length > 1000} onClick={() => { onStatus(rejectingClinic.id, 'REJECTED', rejectionReason.trim()); setRejectingClinic(null); }}>Confirm rejection</Button>
+          </div>
+        </section>
+      </div>
+    ) : null}
+    </>
   );
 }

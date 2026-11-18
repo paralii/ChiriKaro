@@ -23,6 +23,9 @@ export class UpdateClinicSetupUseCase implements IUpdateClinicSetupUseCase {
     if (clinic.setupStatus === ClinicSetupStatus.PENDING_VERIFICATION) {
       throw new ConflictError("Clinic application details cannot be edited while review is pending");
     }
+    if (clinic.setupStatus === ClinicSetupStatus.VERIFIED) {
+      throw new ConflictError("Verified clinic setup cannot be edited");
+    }
     const data = updates as Record<string, unknown>;
     const allowed = ["location", "specializations", "workingHours"];
     if (!Object.keys(data).length || Object.keys(data).some((key) => !allowed.includes(key))) {

@@ -42,6 +42,11 @@ const slice = createSlice({
         const { clinic, statistics } = a.payload;
         const existing = s.items.find((c) => c.id === clinic.id);
         if (existing) Object.assign(existing, clinic);
+        if (["APPROVED", "REJECTED"].includes(clinic.status)) {
+          s.items = s.items.filter((item) => item.id !== clinic.id);
+          s.totalItems = Math.max(0, s.totalItems - 1);
+          s.totalPages = Math.ceil(s.totalItems / s.limit);
+        }
         s.summary = statistics.clinics; s.doctorStatistics = statistics.doctors; s.busy = false; s.message = `Clinic ${clinic.status.toLowerCase()}.`;
       })
       .addCase(changeClinicStatus.rejected, (s, a) => { s.busy = false; s.error = a.error.message ?? 'Could not update clinic.'; });

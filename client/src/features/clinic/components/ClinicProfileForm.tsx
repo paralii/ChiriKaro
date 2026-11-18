@@ -6,6 +6,11 @@ import type { ClinicProfile } from '@shared/types';
 
 export function ClinicProfileForm({ initial, busy, onSave, profileOnly = false, setupOnly = false }: { initial: ClinicProfile; busy: boolean; onSave: (values: ClinicProfile) => void; profileOnly?: boolean; setupOnly?: boolean }) {
   const [v, setV] = useState(initial);
+  const [lastInitial, setLastInitial] = useState(initial);
+  if (lastInitial !== initial) {
+    setLastInitial(initial);
+    setV(initial);
+  }
   const bind = (field: keyof ClinicProfile) => ({
     value: (v[field] as string | null) ?? '',
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => setV((c) => ({ ...c, [field]: e.target.value })),

@@ -33,6 +33,9 @@ export class UploadClinicDocumentUseCase implements IUploadClinicDocumentUseCase
     if (clinic.setupStatus === ClinicSetupStatus.PENDING_VERIFICATION) {
       throw new ConflictError("Clinic documents cannot be changed while review is pending");
     }
+    if (clinic.setupStatus === ClinicSetupStatus.VERIFIED) {
+      throw new ConflictError("Verified clinic documents cannot be changed");
+    }
     const key = await this._storage.save(content, contentType);
     try {
       clinic.addDocument({

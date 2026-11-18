@@ -15,7 +15,7 @@ import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@shared/errors/index.ts";
 
 function toDTO(entry: QueueEntryRecord): QueueEntryDTO {
-  return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, doctorName: entry.doctorNameSnapshot, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };
+  return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, doctorName: entry.doctorNameSnapshot, clinicName: entry.clinicNameSnapshot, timeZone: entry.timeZone, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };
 }
 
 export class CheckInAppointmentUseCase implements ICheckInAppointmentUseCase {
@@ -41,7 +41,10 @@ export class CheckInAppointmentUseCase implements ICheckInAppointmentUseCase {
       doctorUserId: appointment.doctorUserId, localDate, kind: "APPOINTMENT",
       appointmentId: input.appointmentId, patientUserId: patient.id,
       patientNameSnapshot: patient.name, doctorNameSnapshot: appointment.doctorNameSnapshot,
+      clinicNameSnapshot: clinic.name, timeZone: clinic.timeZone,
       tokenNumber, status: QueueEntryStatus.WAITING,
+      createdByUserId: input.actorUserId, createdByRole: input.actorRole,
+      statusHistory: [{ fromStatus: null, toStatus: QueueEntryStatus.WAITING, actorUserId: input.actorUserId, actorRole: input.actorRole, changedAt: now }],
       idempotencyKey, requestFingerprint: createHash("sha256").update(input.appointmentId).digest("hex"),
       createdAt: now, updatedAt: now,
     };

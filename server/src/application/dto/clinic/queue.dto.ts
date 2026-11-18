@@ -6,6 +6,8 @@ export interface QueueEntryDTO {
   kind: "WALK_IN" | "APPOINTMENT";
   patientName: string;
   doctorName: string;
+  clinicName: string;
+  timeZone: string;
   localDate: string;
   status: QueueEntryStatus;
   createdAt: Date;
@@ -37,4 +39,12 @@ export interface CheckInAppointmentInput {
   actorUserId: string;
   actorRole: string;
   appointmentId: string;
+}
+
+export interface TransitionQueueEntryInput {
+  clinicId: string;
+  actorUserId: string;
+  actorRole: string;
+  queueEntryId: string;
+  nextStatus: unknown;
 }

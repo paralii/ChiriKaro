@@ -28,6 +28,7 @@ import PatientDashboardPage from '@/pages/portal/patient/PatientDashboardPage';
 import PatientProfilePage from '@/pages/portal/patient/PatientProfilePage';
 import PatientClinicsPage from '@/pages/portal/patient/PatientClinicsPage';
 import PatientAppointmentsPage from '@/pages/portal/patient/PatientAppointmentsPage';
+import PatientQueuePage from '@/pages/portal/patient/PatientQueuePage';
 import ClinicQueuePage from '@/pages/portal/clinic/ClinicQueuePage';
 
 export default function AppRouter() {
@@ -48,6 +49,7 @@ export default function AppRouter() {
           <Route path="dashboard" element={<PatientDashboardPage />} />
           <Route path="clinics" element={<PatientClinicsPage />} />
           <Route path="appointments" element={<PatientAppointmentsPage />} />
+          <Route path="queue" element={<PatientQueuePage />} />
           <Route path="profile" element={<PatientProfilePage />} />
         </Route>
       </Route>

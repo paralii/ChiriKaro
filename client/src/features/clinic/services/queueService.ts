@@ -7,8 +7,10 @@ export type QueueEntry = {
   kind: 'WALK_IN' | 'APPOINTMENT';
   patientName: string;
   doctorName: string;
+  clinicName: string;
+  timeZone: string;
   localDate: string;
-  status: string;
+  status: 'WAITING' | 'IN_CONSULTATION' | 'COMPLETED' | 'SKIPPED' | 'CANCELLED' | 'NO_SHOW';
   createdAt: string;
 };
 export type QueueDay = { localDate: string; timeZone: string; entries: QueueEntry[] };
@@ -29,4 +31,6 @@ export const queueService = {
   },
   checkInAppointment: async (appointmentId: string) =>
     requireData(await api.post<Envelope<QueueEntry>>(API_ROUTES.CLINIC.QUEUE_APPOINTMENT_CHECK_IN(appointmentId)), 'The patient was not checked into the queue.'),
+  transition: async (queueEntryId: string, status: QueueEntry['status']) =>
+    requireData(await api.patch<Envelope<QueueEntry>>(API_ROUTES.CLINIC.QUEUE_STATUS(queueEntryId), { status }), 'Queue status was not returned.'),
 };

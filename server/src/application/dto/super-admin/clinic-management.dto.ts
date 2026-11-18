@@ -19,6 +19,7 @@ export interface ClinicSummaryDTO {
 }
 
 export interface ClinicDetailsDTO extends ClinicSummaryDTO {
+  ownerName: string | null;
   city: string | null;
   state: string | null;
   pincode: string | null;
@@ -27,6 +28,8 @@ export interface ClinicDetailsDTO extends ClinicSummaryDTO {
   workingHours: Array<{ day: string; isOpen: boolean; startTime: string; endTime: string }>;
   documents: Array<{ documentType: string; uploadedAt: Date }>;
   reviewHistory: Array<{ decision: "APPROVED" | "REJECTED"; reason: string | null; reviewerId: string | null; reviewedAt: Date }>;
+  doctors: Array<{ name: string; professionalTitle: string | null; verificationStatus: string; specializations: string[] }>;
+  staff: Array<{ name: string; role: "CLINIC_ADMIN" | "STAFF"; status: string }>;
 }
 
 export interface ClinicListResultDTO {

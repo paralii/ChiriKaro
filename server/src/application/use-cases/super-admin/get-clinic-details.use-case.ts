@@ -16,8 +16,15 @@ export class GetClinicDetailsUseCase implements IGetClinicDetailsUseCase {
 
     if (!clinic) throw new NotFoundError("Clinic");
 
+    const [ownerName, doctors, staff] = await Promise.all([
+      clinic.ownerAdminId ? this.clinicRepository.findOwnerName(clinic.ownerAdminId) : Promise.resolve(null),
+      this.clinicRepository.findDoctors(clinicId),
+      this.clinicRepository.findTeamMembers(clinicId),
+    ]);
+
     return {
       ...toClinicSummaryDTO(clinic),
+      ownerName,
       city: clinic.city ?? null,
       state: clinic.state ?? null,
       pincode: clinic.pincode ?? null,
@@ -35,6 +42,8 @@ export class GetClinicDetailsUseCase implements IGetClinicDetailsUseCase {
         uploadedAt: doc.uploadedAt,
       })),
       reviewHistory: clinic.reviewHistory,
+      doctors: doctors.map((doctor) => ({ ...doctor })),
+      staff: staff.map((member) => ({ ...member })),
     };
   }
 }

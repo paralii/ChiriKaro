@@ -17,7 +17,7 @@ export type RegisterResult = {
 };
 
 export type ClinicStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
-export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; reviewHistory?: Array<{ decision: 'APPROVED' | 'REJECTED'; reason: string | null; reviewerId: string | null; reviewedAt: string }>; isActive?: boolean; createdAt?: string; updatedAt?: string };
+export type Clinic = { id: string; name: string; address?: string | null; city?: string | null; state?: string | null; pincode?: string | null; phone?: string | null; ownerName?: string | null; ownerAdminId?: string | null; contactEmail?: string | null; registrationNumber?: string | null; status: ClinicStatus; setupStatus?: string; specializations?: string[]; workingHours?: WorkingHour[]; documents?: ClinicDocument[]; reviewHistory?: Array<{ decision: 'APPROVED' | 'REJECTED'; reason: string | null; reviewerId: string | null; reviewedAt: string }>; doctors?: Array<{ name: string; professionalTitle: string | null; verificationStatus: string; specializations: string[] }>; staff?: Array<{ name: string; role: 'CLINIC_ADMIN' | 'STAFF'; status: string }>; isActive?: boolean; createdAt?: string; updatedAt?: string };
 export type ClinicSummary = { total: number; pending: number; approved: number; rejected: number; blocked: number };
 export type SuperAdminDoctorStatistics = {
   total: number;

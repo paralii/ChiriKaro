@@ -51,19 +51,23 @@ export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?
       {detailError ? <Notices error={detailError} /> : null}
       {selectedClinic ? (
         <div role="dialog" aria-modal="true" aria-label="Clinic registration details" className="fixed inset-0 z-50 grid place-items-center bg-[#17203a66] p-4" onClick={() => setSelectedClinic(null)}>
-          <div className="w-full max-w-xl" onClick={(event) => event.stopPropagation()}>
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
             <Card>
               <SectionHeading title={selectedClinic.name} description="Clinic registration details" action={<Button size="xs" variant="ghost" onClick={() => setSelectedClinic(null)}>Close</Button>} />
               <dl className="grid grid-cols-[130px_minmax(0,1fr)] gap-x-4 gap-y-3 px-[18px] py-4 text-xs">
                 <dt className="text-[#777c8a]">Status</dt><dd className="m-0">{selectedClinic.status}</dd>
                 <dt className="text-[#777c8a]">Setup review</dt><dd className="m-0">{selectedClinic.setupStatus?.replaceAll('_', ' ') ?? 'Not submitted'}</dd>
+                <dt className="text-[#777c8a]">Clinic owner</dt><dd className="m-0">{selectedClinic.ownerName ?? 'Not available'}</dd>
                 <dt className="text-[#777c8a]">Address</dt><dd className="m-0">{selectedClinic.address ?? 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">City / State</dt><dd className="m-0">{[selectedClinic.city, selectedClinic.state, selectedClinic.pincode].filter(Boolean).join(', ') || 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">Phone</dt><dd className="m-0">{selectedClinic.phone ?? 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">Contact email</dt><dd className="m-0">{selectedClinic.contactEmail ?? 'Not provided'}</dd>
                 <dt className="text-[#777c8a]">Registration no.</dt><dd className="m-0">{selectedClinic.registrationNumber ?? 'Not provided'}</dd>
+                <dt className="text-[#777c8a]">Clinic status</dt><dd className="m-0">{selectedClinic.status === 'BLOCKED' ? 'Blocked' : selectedClinic.status === 'APPROVED' ? 'Active' : 'Not operational'}</dd>
                 <dt className="text-[#777c8a]">Specializations</dt><dd className="m-0">{selectedClinic.specializations?.join(', ') || 'Not provided'}</dd>
-                <dt className="text-[#777c8a]">Working hours</dt><dd className="m-0">{reviewHours.filter((hour) => hour.isOpen).map((hour) => `${hour.day}: ${hour.startTime || '—'}–${hour.endTime || '—'}`).join('; ') || 'Not provided'}</dd>
+                <dt className="text-[#777c8a]">Working hours</dt><dd className="m-0">{reviewHours.length ? <ul className="m-0 grid list-none gap-1 p-0">{reviewHours.map((hour) => <li key={hour.day}>{hour.day}: {hour.isOpen ? `${hour.startTime || '—'}–${hour.endTime || '—'}` : 'Closed'}</li>)}</ul> : 'Not provided'}</dd>
+                <dt className="text-[#777c8a]">Doctors</dt><dd className="m-0">{selectedClinic.doctors?.length ? <ul className="m-0 grid list-none gap-2 p-0">{selectedClinic.doctors.map((doctor, index) => <li key={`${doctor.name}-${index}`}><strong>{doctor.name}</strong>{doctor.professionalTitle ? ` · ${doctor.professionalTitle}` : ''} · {doctor.verificationStatus.replaceAll('_', ' ')}{doctor.specializations.length ? ` · ${doctor.specializations.join(', ')}` : ''}</li>)}</ul> : 'No doctors associated'}</dd>
+                <dt className="text-[#777c8a]">Clinic team</dt><dd className="m-0">{selectedClinic.staff?.length ? <ul className="m-0 grid list-none gap-2 p-0">{selectedClinic.staff.map((member, index) => <li key={`${member.name}-${member.role}-${index}`}><strong>{member.name}</strong> · {member.role.replaceAll('_', ' ')} · {member.status.toLowerCase()}</li>)}</ul> : 'No clinic admin or staff accounts found'}</dd>
                 <dt className="text-[#777c8a]">Documents</dt><dd className="m-0">{reviewDocuments.length ? <ul className="m-0 grid list-none gap-2 p-0">{reviewDocuments.map((doc) => <li key={doc.documentType} className="flex flex-wrap items-center justify-between gap-2"><span>{doc.documentType.replaceAll('_', ' ')} · {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : 'Date unavailable'}</span><Button size="xs" variant="ghost" disabled={detailBusy} onClick={() => openDocument(selectedClinic.id, doc.documentType)}>Review file</Button></li>)}</ul> : 'No valid documents submitted'}</dd>
                 <dt className="text-[#777c8a]">Registered</dt><dd className="m-0">{selectedClinic.createdAt ? new Date(selectedClinic.createdAt).toLocaleDateString() : '—'}</dd>
                 <dt className="text-[#777c8a]">Review history</dt><dd className="m-0">{selectedClinic.reviewHistory?.length ? <ul className="m-0 grid list-none gap-1 p-0">{selectedClinic.reviewHistory.map((entry, index) => <li key={`${entry.reviewedAt}-${index}`}>{entry.decision} · {new Date(entry.reviewedAt).toLocaleString()}{entry.reason ? ` · ${entry.reason}` : ''}</li>)}</ul> : 'No review decisions recorded'}</dd>

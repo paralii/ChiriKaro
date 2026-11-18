@@ -8,6 +8,8 @@ import type { ISuperAdminStatisticsRepository } from "@application/interfaces/re
 import type { SuperAdminStatisticsDTO } from "@application/dto/super-admin/statistics.dto.ts";
 import { Clinic } from "@domain/entities/clinic.entity.ts";
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
+import { UserModel } from "@infrastructure/database/mongodb/models/UserModel.ts";
+import type { SuperAdminClinicTeamMemberSummary, SuperAdminDoctorSummary } from "@application/interfaces/repositories/ISuperAdminClinicRepository.ts";
 
 interface CountByStatus {
   _id: string;
@@ -20,6 +22,38 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
   async findById(id: string): Promise<Clinic | null> {
     const doc = await super.findDocumentById(id);
     return doc ? this.toDomain(doc) : null;
+  }
+
+  async findOwnerName(ownerId: string): Promise<string | null> {
+    if (!Types.ObjectId.isValid(ownerId)) return null;
+    const owner = await UserModel.findById(ownerId).select("name").lean().exec();
+    return owner?.name ?? null;
+  }
+
+  async findDoctors(clinicId: string): Promise<SuperAdminDoctorSummary[]> {
+    const doctors = await DentistModel.find({ clinicId: new Types.ObjectId(clinicId) })
+      .select("firstName lastName professionalTitle verificationStatus specializations")
+      .sort({ firstName: 1, lastName: 1 })
+      .lean()
+      .exec();
+    return doctors.map((doctor) => ({
+      name: `${doctor.firstName} ${doctor.lastName}`.trim(),
+      professionalTitle: doctor.professionalTitle ?? null,
+      verificationStatus: doctor.verificationStatus,
+      specializations: doctor.specializations ?? [],
+    }));
+  }
+
+  async findTeamMembers(clinicId: string): Promise<SuperAdminClinicTeamMemberSummary[]> {
+    const members = await UserModel.find({
+      clinicId: new Types.ObjectId(clinicId),
+      role: { $in: ["CLINIC_ADMIN", "STAFF"] },
+    }).select("name role status").sort({ role: 1, name: 1 }).lean().exec();
+    return members.flatMap((member) =>
+      member.role === "CLINIC_ADMIN" || member.role === "STAFF"
+        ? [{ name: member.name, role: member.role, status: member.status }]
+        : [],
+    );
   }
 
   async findAll(): Promise<Clinic[]> {

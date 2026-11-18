@@ -47,7 +47,15 @@ export default function AdminPatientsPage() {
     if (!window.confirm(`${action} patient ${patient.name}?`)) return;
     void run(async () => {
       const updated = await superAdminService.updatePatientStatus(patient.id, blocking ? 'SUSPENDED' : 'ACTIVE');
-      setPatients((current) => current.map((item) => item.id === updated.id ? updated : item));
+      const leavesCurrentFilter = status && status !== updated.status;
+      setPatients((current) => leavesCurrentFilter
+        ? current.filter((item) => item.id !== updated.id)
+        : current.map((item) => item.id === updated.id ? { ...item, ...updated } : item));
+      if (leavesCurrentFilter) {
+        const nextCount = Math.max(0, totalItems - 1);
+        setTotalItems(nextCount);
+        setTotalPages(Math.ceil(nextCount / 20));
+      }
       setSelectedPatient((current) => current?.id === updated.id ? { ...current, ...updated } : current);
     }, { success: `Patient ${blocking ? 'blocked' : 'unblocked'}.`, fallback: `Could not ${action.toLowerCase()} patient.` });
   };

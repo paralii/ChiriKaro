@@ -28,8 +28,8 @@ export class UpdateClinicSetupUseCase implements IUpdateClinicSetupUseCase {
     if (!Object.keys(data).length || Object.keys(data).some((key) => !allowed.includes(key))) {
       throw new ValidationError("Provide only location, specializations, or workingHours");
     }
-    if (clinic.setupStatus === ClinicSetupStatus.VERIFIED && Object.keys(data).some((key) => key !== "specializations")) {
-      throw new ConflictError("Verified clinic details and working hours cannot be edited through setup");
+    if (clinic.setupStatus === ClinicSetupStatus.VERIFIED && Object.keys(data).some((key) => key === "location")) {
+      throw new ConflictError("Verified clinic location cannot be edited through setup");
     }
     try {
       if (data.location !== undefined) {

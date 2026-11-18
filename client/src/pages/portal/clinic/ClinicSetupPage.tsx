@@ -132,6 +132,7 @@ export default function ClinicSetupPage() {
   const reviewPending = profile?.setupStatus === 'PENDING_VERIFICATION';
   const editingDisabled = busy || reviewPending || profile?.setupStatus === 'VERIFIED';
   const specializationsDisabled = busy || reviewPending;
+  const workingHoursDisabled = busy || reviewPending;
 
   return (
     <div className="grid gap-[18px] [&>section]:mt-0">
@@ -144,7 +145,7 @@ export default function ClinicSetupPage() {
           <Card className="pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={editingDisabled} onSave={saveProfile} setupOnly /></Card>
           <Card className="pb-5"><SectionHeading title="Specializations" description={profile.setupStatus === 'VERIFIED' ? 'Manage the services offered by your approved clinic. Assigned specializations must be reassigned before removal.' : 'List the services your clinic provides.'} /><SpecializationsForm initial={profile.specializations} busy={specializationsDisabled} onSave={saveSpecializations} /></Card>
           <Card className="pb-5"><SectionHeading title="Doctor specializations" description="Assign each doctor only specializations offered by this clinic." /><DoctorSpecializationAssignments doctors={doctorAssignments} clinicSpecializations={profile.specializations} busy={busy} onSave={saveDoctorSpecializations} /></Card>
-          <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic." /><WorkingHoursForm initial={profile.workingHours} busy={editingDisabled} onSave={saveHours} /></Card>
+          <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic. Doctor schedules must fit within these hours." /><WorkingHoursForm initial={profile.workingHours} busy={workingHoursDisabled} onSave={saveHours} /></Card>
           <Card className="pb-5"><SectionHeading title="Doctor working hours" description="Set schedules for doctors in this clinic. Doctor hours must fit clinic operating hours." /><ClinicDoctorWorkingHours doctors={doctorSchedules} busy={busy} onSave={saveDoctorHours} /></Card>
           <Card className="pb-5">
             <SectionHeading title="Clinic documents" description="Private PDF, JPG, or PNG files up to 10 MB." />

@@ -346,7 +346,7 @@ export class Doctor {
   }
 
   private normalizeWorkingHours(values: DoctorWorkingHour[]): DoctorWorkingHour[] {
-    if (!Array.isArray(values)) throw new InvalidDoctorDataError("workingHours must be a list");
+    if (!Array.isArray(values) || values.length !== DAYS.length) throw new InvalidDoctorDataError("workingHours must include all seven days");
     const seen = new Set<string>();
     return values.map((hours) => {
       if (!DAYS.includes(hours.day) || seen.has(hours.day)) {

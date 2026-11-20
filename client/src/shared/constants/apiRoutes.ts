@@ -141,6 +141,7 @@ export const API_ROUTES = {
     APPOINTMENT_RESCHEDULE: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/reschedule`,
     APPOINTMENT_PAYMENT_ORDER: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/order`,
     APPOINTMENT_PAYMENT_VERIFY: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/verify`,
+    APPOINTMENT_PAYMENT_TEST_CONFIRM: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/test-confirm`,
     APPOINTMENT_PAYMENT_STATUS: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/payment/status`,
   },
 

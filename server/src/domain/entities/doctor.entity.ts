@@ -258,7 +258,8 @@ export class Doctor {
     this.props.breaks = breaks;
     this.props.slotDurationMinutes = updates.slotDurationMinutes;
     this.props.bufferTimeMinutes = updates.bufferTimeMinutes;
-    this.props.updatedAt = new Date();
+    if (this.props.verificationStatus === "REJECTED") this.markInProgress();
+    else this.props.updatedAt = new Date();
   }
 
   generateAvailabilitySlots(): DoctorAvailabilitySlot[] {

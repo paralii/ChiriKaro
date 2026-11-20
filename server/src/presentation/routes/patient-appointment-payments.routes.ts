@@ -10,6 +10,7 @@ export function PatientAppointmentPaymentsRouter(
   const router = Router();
   router.post(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_ORDER, middleware.authenticate, middleware.authorizePatient, controller.createOrder);
   router.post(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_VERIFY, middleware.authenticate, middleware.authorizePatient, controller.verify);
+  router.post(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_TEST_CONFIRM, middleware.authenticate, middleware.authorizePatient, controller.confirmTestPayment);
   router.get(API_ROUTES.PATIENT.APPOINTMENT_PAYMENT_STATUS, middleware.authenticate, middleware.authorizePatient, controller.status);
   router.post(API_ROUTES.PATIENT.PAYMENT_WEBHOOK, controller.webhook);
   return router;

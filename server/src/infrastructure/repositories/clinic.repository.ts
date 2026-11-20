@@ -5,6 +5,26 @@ import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.re
 import type { IClinicRepository } from "@application/interfaces/repositories/IClinicRepository.ts";
 import { Clinic } from "@domain/entities/clinic.entity.ts";
 
+const CLINIC_WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function normalizePersistedWorkingHours(value: unknown) {
+  const rows = Array.isArray(value) ? value as Array<Record<string, unknown>> : [];
+  return CLINIC_WEEK_DAYS.map((day, index) => {
+    const row = rows.find((item) => {
+      const storedDay = item?.day ?? item?.weekday;
+      return typeof storedDay === "string" && storedDay.trim().toUpperCase() === day.toUpperCase();
+    }) ?? rows[index];
+    const startTime = row?.startTime ?? row?.start ?? row?.openingTime;
+    const endTime = row?.endTime ?? row?.end ?? row?.closingTime;
+    return {
+      day,
+      isOpen: typeof row?.isOpen === "boolean" ? row.isOpen : typeof row?.open === "boolean" ? row.open : false,
+      startTime: typeof startTime === "string" ? startTime : "09:00",
+      endTime: typeof endTime === "string" ? endTime : "17:00",
+    };
+  });
+}
+
 export class ClinicRepository
   extends BaseRepository<IClinicDocument>
   implements IClinicRepository
@@ -80,7 +100,7 @@ export class ClinicRepository
       ownerAdminId: doc.ownerAdminId ? doc.ownerAdminId.toString() : null,
       status: doc.status,
       specializations: doc.services ?? [],
-      workingHours: doc.workingHours ?? [],
+      workingHours: normalizePersistedWorkingHours(doc.workingHours),
       timeZone: doc.timeZone ?? "Asia/Kolkata",
       documents: doc.documents ?? [],
       setupStatus: doc.setupStatus,

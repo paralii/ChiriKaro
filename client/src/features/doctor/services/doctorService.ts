@@ -38,7 +38,7 @@ export const doctorService = {
   uploadOnboardingDocument: async (documentType: string, file: File) => {
     const safeType = documentType.trim().replace(/\s+/g, "_");
     const response = await http.post<ApiEnvelope<DoctorOnboardingDTO>>(
-      API_ROUTES.DOCTOR.ONBOARDING_DOCUMENT_BY_TYPE(safeType),
+      `${API_ROUTES.DOCTOR.ONBOARDING_DOCUMENTS}?documentType=${encodeURIComponent(safeType)}`,
       file,
       {
         headers: { "Content-Type": file.type },
@@ -124,7 +124,7 @@ export const doctorService = {
   submitVerification: () =>
     responseData(
       api.post<ApiEnvelope<DoctorOnboardingDTO>>(
-        "API_ROUTES.DOCTOR.VERIFICATION_SUBMIT",
+        API_ROUTES.DOCTOR.VERIFICATION_SUBMIT,
       ),
       "Doctor verification status was not returned.",
     ),

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Notice } from '@/components/atoms/Notice';
@@ -16,12 +17,27 @@ import { defaultHours } from '@/shared/constants/schedule';
 import { useAction } from '@/shared/hooks/useAction';
 import { doctorService } from '@/features/doctor/services/doctorService';
 import { openSignedUrl } from '@/services/storageService';
-import { emptyDoctorOnboardingProfile, findClinicHoursConflict, findInvalidHours, findResumeStep, toDisplayWorkingHours, toDoctorWorkingHours } from '@/shared/utils/doctor';
+import { emptyDoctorOnboardingProfile, findInvalidHours, findResumeStep, hasCompleteDoctorHours, toDisplayWorkingHours, toDoctorWorkingHours } from '@/shared/utils/doctor';
 import type { DoctorOnboardingProfile, DoctorOnboardingStep, WorkingHour } from '@/shared/types';
 import { useAppSelector } from '@/store/hooks';
 
 const steps = ['Basic information', 'Professional details', 'Practice details', 'Working hours', 'Documents', 'Review'];
 const docTypes = ['Professional license', 'Qualification certificate', 'Identity document', 'Additional certificate'];
+const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+function clinicScheduleAsDisplayHours(clinicHours: WorkingHour[]): WorkingHour[] {
+  return weekDays.map((day) => {
+    const clinicHour = clinicHours.find((hour) =>
+      typeof hour?.day === 'string' && hour.day.trim().toUpperCase() === day.toUpperCase()
+    );
+    return {
+      day,
+      isOpen: Boolean(clinicHour?.isOpen),
+      startTime: clinicHour?.startTime ?? '09:00',
+      endTime: clinicHour?.endTime ?? '17:00',
+    };
+  });
+}
 
 export default function DoctorOnboardingPage() {
   const user = useAppSelector((state) => state.auth.user)!;
@@ -114,11 +130,10 @@ export default function DoctorOnboardingPage() {
     if (invalid) return setError(`${invalid.day}: closing time must be later than opening time.`);
     if (!hours.some((hour) => hour.isOpen)) return setError('Open at least one working day.');
     if (!clinicWorkingHours.length) return setError('Clinic working hours are not configured. Ask your Clinic Admin to set them first.');
-    const conflict = findClinicHoursConflict(hours, clinicWorkingHours);
-    if (conflict) return setError(`${conflict.day}: doctor hours must fit within the clinic working hours.`);
     void run(async () => {
       const updated = applyResponse(await doctorService.updateOnboarding('practice', { workingHours: toDoctorWorkingHours(hours) }));
-      if (findResumeStep(updated) > 2) setStep(4);
+      // Saving valid hours completes this step; documents are the next step.
+      setStep(4);
 
       return updated;
     }, { success: 'Working hours saved.', fallback: 'Could not save working hours.' });
@@ -156,7 +171,14 @@ export default function DoctorOnboardingPage() {
     setStep(next);
   };
 
-  const hours = profile?.workingHours?.length === 7 ? toDisplayWorkingHours(profile.workingHours) : defaultHours;
+  const savedDoctorHours = profile?.workingHours?.length
+    ? toDisplayWorkingHours(profile.workingHours)
+    : [];
+  const hours = savedDoctorHours.some((hour) => hour.isOpen)
+    ? savedDoctorHours
+    : clinicWorkingHours.length
+      ? clinicScheduleAsDisplayHours(clinicWorkingHours)
+      : defaultHours;
   const reviewHours = profile ? toDisplayWorkingHours(profile.workingHours) : [];
   const openHours = reviewHours.filter((hour) => hour.isOpen);
   const documents = Array.isArray(profile?.documents)
@@ -165,6 +187,7 @@ export default function DoctorOnboardingPage() {
       documentType: document.documentType.replaceAll('_', ' '),
     }))
     : [];
+  const reviewReady = Boolean(profile && hasCompleteDoctorHours(profile.workingHours) && documents.length > 0);
   const reviewItems: [string, string | number | null | undefined][] = profile ? [
     ['Name', `${profile.firstName} ${profile.lastName}`.trim()],
     ['Gender', profile.gender?.replaceAll('_', ' ') ?? 'Not provided'],
@@ -181,7 +204,8 @@ export default function DoctorOnboardingPage() {
   ] : [];
 
   const continueToReview = () => {
-    if (!profile || findResumeStep(profile) !== 5) return setError('Complete all previous steps and upload at least one document before reviewing.');
+    if (!profile || !hasCompleteDoctorHours(profile.workingHours)) return setError('Save valid working hours before reviewing.');
+    if (!documents.length) return setError('Upload at least one document before reviewing.');
     setStep(5);
   };
 
@@ -199,6 +223,9 @@ export default function DoctorOnboardingPage() {
               </Notice>
               <SectionHeading title="Submitted profile" description="Your saved details and verification status." />
               <DetailList items={reviewItems} />
+              <div className="px-[18px] pb-4">
+                <Link to="/doctor/availability" className="text-xs font-semibold text-brand-deep underline">Edit working hours and availability</Link>
+              </div>
               <SectionHeading title="Submitted documents" description="Open a document to review the uploaded file." className="border-t" />
               <DocumentList items={documents.map((document) => ({ key: document.documentType, label: document.documentType, status: document.status }))} onOpen={openDocument} busy={busy} />
             </Card>
@@ -213,7 +240,7 @@ export default function DoctorOnboardingPage() {
 
           {step === 2 ? <Card className="pb-5"><SectionHeading title="Practice details" description="Choose specializations offered by your clinic and list procedures." /><DoctorPracticeForm initial={profile} busy={busy || Boolean(locked)} clinicSpecializations={clinicSpecializations} onSave={savePractice} /></Card> : null}
 
-          {step === 3 ? <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours you are available at this clinic." /><WorkingHoursForm initial={hours} busy={busy || Boolean(locked)} onSave={saveHours} submitLabel="Save hours and continue" /></Card> : null}
+          {step === 3 ? <Card className="pb-5"><SectionHeading title="Working hours" description="Clinic hours are preselected. Keep or remove days, and set doctor hours within the clinic’s times." /><WorkingHoursForm key={`doctor-hours-${profile.workingHours.length}-${clinicWorkingHours.length}`} initial={hours} busy={busy || Boolean(locked)} onSave={saveHours} submitLabel="Save hours and continue" /></Card> : null}
 
           {step === 4 ? (
             <Card className="pb-5">
@@ -222,7 +249,7 @@ export default function DoctorOnboardingPage() {
                 busy={busy} showStatus onUpload={upload} onOpen={openDocument} onDelete={removeDocument} />
               <div className="flex flex-wrap justify-between gap-2.5 px-[18px] pt-3.5">
                 <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(3)}>Back to working hours</Button>
-                <Button type="button" disabled={busy || findResumeStep(profile) !== 5} onClick={continueToReview}>Continue to review</Button>
+                <Button type="button" disabled={busy} onClick={continueToReview}>Continue to review</Button>
               </div>
             </Card>
           ) : null}
@@ -237,7 +264,7 @@ export default function DoctorOnboardingPage() {
               <DetailList items={reviewHours.map((hour) => [hour.day, hour.isOpen ? `${hour.startTime}–${hour.endTime}` : 'Closed'])} /> */}
               <div className="flex flex-wrap justify-between gap-2.5 px-[18px] pt-3.5">
                 <Button type="button" variant="secondary" onClick={() => setStep(4)}>Back to documents</Button>
-                <Button type="button" disabled={busy || locked || profile.onboardingStatus !== 'IN_PROGRESS' || findResumeStep(profile) !== 5} onClick={submitForVerification}>
+                <Button type="button" disabled={busy || locked || profile.onboardingStatus !== 'IN_PROGRESS' || !reviewReady} onClick={submitForVerification}>
                   {busy ? 'Submitting...' : profile.onboardingStatus === 'PENDING_VERIFICATION' ? 'Pending verification' : profile.onboardingStatus === 'VERIFIED' ? 'Verified' : profile.onboardingStatus === 'REJECTED' ? 'Save a correction to resubmit' : 'Submit for verification'}
                 </Button>
               </div>

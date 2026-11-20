@@ -71,6 +71,7 @@ export const API_ROUTES = {
     APPOINTMENT_RESCHEDULE: "/appointments/:appointmentId/reschedule",
     APPOINTMENT_PAYMENT_ORDER: "/appointments/:appointmentId/payment/order",
     APPOINTMENT_PAYMENT_VERIFY: "/appointments/:appointmentId/payment/verify",
+    APPOINTMENT_PAYMENT_TEST_CONFIRM: "/appointments/:appointmentId/payment/test-confirm",
     APPOINTMENT_PAYMENT_STATUS: "/appointments/:appointmentId/payment/status",
     PAYMENT_WEBHOOK: "/payments/razorpay/webhook",
   },

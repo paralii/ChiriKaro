@@ -166,8 +166,8 @@ export default function PatientClinicsPage() {
                     <p className="m-0 text-xs text-[#686e7b]">Clinic local time ({availability[listing.listingId]?.clinicTimeZone})</p>
                     {availability[listing.listingId]?.slots.length ? <div className="mt-2 flex flex-wrap gap-2">
                       {availability[listing.listingId]?.slots.map((slot) => <Button key={slot.startAt} type="button" size="sm" variant={selection?.listingId === listing.listingId && selection.startsAt === slot.startAt ? 'primary' : 'secondary'} onClick={() => { setBookingError(''); setSelection({ listingId: listing.listingId, date, startsAt: slot.startAt, localStartTime: slot.localStartTime, localEndTime: slot.localEndTime, timeZone: availability[listing.listingId]?.clinicTimeZone ?? '', clinicName: listing.clinicName, doctorName: listing.doctorName, amountMinor: Math.round(listing.consultationFee * 100), currency: listing.currency }); }}>{slot.localStartTime}–{slot.localEndTime}</Button>)}
-                    </div> : <p className="mt-2 mb-0 text-xs text-[#777d8a]">No schedule slots are available on this date.</p>}
-                    <p className="mt-2 mb-0 text-[10px] text-[#8a6870]">Times are generated from schedules; booking will recheck availability.</p>
+                    </div> : <p className="mt-2 mb-0 text-xs text-[#777d8a]">No future appointment times remain for this date. Past times and closed days are hidden; choose another clinic day.</p>}
+                    {availability[listing.listingId]?.slots.length ? <p className="mt-2 mb-0 text-[10px] text-[#687568]">These times use the doctor’s saved weekly hours. Availability is checked again when you request a booking.</p> : null}
                   </div> : null}
                 </div>
               </div>

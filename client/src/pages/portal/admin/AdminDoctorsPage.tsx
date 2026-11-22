@@ -11,6 +11,7 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { superAdminService } from '@/features/admin/services/superAdminService';
 import { useAction } from '@/shared/hooks/useAction';
 import type { SuperAdminDoctor, SuperAdminDoctorDetail } from '@/shared/types';
+import { ListPagination } from '@/components/molecules/ListPagination';
 
 const statuses = ['NOT_STARTED', 'IN_PROGRESS', 'PENDING_VERIFICATION', 'VERIFIED', 'REJECTED'];
 
@@ -41,6 +42,7 @@ export default function AdminDoctorsPage() {
     setStatus(statusDraft);
     setPage(1);
   };
+  const resetFilters = () => { setSearchDraft(''); setStatusDraft(''); setSearch(''); setStatus(''); setPage(1); };
   const showDetails = (id: string) => void run(async () => setSelectedDoctor(await superAdminService.getDoctor(id)), { fallback: 'Could not load doctor details.' });
 
   return <>
@@ -50,7 +52,7 @@ export default function AdminDoctorsPage() {
       <Form onSubmit={applyFilters} className="grid grid-cols-[minmax(180px,1fr)_220px_auto] items-end gap-2 px-[15px] pb-3 max-md:grid-cols-1">
         <label className="grid gap-1 text-[10px] text-[#777c8a]">Search doctors<Input value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} maxLength={100} placeholder="Name, email, clinic, specialty" /></label>
         <label className="grid gap-1 text-[10px] text-[#777c8a]">Verification status<select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)} className="h-[38px] rounded border border-[#cfd2df] bg-white px-2 text-xs"><option value="">All statuses</option>{statuses.map((item) => <option key={item} value={item}>{item.replaceAll('_', ' ')}</option>)}</select></label>
-        <Button size="xs" disabled={busy}>Apply</Button>
+        <div className="flex gap-2"><Button size="xs" disabled={busy}>Apply</Button><Button type="button" size="xs" variant="ghost" disabled={busy || (!searchDraft && !statusDraft && !search && !status)} onClick={resetFilters}>Reset</Button></div>
       </Form>
       {busy && !doctors.length ? <div className="p-4 text-xs text-[#777c8a]">Loading doctors...</div> : !doctors.length ? <EmptyState>No doctors match these filters.</EmptyState> : <DataTable headers={['DOCTOR', 'EMAIL', 'CLINIC', 'SPECIALTIES', 'STATUS', 'ACTIONS']}>
         {doctors.map((doctor) => <tr key={doctor.id}>
@@ -62,11 +64,7 @@ export default function AdminDoctorsPage() {
           <td className={tdClass}><Button size="xs" variant="ghost" disabled={busy} onClick={() => showDetails(doctor.id)}>Details</Button></td>
         </tr>)}
       </DataTable>}
-      {totalPages > 1 ? <div className="flex items-center justify-end gap-2 border-t border-[#eff0f4] px-[15px] py-3">
-        <Button size="xs" variant="ghost" disabled={busy || page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
-        <span className="text-[10px] text-[#656a79]">Page {page} of {totalPages}</span>
-        <Button size="xs" variant="ghost" disabled={busy || page >= totalPages} onClick={() => setPage((current) => current + 1)}>Next</Button>
-      </div> : null}
+      <ListPagination page={page} totalPages={totalPages} totalItems={totalItems} busy={busy} onPageChange={setPage} />
     </Card>
     {selectedDoctor ? <div role="dialog" aria-modal="true" aria-label="Doctor details" className="fixed inset-0 z-50 grid place-items-center bg-[#17203a66] p-4" onClick={() => setSelectedDoctor(null)}>
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}><Card>

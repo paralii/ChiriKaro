@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import type { IGetRoleDashboardUseCase } from "@application/interfaces/use-cases/dashboard/IGetRoleDashboardUseCase.ts";
 
@@ -16,9 +17,10 @@ export class RoleDashboardController {
       const dashboard = await this._getRoleDashboardUseCase.execute(
         req.user!.sub,
       );
-      ApiResponse.success(res, "Dashboard retrieved successfully", dashboard);
+      ApiResponse.success(res, MESSAGES.response.dashboardRetrieved, dashboard);
     } catch (error) {
       next(error);
     }
   };
 }
+

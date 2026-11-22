@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 import { ValidationError } from "@shared/errors/index.ts";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
@@ -35,7 +36,7 @@ export class SuperAdminController {
       );
       ApiResponse.paginated(
         res,
-        "Clinics retrieved successfully",
+        MESSAGES.response.clinicsRetrieved,
         result.clinics,
         {
           page: result.page,
@@ -58,7 +59,7 @@ export class SuperAdminController {
       const clinic = await this._getClinicDetailsUseCase.execute(
         req.params.id as string,
       );
-      ApiResponse.success(res, "Clinic retrieved successfully", clinic);
+      ApiResponse.success(res, MESSAGES.response.clinicRetrieved, clinic);
     } catch (error) {
       next(error);
     }
@@ -76,7 +77,7 @@ export class SuperAdminController {
         reason: req.body?.reason,
         reviewerId: req.user!.sub,
       });
-      ApiResponse.success(res, "Clinic status updated successfully", clinic);
+      ApiResponse.success(res, MESSAGES.response.clinicStatusUpdated, clinic);
     } catch (error) {
       next(error);
     }
@@ -91,7 +92,7 @@ export class SuperAdminController {
       const result = await this._getStatisticsUseCase.execute();
       ApiResponse.success(
         res,
-        "Super Admin statistics retrieved successfully",
+        MESSAGES.response.superAdminStatisticsRetrieved,
         result,
       );
     } catch (error) {
@@ -102,7 +103,7 @@ export class SuperAdminController {
   listPatients = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this._managePatientsUseCase.list(req.query);
-      ApiResponse.paginated(res, "Patients retrieved successfully", result.patients, {
+      ApiResponse.paginated(res, MESSAGES.response.patientsRetrieved, result.patients, {
         page: result.page, limit: result.limit, totalItems: result.totalItems, totalPages: result.totalPages,
       });
     } catch (error) { next(error); }
@@ -111,21 +112,21 @@ export class SuperAdminController {
   updatePatientStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const patient = await this._managePatientsUseCase.setStatus(req.params.id as string, req.body?.status);
-      ApiResponse.success(res, "Patient status updated successfully", patient);
+      ApiResponse.success(res, MESSAGES.response.patientStatusUpdated, patient);
     } catch (error) { next(error); }
   };
 
   getPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const patient = await this._managePatientsUseCase.getDetails(req.params.id as string);
-      ApiResponse.success(res, "Patient retrieved successfully", patient);
+      ApiResponse.success(res, MESSAGES.response.patientRetrieved, patient);
     } catch (error) { next(error); }
   };
 
   listDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this._manageDoctorsUseCase.list(req.query as unknown as DoctorListQueryDTO);
-      ApiResponse.paginated(res, "Doctors retrieved successfully", result.doctors, {
+      ApiResponse.paginated(res, MESSAGES.response.doctorsRetrieved, result.doctors, {
         page: result.page, limit: result.limit, totalItems: result.totalItems, totalPages: result.totalPages,
       });
     } catch (error) { next(error); }
@@ -134,7 +135,7 @@ export class SuperAdminController {
   getDoctor = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const doctor = await this._manageDoctorsUseCase.getDetails(req.params.id as string);
-      ApiResponse.success(res, "Doctor retrieved successfully", doctor);
+      ApiResponse.success(res, MESSAGES.response.doctorRetrieved, doctor);
     } catch (error) { next(error); }
   };
 
@@ -157,3 +158,4 @@ export class SuperAdminController {
     }
   };
 }
+

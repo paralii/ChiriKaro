@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { UnauthorizedError } from "@shared/errors/index.ts";
 
@@ -39,7 +40,7 @@ export class AuthController {
     try {
       const result = await this._registerUseCase.execute(req.body);
 
-      ApiResponse.created(res, "User registered", result.user);
+      ApiResponse.created(res, MESSAGES.response.userRegistered, result.user);
     } catch (error) {
       next(error);
     }
@@ -59,7 +60,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      ApiResponse.success(res, "User Logined", result.user);
+      ApiResponse.success(res, MESSAGES.response.userLoggedIn, result.user);
     } catch (error) {
       next(error);
     }
@@ -77,7 +78,7 @@ export class AuthController {
 
       AuthCookieHelper.clearAuthCookies(res);
 
-      ApiResponse.success(res, "Logged out successfully");
+      ApiResponse.success(res, MESSAGES.response.loggedOut);
     } catch (error) {
       next(error);
     }
@@ -91,7 +92,7 @@ export class AuthController {
     try {
       const result = await this._getProfileUseCase.execute(req.user!.sub);
 
-      ApiResponse.success(res, "User data fetched", result);
+      ApiResponse.success(res, MESSAGES.response.userDataFetched, result);
     } catch (error) {
       next(error);
     }
@@ -113,7 +114,7 @@ export class AuthController {
         result.refreshToken,
       );
 
-      ApiResponse.success(res, "Token refreshed successfully");
+      ApiResponse.success(res, MESSAGES.response.tokenRefreshed);
     } catch (error) {
       next(error);
     }
@@ -129,7 +130,7 @@ export class AuthController {
 
       ApiResponse.success(
         res,
-        "If the account exists, password reset instructions will be sent.",
+        MESSAGES.response.passwordResetInstructionsSent,
       );
     } catch (error) {
       next(error);
@@ -144,7 +145,7 @@ export class AuthController {
     try {
       await this._resetPasswordUseCase.execute(req.body);
 
-      ApiResponse.success(res, "Password reset successfully");
+      ApiResponse.success(res, MESSAGES.response.passwordReset);
     } catch (error) {
       next(error);
     }
@@ -158,7 +159,7 @@ export class AuthController {
     try {
       const result = await this._verifyOtpUseCase.execute(req.body);
 
-      ApiResponse.success(res, "Otp verified", result);
+      ApiResponse.success(res, MESSAGES.response.otpVerified, result);
     } catch (error) {
       next(error);
     }
@@ -174,7 +175,7 @@ export class AuthController {
 
       ApiResponse.success(
         res,
-        "If applicable, a verification code will be sent.",
+        MESSAGES.response.verificationCodeSentIfApplicable,
       );
     } catch (error) {
       next(error);
@@ -234,9 +235,10 @@ export class AuthController {
         userId: req.user!.sub,
       });
 
-      ApiResponse.success(res, "Password changed successfully");
+      ApiResponse.success(res, MESSAGES.response.passwordChanged);
     } catch (error) {
       next(error);
     }
   };
 }
+

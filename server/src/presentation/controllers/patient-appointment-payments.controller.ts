@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import type { IPatientAppointmentPaymentsUseCase } from "@application/interfaces/use-cases/patient/IPatientAppointmentPaymentsUseCase.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { ValidationError } from "@shared/errors/index.ts";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 
 type RawBodyRequest = Request & { rawBody?: Buffer };
 
@@ -11,16 +12,16 @@ export class PatientAppointmentPaymentsController {
   createOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const appointmentId = req.params.appointmentId;
-      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
-      ApiResponse.created(res, "Payment order created", await this.payments.createOrder({ appointmentId, patientUserId: req.user!.sub }));
+      if (typeof appointmentId !== "string") throw new ValidationError(MESSAGES.request.appointmentIdRequired);
+      ApiResponse.created(res, MESSAGES.response.paymentOrderCreated, await this.payments.createOrder({ appointmentId, patientUserId: req.user!.sub }));
     } catch (error) { next(error); }
   };
 
   verify = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const appointmentId = req.params.appointmentId;
-      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
-      ApiResponse.success(res, "Payment status verified", await this.payments.verify({
+      if (typeof appointmentId !== "string") throw new ValidationError(MESSAGES.request.appointmentIdRequired);
+      ApiResponse.success(res, MESSAGES.response.paymentStatusVerified, await this.payments.verify({
         appointmentId,
         patientUserId: req.user!.sub,
         orderId: req.body?.razorpay_order_id,
@@ -33,16 +34,16 @@ export class PatientAppointmentPaymentsController {
   confirmTestPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const appointmentId = req.params.appointmentId;
-      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
-      ApiResponse.success(res, "Test payment completed", await this.payments.confirmTestPayment({ appointmentId, patientUserId: req.user!.sub }));
+      if (typeof appointmentId !== "string") throw new ValidationError(MESSAGES.request.appointmentIdRequired);
+      ApiResponse.success(res, MESSAGES.response.testPaymentCompleted, await this.payments.confirmTestPayment({ appointmentId, patientUserId: req.user!.sub }));
     } catch (error) { next(error); }
   };
 
   status = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const appointmentId = req.params.appointmentId;
-      if (typeof appointmentId !== "string") throw new ValidationError("Appointment id is required");
-      ApiResponse.success(res, "Payment status retrieved", await this.payments.getStatus(appointmentId, req.user!.sub));
+      if (typeof appointmentId !== "string") throw new ValidationError(MESSAGES.request.appointmentIdRequired);
+      ApiResponse.success(res, MESSAGES.response.paymentStatusRetrieved, await this.payments.getStatus(appointmentId, req.user!.sub));
     } catch (error) { next(error); }
   };
 
@@ -50,9 +51,10 @@ export class PatientAppointmentPaymentsController {
     try {
       if (!Buffer.isBuffer(req.rawBody)) throw new ValidationError("Raw webhook body is unavailable");
       const signature = req.get("x-razorpay-signature");
-      if (!signature) throw new ValidationError("Webhook signature is required");
+      if (!signature) throw new ValidationError(MESSAGES.request.webhookSignatureRequired);
       await this.payments.handleWebhook(req.rawBody, signature, req.get("x-razorpay-event-id") ?? undefined);
       res.status(200).json({ received: true });
     } catch (error) { next(error); }
   };
 }
+

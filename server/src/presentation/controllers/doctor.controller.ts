@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "@shared/enums/http-status.enum.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { ValidationError } from "@shared/errors/index.ts";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 
 import type { IGetDoctorOnboardingUseCase } from "@application/interfaces/use-cases/doctor/IGetDoctorOnboardingUseCase.ts";
 import type { IUpdateDoctorOnboardingUseCase } from "@application/interfaces/use-cases/doctor/IUpdateDoctorOnboardingUseCase.ts";
@@ -41,7 +42,7 @@ export class DoctorController {
         req.user!.sub,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor onboarding retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorOnboardingRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -68,7 +69,7 @@ export class DoctorController {
         step: step as DoctorOnboardingStep,
         updates: req.body,
       });
-      ApiResponse.success(res, "Doctor onboarding step saved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorOnboardingSaved, result);
     } catch (error) {
       next(error);
     }
@@ -86,7 +87,7 @@ export class DoctorController {
         );
       const documentType = req.query.documentType;
       if (typeof documentType !== "string")
-        throw new ValidationError("Document type is required");
+        throw new ValidationError(MESSAGES.request.documentTypeRequired);
       const result = await this._uploadDocumentUseCase.execute(
         req.user!.sub,
         req.user!.clinicId!,
@@ -94,7 +95,7 @@ export class DoctorController {
         req.body,
         req.header("content-type")?.split(";")[0]?.trim().toLowerCase() ?? "",
       );
-      ApiResponse.created(res, "Doctor document uploaded", result);
+      ApiResponse.created(res, MESSAGES.response.doctorDocumentUploaded, result);
     } catch (error) {
       next(error);
     }
@@ -108,7 +109,7 @@ export class DoctorController {
     try {
       const documentType = req.params.documentType;
       if (typeof documentType !== "string")
-        throw new ValidationError("Document type is required");
+        throw new ValidationError(MESSAGES.request.documentTypeRequired);
       const result = await this._getDocumentUseCase.execute(
         req.user!.sub,
         documentType,
@@ -127,13 +128,13 @@ export class DoctorController {
     try {
       const documentType = req.params.documentType;
       if (typeof documentType !== "string")
-        throw new ValidationError("Document type is required");
+        throw new ValidationError(MESSAGES.request.documentTypeRequired);
       const result = await this._deleteDocumentUseCase.execute(
         req.user!.sub,
         req.user!.clinicId!,
         documentType,
       );
-      ApiResponse.success(res, "Doctor document removed", result);
+      ApiResponse.success(res, MESSAGES.response.doctorDocumentRemoved, result);
     } catch (error) {
       next(error);
     }
@@ -149,7 +150,7 @@ export class DoctorController {
         req.user!.sub,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor verification status retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorVerificationStatusRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -167,7 +168,7 @@ export class DoctorController {
       );
       ApiResponse.success(
         res,
-        "Doctor profile submitted for verification",
+        MESSAGES.response.doctorProfileSubmitted,
         result,
       );
     } catch (error) {
@@ -185,7 +186,7 @@ export class DoctorController {
         req.user!.sub,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor consultation fee retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorConsultationFeeRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -194,7 +195,7 @@ export class DoctorController {
   listFeeChangeRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this._feeChangeRequestsUseCase.listForDoctor(req.user!.sub, req.user!.clinicId!);
-      ApiResponse.success(res, "Consultation fee change requests retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.feeChangeRequestsRetrieved, result);
     } catch (error) { next(error); }
   };
 
@@ -204,7 +205,7 @@ export class DoctorController {
         requestedFee: req.body?.requestedFee,
         reason: req.body?.reason,
       });
-      ApiResponse.created(res, "Consultation fee change request submitted", result);
+      ApiResponse.created(res, MESSAGES.response.feeChangeRequestSubmitted, result);
     } catch (error) { next(error); }
   };
 
@@ -218,7 +219,7 @@ export class DoctorController {
         req.user!.sub,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor availability retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorAvailabilityRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -235,7 +236,7 @@ export class DoctorController {
         clinicId: req.user!.clinicId!,
         updates: req.body,
       });
-      ApiResponse.success(res, "Doctor availability updated", result);
+      ApiResponse.success(res, MESSAGES.response.doctorAvailabilityUpdated, result);
     } catch (error) {
       next(error);
     }
@@ -251,9 +252,11 @@ export class DoctorController {
         req.user!.sub,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor availability slots generated", result);
+      ApiResponse.success(res, MESSAGES.response.doctorAvailabilitySlotsGenerated, result);
     } catch (error) {
       next(error);
     }
   };
 }
+
+

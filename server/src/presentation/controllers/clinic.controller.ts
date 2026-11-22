@@ -22,6 +22,7 @@ import type { IApproveDoctorVerificationUseCase } from "@application/interfaces/
 import type { IRejectDoctorVerificationUseCase } from "@application/interfaces/use-cases/doctor/IRejectDoctorVerificationUseCase.ts";
 import type { IGetClinicDoctorDocumentUseCase } from "@application/interfaces/use-cases/doctor/IGetClinicDoctorDocumentUseCase.ts";
 import type { IManageDoctorFeeChangeRequestsUseCase } from "@application/interfaces/use-cases/doctor/IManageDoctorFeeChangeRequestsUseCase.ts";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 
 export class ClinicController {
   constructor(
@@ -71,7 +72,7 @@ export class ClinicController {
       const result = await this._getClinicProfileUseCase.execute(
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Clinic profile retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.clinicProfileRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -87,7 +88,7 @@ export class ClinicController {
         clinicId: req.user!.clinicId!,
         updates: req.body,
       });
-      ApiResponse.success(res, "Clinic profile updated", result);
+      ApiResponse.success(res, MESSAGES.response.clinicProfileUpdated, result);
     } catch (error) {
       next(error);
     }
@@ -102,7 +103,7 @@ export class ClinicController {
       const result = await this._getClinicDashboardUseCase.execute(
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Clinic dashboard retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.clinicDashboardRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -118,7 +119,7 @@ export class ClinicController {
         req.user!.clinicId!,
         req.body,
       );
-      ApiResponse.success(res, "Clinic setup updated", result);
+      ApiResponse.success(res, MESSAGES.response.clinicSetupUpdated, result);
     } catch (error) {
       next(error);
     }
@@ -136,14 +137,14 @@ export class ClinicController {
         );
       const documentType = req.query.documentType;
       if (typeof documentType !== "string")
-        throw new ValidationError("Document type is required");
+        throw new ValidationError(MESSAGES.request.documentTypeRequired);
       const result = await this._uploadClinicDocumentUseCase.execute(
         req.user!.clinicId!,
         documentType,
         req.body,
         req.header("content-type") ?? "",
       );
-      ApiResponse.created(res, "Clinic document uploaded", result);
+      ApiResponse.created(res, MESSAGES.response.clinicDocumentUploaded, result);
     } catch (error) {
       next(error);
     }
@@ -157,7 +158,7 @@ export class ClinicController {
     try {
       const documentType = req.params.documentType;
       if (typeof documentType !== "string")
-        throw new ValidationError("Document type is required");
+        throw new ValidationError(MESSAGES.request.documentTypeRequired);
       const result = await this._getClinicDocumentUseCase.execute(
         req.user!.clinicId!,
         documentType,
@@ -179,7 +180,7 @@ export class ClinicController {
       );
       ApiResponse.success(
         res,
-        "Clinic setup submitted for verification",
+        MESSAGES.response.clinicSetupSubmitted,
         result,
       );
     } catch (error) {
@@ -195,13 +196,13 @@ export class ClinicController {
     try {
       const doctorId = req.params.doctorId;
       if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
+        throw new ValidationError(MESSAGES.request.doctorIdRequired);
       const result = await this._updateConsultationFeeUseCase.execute({
         doctorId,
         clinicId: req.user!.clinicId!,
         consultationFee: req.body?.consultationFee,
       });
-      ApiResponse.success(res, "Doctor consultation fee updated", result);
+      ApiResponse.success(res, MESSAGES.response.doctorConsultationFeeUpdated, result);
     } catch (error) {
       next(error);
     }
@@ -210,7 +211,7 @@ export class ClinicController {
   listDoctorFeeChangeRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this._feeChangeRequestsUseCase.listPendingForClinic(req.user!.clinicId!);
-      ApiResponse.success(res, "Pending consultation fee change requests retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.pendingFeeChangeRequestsRetrieved, result);
     } catch (error) { next(error); }
   };
 
@@ -218,7 +219,7 @@ export class ClinicController {
     try {
       const doctorId = req.params.doctorId;
       const requestId = req.params.requestId;
-      if (typeof doctorId !== "string" || typeof requestId !== "string") throw new ValidationError("Doctor and request are required");
+      if (typeof doctorId !== "string" || typeof requestId !== "string") throw new ValidationError(MESSAGES.request.doctorAndRequestRequired);
       const result = await this._feeChangeRequestsUseCase.review({
         doctorId,
         requestId,
@@ -227,7 +228,7 @@ export class ClinicController {
         decision: req.body?.decision,
         reason: req.body?.reason,
       });
-      ApiResponse.success(res, "Consultation fee change request reviewed", result);
+      ApiResponse.success(res, MESSAGES.response.feeChangeRequestReviewed, result);
     } catch (error) { next(error); }
   };
 
@@ -238,7 +239,7 @@ export class ClinicController {
   ): Promise<void> => {
     try {
       const result = await this._listDoctorSpecializationsUseCase.execute(req.user!.clinicId!);
-      ApiResponse.success(res, "Clinic doctor specializations retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.clinicDoctorSpecializationsRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -251,13 +252,13 @@ export class ClinicController {
   ): Promise<void> => {
     try {
       const doctorId = req.params.doctorId;
-      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      if (typeof doctorId !== "string") throw new ValidationError(MESSAGES.request.doctorIdRequired);
       const result = await this._updateDoctorSpecializationsUseCase.execute({
         clinicId: req.user!.clinicId!,
         doctorId,
         specializations: req.body?.specializations,
       });
-      ApiResponse.success(res, "Doctor specializations updated", result);
+      ApiResponse.success(res, MESSAGES.response.doctorSpecializationsUpdated, result);
     } catch (error) {
       next(error);
     }
@@ -270,7 +271,7 @@ export class ClinicController {
   ): Promise<void> => {
     try {
       const result = await this._listDoctorSchedulesUseCase.execute(req.user!.clinicId!);
-      ApiResponse.success(res, "Clinic doctor schedules retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.clinicDoctorSchedulesRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -283,13 +284,13 @@ export class ClinicController {
   ): Promise<void> => {
     try {
       const doctorId = req.params.doctorId;
-      if (typeof doctorId !== "string") throw new ValidationError("Doctor id is required");
+      if (typeof doctorId !== "string") throw new ValidationError(MESSAGES.request.doctorIdRequired);
       const result = await this._updateDoctorWorkingHoursUseCase.executeForClinicAdmin({
         clinicId: req.user!.clinicId!,
         doctorId,
         workingHours: req.body?.workingHours,
       });
-      ApiResponse.success(res, "Doctor working hours updated", result);
+      ApiResponse.success(res, MESSAGES.response.doctorWorkingHoursUpdated, result);
     } catch (error) {
       next(error);
     }
@@ -305,7 +306,7 @@ export class ClinicController {
       );
       ApiResponse.success(
         res,
-        "Pending doctor verifications retrieved",
+        MESSAGES.response.pendingDoctorVerificationsRetrieved,
         result,
       );
     } catch (error) {
@@ -321,12 +322,12 @@ export class ClinicController {
     try {
       const doctorId = req.params.doctorId;
       if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
+        throw new ValidationError(MESSAGES.request.doctorIdRequired);
       const result = await this._getVerificationDetailsUseCase.execute(
         doctorId,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor verification details retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorVerificationDetailsRetrieved, result);
     } catch (error) {
       next(error);
     }
@@ -340,12 +341,12 @@ export class ClinicController {
     try {
       const doctorId = req.params.doctorId;
       if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
+        throw new ValidationError(MESSAGES.request.doctorIdRequired);
       const result = await this._approveVerificationUseCase.execute(
         doctorId,
         req.user!.clinicId!,
       );
-      ApiResponse.success(res, "Doctor profile approved", result);
+      ApiResponse.success(res, MESSAGES.response.doctorProfileApproved, result);
     } catch (error) {
       next(error);
     }
@@ -359,13 +360,13 @@ export class ClinicController {
     try {
       const doctorId = req.params.doctorId;
       if (typeof doctorId !== "string")
-        throw new ValidationError("Doctor id is required");
+        throw new ValidationError(MESSAGES.request.doctorIdRequired);
       const result = await this._rejectVerificationUseCase.execute(
         doctorId,
         req.user!.clinicId!,
         req.body?.reason,
       );
-      ApiResponse.success(res, "Doctor profile rejected", result);
+      ApiResponse.success(res, MESSAGES.response.doctorProfileRejected, result);
     } catch (error) {
       next(error);
     }
@@ -379,7 +380,7 @@ export class ClinicController {
     try {
       const { doctorId, documentType } = req.params;
       if (typeof doctorId !== "string" || typeof documentType !== "string") {
-        throw new ValidationError("Doctor id and document type are required");
+        throw new ValidationError(MESSAGES.request.doctorAndDocumentTypeRequired);
       }
       const result = await this._getClinicDoctorDocumentUseCase.execute(
         doctorId,
@@ -392,3 +393,5 @@ export class ClinicController {
     }
   };
 }
+
+

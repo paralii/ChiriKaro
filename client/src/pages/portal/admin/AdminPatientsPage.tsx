@@ -11,6 +11,7 @@ import { DataTable, CellTitle, tdClass } from '@/components/molecules/DataTable'
 import { superAdminService } from '@/features/admin/services/superAdminService';
 import { useAction } from '@/shared/hooks/useAction';
 import type { SuperAdminPatient } from '@/shared/types';
+import { ListPagination } from '@/components/molecules/ListPagination';
 
 export default function AdminPatientsPage() {
   const [patients, setPatients] = useState<SuperAdminPatient[]>([]);
@@ -40,6 +41,7 @@ export default function AdminPatientsPage() {
     setStatus(statusDraft);
     setPage(1);
   };
+  const resetFilters = () => { setSearchDraft(''); setStatusDraft(''); setSearch(''); setStatus(''); setPage(1); };
 
   const setPatientStatus = (patient: SuperAdminPatient) => {
     const blocking = patient.status === 'ACTIVE';
@@ -69,7 +71,7 @@ export default function AdminPatientsPage() {
       <Form onSubmit={applyFilters} className="grid grid-cols-[minmax(180px,1fr)_180px_auto] items-end gap-2 px-[15px] pb-3 max-md:grid-cols-1">
         <label className="grid gap-1 text-[10px] text-[#777c8a]">Search patients<Input value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} maxLength={100} placeholder="Name or email" /></label>
         <label className="grid gap-1 text-[10px] text-[#777c8a]">Status<select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)} className="h-[38px] rounded border border-[#cfd2df] bg-white px-2 text-xs"><option value="">All statuses</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Blocked</option></select></label>
-        <Button size="xs" disabled={busy}>Apply</Button>
+        <div className="flex gap-2"><Button size="xs" disabled={busy}>Apply</Button><Button type="button" size="xs" variant="ghost" disabled={busy || (!searchDraft && !statusDraft && !search && !status)} onClick={resetFilters}>Reset</Button></div>
       </Form>
       {busy && !patients.length ? <div className="p-4 text-xs text-[#777c8a]">Loading patients...</div> : !patients.length ? <EmptyState>No patients match these filters.</EmptyState> : (
         <DataTable headers={['PATIENT', 'EMAIL', 'STATUS', 'REGISTERED', 'ACTIONS']}>
@@ -82,11 +84,7 @@ export default function AdminPatientsPage() {
           </tr>)}
         </DataTable>
       )}
-      {totalPages > 1 ? <div className="flex items-center justify-end gap-2 border-t border-[#eff0f4] px-[15px] py-3">
-        <Button size="xs" variant="ghost" disabled={busy || page <= 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
-        <span className="text-[10px] text-[#656a79]">Page {page} of {totalPages}</span>
-        <Button size="xs" variant="ghost" disabled={busy || page >= totalPages} onClick={() => setPage((current) => current + 1)}>Next</Button>
-      </div> : null}
+      <ListPagination page={page} totalPages={totalPages} totalItems={totalItems} busy={busy} onPageChange={setPage} />
     </Card>
     {selectedPatient ? <div role="dialog" aria-modal="true" aria-label="Patient details" className="fixed inset-0 z-50 grid place-items-center bg-[#17203a66] p-4" onClick={() => setSelectedPatient(null)}>
       <div className="w-full max-w-xl" onClick={(event) => event.stopPropagation()}><Card>

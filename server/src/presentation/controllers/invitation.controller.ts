@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 
 import type { ICreateInvitationUseCase } from "@application/interfaces/use-cases/invitation/ICreateInvitationUseCase.ts";
@@ -27,7 +28,7 @@ export class InvitationController {
         req.body?.token,
       );
 
-      ApiResponse.success(res, "Invitation is valid", result);
+      ApiResponse.success(res, MESSAGES.response.invitationValid, result);
     } catch (error) {
       next(error);
     }
@@ -42,7 +43,7 @@ export class InvitationController {
       const result = await this._acceptInvitationUseCase.execute(
         req.body as AcceptInvitationDTO,
       );
-      ApiResponse.created(res, "Invitation accepted successfully", result);
+      ApiResponse.created(res, MESSAGES.response.invitationAccepted, result);
     } catch (error) {
       next(error);
     }
@@ -62,7 +63,7 @@ export class InvitationController {
       });
       ApiResponse.created(
         res,
-        "Invitation email sent successfully",
+        MESSAGES.response.invitationEmailSent,
         invitation,
       );
     } catch (error) {
@@ -81,7 +82,7 @@ export class InvitationController {
       );
       ApiResponse.success(
         res,
-        "Pending invitations retrieved successfully",
+        MESSAGES.response.pendingInvitationsRetrieved,
         invitations,
       );
     } catch (error) {
@@ -101,7 +102,7 @@ export class InvitationController {
       );
       ApiResponse.success(
         res,
-        "Invitation email resent successfully",
+        MESSAGES.response.invitationEmailResent,
         invitation,
       );
     } catch (error) {
@@ -109,3 +110,4 @@ export class InvitationController {
     }
   };
 }
+

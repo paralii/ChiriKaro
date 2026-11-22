@@ -1,4 +1,5 @@
 import express from "express";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 import type { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -58,7 +59,7 @@ export class App {
 
   private initializeHealthCheck(): void {
     this.instance.get("/health", (_req, res) => {
-      ApiResponse.success(res, "Server is running and health is good", {
+      ApiResponse.success(res, MESSAGES.response.serverHealthy, {
         timestamp: new Date().toLocaleString("en-IN", {
           timeZone: "Asia/Kolkata",
         }),
@@ -87,9 +88,10 @@ export class App {
     this.instance.use(errorMiddleware);
 
     this.instance.use((_req, res) => {
-      ApiResponse.failed(res, "Route not found")
+      ApiResponse.failed(res, MESSAGES.response.routeNotFound)
     });
   }
 }
 
 export const app = new App();
+

@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 import { cn } from "@shared/lib/cn";
 
 const tones = {
-  pill: "bg-[#e1f4ed] text-[#286d5b]",
-  pending: "bg-[#fff2dc] text-[#925712]",
-  approved: "bg-[#e6f5ed] text-[#276d59]",
-  rejected: "bg-[#ffedeb] text-[#943b37]",
-  blocked: "bg-[#eaebf0] text-[#555b69]",
-  neutral: "bg-[#eef0f6] text-[#6d7180]",
+  pill: "bg-success-soft text-success",
+  pending: "bg-warning-soft text-warning",
+  approved: "bg-success-soft text-success",
+  rejected: "bg-danger-soft text-danger",
+  blocked: "bg-page text-text-secondary",
+  neutral: "bg-page text-text-secondary",
 };
 export type BadgeTone = keyof typeof tones;
 
@@ -23,7 +23,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-block rounded-sm px-2 py-1.25 text-[9px] font-bold",
+        "inline-block rounded-sm px-2 py-1.25 text-xs leading-tight font-semibold",
         tones[tone],
         className,
       )}

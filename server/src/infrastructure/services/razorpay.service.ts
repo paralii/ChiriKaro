@@ -78,7 +78,7 @@ export class RazorpayService {
 
   assertCheckoutPayload(orderId: unknown, paymentId: unknown, signature: unknown): { orderId: string; paymentId: string; signature: string } {
     if (typeof orderId !== "string" || typeof paymentId !== "string" || typeof signature !== "string" ||
-      !/^[\da-f]{16,64}$/i.test(orderId) || !/^[\da-f]{16,64}$/i.test(paymentId) || !/^[\da-f]{64}$/i.test(signature)) {
+      !/^order_[A-Za-z0-9]+$/.test(orderId) || !/^pay_[A-Za-z0-9]+$/.test(paymentId) || !/^[\da-f]{64}$/i.test(signature)) {
       throw new ValidationError("Payment verification details are invalid");
     }
     return { orderId, paymentId, signature };

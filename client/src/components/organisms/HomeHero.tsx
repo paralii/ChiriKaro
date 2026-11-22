@@ -4,7 +4,7 @@ import { Eyebrow } from "@components/atoms/Eyebrow";
 
 export function HomeHero() {
   return (
-    <section className="grid min-h-[34rem] grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] items-center gap-10 py-14 lg:gap-14 lg:py-20 max-md:grid-cols-1 max-md:gap-0 max-md:py-12">
+    <section className="grid min-h-136 grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] items-center gap-10 py-14 lg:gap-14 lg:py-20 max-md:grid-cols-1 max-md:gap-0 max-md:py-12">
       <div className="max-w-2xl animate-rise-in">
         <Eyebrow className="flex items-center gap-2 text-secondary">
           <span className="size-2 rounded-full bg-secondary" />A connected
@@ -45,7 +45,7 @@ export function HomeHero() {
 
       <div
         aria-label="Illustration showing patient appointment and clinic management"
-        className="relative isolate grid min-h-[24rem] animate-rise-in place-items-center max-md:mt-8 max-md:min-h-[22rem] sm:min-h-[28rem]"
+        className="relative isolate grid min-h-96 animate-rise-in place-items-center max-md:mt-8 max-md:min-h-88 sm:min-h-112"
       >
         <span className="absolute top-[6%] right-[2%] -z-20 h-[83%] w-[74%] rotate-[9deg] rounded-[48%_52%_44%_56%] bg-[#e8efff]" />
 

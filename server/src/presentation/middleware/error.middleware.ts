@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { logger } from "../../infrastructure/logger/logger.js";
 import { AppError } from "../../shared/errors/index.js";
+import { InvalidClinicDataError, InvalidDoctorDataError, InvalidInvitationDataError, InvalidUserDataError } from "../../domain/error/DomainError.js";
 
 interface MongoServerErrorLike extends Error {
   code?: number;
@@ -55,6 +56,10 @@ const resolveErrorDetails = (
     }
 
     return result;
+  }
+
+  if (err instanceof InvalidClinicDataError || err instanceof InvalidDoctorDataError || err instanceof InvalidInvitationDataError || err instanceof InvalidUserDataError) {
+    return { statusCode: 422, message: err.message };
   }
 
   if (isMongoServerError(err)) {

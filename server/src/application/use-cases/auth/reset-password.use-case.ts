@@ -8,6 +8,7 @@ import type { IPasswordResetTokenService } from "@application/interfaces/service
 
 import type { ResetPasswordDto } from "@application/dto/auth/reset-password.dto.ts";
 import type { IResetPasswordUseCase } from "@application/interfaces/use-cases/auth/IResetPasswordUseCase.ts";
+import { assertValidNewPassword } from "@shared/utils/password.policy.ts";
 
 export class ResetPasswordUseCase implements IResetPasswordUseCase{
   constructor(
@@ -32,6 +33,8 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase{
     if (!user) {
       throw new BadRequestError("Invalid or expired password reset token");
     }
+
+    assertValidNewPassword(dto.newPassword);
 
     const passwordHash = await this._passwordService.hash(dto.newPassword);
 

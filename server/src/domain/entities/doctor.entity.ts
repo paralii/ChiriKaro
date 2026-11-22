@@ -96,6 +96,9 @@ const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 function requiredText(value: string, field: string): string {
   const trimmed = value?.trim();
   if (!trimmed) throw new InvalidDoctorDataError(`${field} must not be blank`);
+  if ((field === "firstName" || field === "lastName") && (trimmed.length < 2 || trimmed.length > 100)) {
+    throw new InvalidDoctorDataError(`${field} must be between 2 and 100 characters`);
+  }
   return trimmed;
 }
 
@@ -106,13 +109,19 @@ function optionalText(value: string | null): string | null {
 
 function normalizedList(values: string[], field: string): string[] {
   if (!Array.isArray(values)) throw new InvalidDoctorDataError(`${field} must be a list`);
+  if (values.length > 20) throw new InvalidDoctorDataError(`${field} can contain at most 20 entries`);
   const normalized = values.map((value) => requiredText(value, field));
-  return [...new Set(normalized)];
+  if (normalized.some((value) => value.length > 100)) throw new InvalidDoctorDataError(`Each ${field} entry must be 100 characters or fewer`);
+  const keys = normalized.map((value) => value.toLocaleLowerCase());
+  if (new Set(keys).size !== keys.length) throw new InvalidDoctorDataError(`${field} entries must not contain duplicates`);
+  return normalized;
 }
 
 function normalizedSpecializations(values: string[]): string[] {
   if (!Array.isArray(values)) throw new InvalidDoctorDataError("specializations must be a list");
+  if (values.length > 20) throw new InvalidDoctorDataError("A doctor can have at most 20 specializations");
   const normalized = values.map((value) => requiredText(value, "specialization"));
+  if (normalized.some((value) => value.length > 100)) throw new InvalidDoctorDataError("Each specialization must be 100 characters or fewer");
   const keys = normalized.map((value) => value.toLocaleLowerCase());
   if (new Set(keys).size !== keys.length) {
     throw new InvalidDoctorDataError("Specializations must not contain duplicates");
@@ -188,6 +197,7 @@ export class Doctor {
   }): void {
     this.ensureEditable();
     if (updates.professionalTitle !== undefined) this.props.professionalTitle = optionalText(updates.professionalTitle);
+    if (this.props.professionalTitle && this.props.professionalTitle.length > 100) throw new InvalidDoctorDataError("Professional title must be 100 characters or fewer");
     if (updates.qualifications !== undefined) this.props.qualifications = normalizedList(updates.qualifications, "qualification");
     if (updates.yearsOfExperience !== undefined) {
       const years = updates.yearsOfExperience;
@@ -198,6 +208,7 @@ export class Doctor {
     }
     if (updates.registrationNumber !== undefined) this.props.registrationNumber = optionalText(updates.registrationNumber);
     if (updates.registrationAuthority !== undefined) this.props.registrationAuthority = optionalText(updates.registrationAuthority);
+    if ((this.props.registrationNumber?.length ?? 0) > 100 || (this.props.registrationAuthority?.length ?? 0) > 100) throw new InvalidDoctorDataError("Registration number and authority must be 100 characters or fewer");
     this.markInProgress();
   }
 

@@ -31,7 +31,7 @@ export function SignInForm({ emailPlaceholder = 'you@example.com', extras = true
         >
           Continue with Google
         </Button> : null}
-        <TextField label="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={emailPlaceholder} autoComplete="email" required />
+        <TextField label="Email address" type="email" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder={emailPlaceholder} autoComplete="email" required />
         <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete="current-password" required />
         {extras ? (
           <div className="-mt-px flex items-center justify-between text-[11px]">

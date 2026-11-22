@@ -1,4 +1,5 @@
-import { BadRequestError, NotFoundError } from "@shared/errors/index.ts";
+import { BadRequestError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
+import { normalizeValidatedEmail } from "@shared/utils/email-validation.ts";
 
 import type { IVerifyOtpUseCase } from "@application/interfaces/use-cases/auth/IVerifyOtpUseCase.ts";
 import type { VerifyOtpDto } from "@application/dto/auth/verify-otp.dto.ts";
@@ -14,7 +15,9 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   ) {}
 
   public async execute(dto: VerifyOtpDto): Promise<void> {
-    const user = await this._userRepository.findByEmail(dto.email);
+    const email = normalizeValidatedEmail(dto.email);
+    if (!email || typeof dto.code !== "string" || !/^\d{6}$/.test(dto.code)) throw new ValidationError("Enter a valid email address and 6-digit verification code");
+    const user = await this._userRepository.findByEmail(email);
     if (!user) {
       throw new NotFoundError("User");
     }

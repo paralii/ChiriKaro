@@ -48,6 +48,7 @@ export const API_ROUTES = {
     QUEUE: "/clinic/queue",
     QUEUE_STATUS: (queueEntryId: string) => `/clinic/queue/${encodeURIComponent(queueEntryId)}/status`,
     QUEUE_DOCTORS: "/clinic/queue/doctors",
+    QUEUE_APPOINTMENTS: "/clinic/queue/appointments",
     QUEUE_WALK_INS: "/clinic/queue/walk-ins",
     QUEUE_APPOINTMENT_CHECK_IN: (appointmentId: string) => `/clinic/queue/appointments/${encodeURIComponent(appointmentId)}/check-in`,
 

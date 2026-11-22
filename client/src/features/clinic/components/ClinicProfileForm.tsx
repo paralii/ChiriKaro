@@ -21,15 +21,15 @@ export function ClinicProfileForm({ initial, busy, onSave, profileOnly = false, 
     <Form onSubmit={submit} className="max-w-[520px] p-[18px]">
       {!setupOnly ? <>
         <TextField label="Clinic name" {...bind('name')} minLength={2} maxLength={150} required disabled={busy} />
-        {!profileOnly ? <TextField label="Clinic type" {...bind('clinicType')} placeholder="Dental clinic" disabled={busy} /> : null}
-        <TextField label="Contact email" type="email" {...bind('contactEmail')} required disabled={busy} />
-        <TextField label="Phone" type="tel" {...bind('phone')} pattern="[+0-9 ()-]{7,20}" title="Enter a valid phone number." disabled={busy} />
-        <TextField label="Registration number" {...bind('registrationNumber')} disabled={busy} />
+        {!profileOnly ? <TextField label="Clinic type" {...bind('clinicType')} placeholder="Dental clinic" maxLength={100} disabled={busy} /> : null}
+        <TextField label="Contact email" type="email" {...bind('contactEmail')} maxLength={254} required disabled={busy} />
+        <TextField label="Phone" type="tel" {...bind('phone')} pattern="[+]?[0-9 ()-]{7,25}" title="Enter a phone number with 7 to 15 digits. You may include a leading +, spaces, parentheses, or hyphens." disabled={busy} />
+        <TextField label="Registration number" {...bind('registrationNumber')} maxLength={100} disabled={busy} />
       </> : null}
-      <TextField label="Address" {...bind('address')} disabled={busy} />
-      <TextField label="City" {...bind('city')} disabled={busy} />
-      <TextField label="State" {...bind('state')} disabled={busy} />
-      <TextField label="Postal code" {...bind('pincode')} pattern="[A-Za-z0-9 -]{3,12}" title="Enter a valid postal code." disabled={busy} />
+      <TextField label="Address" {...bind('address')} maxLength={250} disabled={busy} />
+      <TextField label="City" {...bind('city')} maxLength={100} disabled={busy} />
+      <TextField label="State" {...bind('state')} maxLength={100} disabled={busy} />
+      <TextField label="Postal code" {...bind('pincode')} pattern="[0-9]{6}" title="Enter a 6-digit Indian PIN code." maxLength={6} disabled={busy} />
       {!setupOnly && !profileOnly ? <TextField label="About the clinic" {...bind('description')} maxLength={500} /> : null}
       <Button className="mt-[3px] justify-self-start" disabled={busy}>{busy ? 'Saving...' : setupOnly ? 'Save location' : 'Save clinic profile'}</Button>
     </Form>

@@ -13,6 +13,7 @@ import { CheckInAppointmentUseCase } from "@application/use-cases/clinic/check-i
 import { ListClinicQueueUseCase } from "@application/use-cases/clinic/list-clinic-queue.use-case.ts";
 import { ListQueueDoctorsUseCase } from "@application/use-cases/clinic/list-queue-doctors.use-case.ts";
 import { TransitionQueueEntryUseCase } from "@application/use-cases/clinic/transition-queue-entry.use-case.ts";
+import { ListCheckInAppointmentsUseCase } from "@application/use-cases/clinic/list-check-in-appointments.use-case.ts";
 import { ClinicQueueController } from "@presentation/controllers/clinic-queue.controller.ts";
 import { ClinicQueueRouter } from "@presentation/routes/clinic-queue.routes.ts";
 
@@ -32,6 +33,7 @@ export const clinicQueueRouter = ClinicQueueRouter(
     new ListClinicQueueUseCase(queue, clinicContext),
     new ListQueueDoctorsUseCase(clinicContext),
     new TransitionQueueEntryUseCase(queue, clinicContext),
+    new ListCheckInAppointmentsUseCase(appointments, users, clinicContext),
   ),
   {
     authenticate: auth.authenticate,

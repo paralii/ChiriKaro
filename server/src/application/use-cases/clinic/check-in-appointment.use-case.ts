@@ -25,7 +25,7 @@ export class CheckInAppointmentUseCase implements ICheckInAppointmentUseCase {
     if (!Types.ObjectId.isValid(input.appointmentId)) throw new BadRequestError("Appointment id is invalid");
     const clinic = await this.context.getOperationalClinic(input.clinicId);
     const appointment = await this.appointments.findConfirmedForQueue(input.appointmentId, input.clinicId);
-    if (!appointment) throw new NotFoundError("Confirmed appointment in this clinic");
+    if (!appointment) throw new BadRequestError("Appointment not found or not eligible for check-in");
     const localDate = this.context.localDate(new Date(), clinic.timeZone);
     if (appointment.slot.localDate !== localDate) throw new ConflictError("Only today's confirmed appointments can join today's queue");
     const existing = await this.queue.findByAppointmentId(input.appointmentId);

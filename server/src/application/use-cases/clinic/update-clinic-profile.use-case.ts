@@ -11,6 +11,8 @@ import { toClinicProfileDTO } from "@application/mappers/clinic-profile.mapper.t
 
 const PROFILE_FIELDS = [
   "name",
+  "clinicType",
+  "description",
   "address",
   "city",
   "state",
@@ -42,6 +44,8 @@ const normalizeUpdates = (value: unknown) => {
   }
   return value as {
     name?: string;
+    clinicType?: string | null;
+    description?: string | null;
     address?: string | null;
     city?: string | null;
     state?: string | null;

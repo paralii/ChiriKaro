@@ -29,12 +29,12 @@ export function DoctorProfessionalForm({ initial, busy, onSave }: {
 
   return (
     <Form onSubmit={submit} className="max-w-[520px] p-[18px]">
-      <TextField label="Professional title" {...bind('professionalTitle')} required />
-      <TextField label="Qualifications, separated by commas" value={qualifications} onChange={(event) => setQualifications(event.target.value)} placeholder="DDS, Orthodontics certification" required />
+      <TextField label="Professional title" {...bind('professionalTitle')} maxLength={100} required />
+      <TextField label="Qualifications, separated by commas" value={qualifications} onChange={(event) => setQualifications(event.target.value)} placeholder="DDS, Orthodontics certification" maxLength={2040} required />
       <TextField label="Years of experience" type="number" min="0" max="80" value={profile.yearsOfExperience ?? ''}
         onChange={(event) => setProfile((current) => ({ ...current, yearsOfExperience: event.target.value === '' ? null : Number(event.target.value) }))} required />
-      <TextField label="Registration number" {...bind('registrationNumber')} required />
-      <TextField label="Registration authority" {...bind('registrationAuthority')} required />
+      <TextField label="Registration number" {...bind('registrationNumber')} maxLength={100} required />
+      <TextField label="Registration authority" {...bind('registrationAuthority')} maxLength={100} required />
       <Button className="mt-[3px] justify-self-start" disabled={busy}>{busy ? 'Saving...' : 'Save and continue'}</Button>
     </Form>
   );

@@ -21,6 +21,8 @@ import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRe
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
+import { assertValidNewPassword } from "@shared/utils/password.policy.ts";
+import { normalizeValidatedEmail } from "@shared/utils/email-validation.ts";
 
 export class RegisterClinicUseCase implements IRegisterClinicUseCase {
   constructor(
@@ -35,15 +37,24 @@ export class RegisterClinicUseCase implements IRegisterClinicUseCase {
   public async execute(
     dto: RegisterClinicDTO,
   ): Promise<RegisterClinicResultDTO> {
+    if (!dto || typeof dto !== "object" || !dto.admin || typeof dto.admin !== "object" || !dto.clinic || typeof dto.clinic !== "object") {
+      throw new ValidationError("Clinic and administrator details are required");
+    }
     const { admin, clinic } = dto;
+    if (typeof admin.name !== "string" || admin.name.trim().length < 2 || admin.name.trim().length > 100) {
+      throw new ValidationError("Administrator name must be between 2 and 100 characters");
+    }
+    if (typeof clinic.name !== "string" || clinic.name.trim().length < 2 || clinic.name.trim().length > 150) {
+      throw new ValidationError("Clinic name must be between 2 and 150 characters");
+    }
+    const email = normalizeValidatedEmail(admin.email);
+    if (!email) throw new ValidationError("Enter a valid administrator email address");
 
-    if (await this._userRepository.existsByEmail(admin.email)) {
+    if (await this._userRepository.existsByEmail(email)) {
       throw new ConflictError("Email is already registered");
     }
 
-    if (!admin.password || admin.password.length < 8) {
-      throw new ValidationError("Password must be at least 8 characters");
-    }
+    assertValidNewPassword(admin.password);
 
     const passwordHash = await this._passwordService.hash(admin.password);
 
@@ -56,7 +67,7 @@ export class RegisterClinicUseCase implements IRegisterClinicUseCase {
 
     const newAdmin = User.create({
       name: admin.name,
-      email: admin.email,
+      email,
       role: Role.CLINIC_ADMIN,
       clinicId: savedClinic.id,
       passwordHash,

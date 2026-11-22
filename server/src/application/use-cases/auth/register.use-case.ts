@@ -10,6 +10,7 @@ import type { IOtpRepository } from "@application/interfaces/repositories/IOtpRe
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
 import type { IOtpService } from "@application/interfaces/services/IOtpService.ts";
 import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
+import { assertValidNewPassword } from "@shared/utils/password.policy.ts";
 
 export class RegisterUseCase implements IRegisterUseCase {
   constructor(
@@ -26,7 +27,7 @@ export class RegisterUseCase implements IRegisterUseCase {
       throw new ConflictError("Email is already registered");
     }
 
-    const hasPassword = Boolean(dto.password?.trim());
+    const hasPassword = dto.password !== undefined;
     const hasGoogleId = Boolean(dto.googleId?.trim());
 
     if (hasPassword === hasGoogleId) {
@@ -34,6 +35,8 @@ export class RegisterUseCase implements IRegisterUseCase {
         "Provide either a password or Google authentication, not both",
       );
     }
+
+    if (dto.password !== undefined) assertValidNewPassword(dto.password);
 
     const passwordHash = dto.password
       ? await this._passwordService.hash(dto.password)

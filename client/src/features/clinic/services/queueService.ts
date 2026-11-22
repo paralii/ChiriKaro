@@ -15,6 +15,7 @@ export type QueueEntry = {
 };
 export type QueueDay = { localDate: string; timeZone: string; entries: QueueEntry[] };
 export type QueueDoctor = { doctorUserId: string; name: string };
+export type CheckInAppointment = { appointmentId: string; patientName: string; doctorName: string; localStartTime: string; localEndTime: string };
 
 type Envelope<T> = { success: boolean; message: string; data?: T };
 function requireData<T>(response: Envelope<T>, message: string): T {
@@ -25,6 +26,7 @@ function requireData<T>(response: Envelope<T>, message: string): T {
 export const queueService = {
   list: async () => requireData(await api.get<Envelope<QueueDay>>(API_ROUTES.CLINIC.QUEUE), 'The clinic queue was not returned.'),
   doctors: async () => requireData(await api.get<Envelope<QueueDoctor[]>>(API_ROUTES.CLINIC.QUEUE_DOCTORS), 'Queue doctors were not returned.'),
+  checkInAppointments: async () => requireData(await api.get<Envelope<CheckInAppointment[]>>(API_ROUTES.CLINIC.QUEUE_APPOINTMENTS), 'Confirmed appointments were not returned.'),
   registerWalkIn: async (body: { doctorUserId: string; patientEmail?: string; guestName?: string }, idempotencyKey: string) => {
     const response = await http.post<Envelope<QueueEntry>>(API_ROUTES.CLINIC.QUEUE_WALK_INS, body, { headers: { 'Idempotency-Key': idempotencyKey } });
     return requireData(response.data, 'The queue token was not returned.');

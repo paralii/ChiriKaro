@@ -7,7 +7,7 @@ import { AuthSubmitButton } from '@components/molecules/AuthSubmitButton';
 import { Notices } from '@components/molecules/Notices';
 import { useAction } from '@shared/hooks/useAction';
 import { invitationService } from '@/features/auth/services/invitationService';
-import { validateEmail } from '@shared/utils/validators';
+import { validateEmail, validatePassword } from '@shared/utils/validators';
 import type { InvitationValidation } from '@/shared/types';
 
 export function InvitationAcceptForm({ onLoaded }: { onLoaded?: (role: string) => void }) {
@@ -35,8 +35,8 @@ export function InvitationAcceptForm({ onLoaded }: { onLoaded?: (role: string) =
     void run(async () => {
       if (!token) throw new Error(tokenError);
       if (!invitation?.email || !validateEmail(invitation.email)) throw new Error('A valid email address is required.');
-      if (name.trim().length < 2) throw new Error('Please enter your full name.');
-      if (password.length < 8) throw new Error('Choose a password with at least 8 characters.');
+      if (name.trim().length < 2 || name.trim().length > 100) throw new Error('Name must be between 2 and 100 characters long.');
+      if (!validatePassword(password)) throw new Error('Use 8–128 characters with an uppercase letter, a number, and a special character. Spaces are not allowed.');
       if (password !== confirm) throw new Error('The password and confirmation do not match.');
       await invitationService.accept({ token, name: name.trim(), password });
       setTimeout(() => navigate(invitation.role.toUpperCase() === 'DOCTOR' ? '/login/doctor' : '/login/staff', { replace: true }), 900);
@@ -50,10 +50,10 @@ export function InvitationAcceptForm({ onLoaded }: { onLoaded?: (role: string) =
         {invitation ? (
           <>
             <p className="m-0 text-[13px] text-[#686d7b]">You were invited to join <strong>{invitation.clinicName}</strong> as a {invitation.role === 'DOCTOR' ? 'doctor' : 'staff member'}.</p>
-            <TextField label="Full name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" autoComplete="name" minLength={2} required />
+            <TextField label="Full name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" autoComplete="name" minLength={2} maxLength={100} required />
             <TextField label="Email address" type="email" value={invitation.email} readOnly />
-            <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete="new-password" minLength={8} required />
-            <TextField label="Confirm password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Enter your password again" autoComplete="new-password" minLength={8} required />
+            <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8+ characters, uppercase, number, symbol" autoComplete="new-password" minLength={8} maxLength={128} title="Use 8–128 characters with an uppercase letter, a number, and a special character. Spaces are not allowed." required />
+            <TextField label="Confirm password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Enter your password again" autoComplete="new-password" maxLength={128} required />
             <AuthSubmitButton busy={busy}>Create account</AuthSubmitButton>
           </>
         ) : busy && !tokenError ? <p className="m-0 text-[13px] text-[#686d7b]">Checking invitation...</p> : null}

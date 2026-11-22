@@ -22,7 +22,7 @@ export interface InvitationProps {
 }
 
 const DEFAULT_TTL_HOURS = 72;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function requireNonBlank(value: string, field: string): string {
   const trimmed = value?.trim();
@@ -48,7 +48,7 @@ export class Invitation {
   }): Invitation {
     const id = props.id?.trim() ?? "";
     const email = requireNonBlank(props.email, "email").toLowerCase();
-    if (!EMAIL_PATTERN.test(email)) {
+    if (email.length > 254 || !EMAIL_PATTERN.test(email)) {
       throw new InvalidInvitationDataError(
         "Invitation email is not a valid email address",
       );

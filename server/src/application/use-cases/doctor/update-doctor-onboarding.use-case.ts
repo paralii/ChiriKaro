@@ -9,6 +9,7 @@ import type { DoctorOnboardingDTO, DoctorOnboardingStep } from "@application/dto
 import { BadRequestError, ValidationError } from "@shared/errors/index.ts";
 import { toDoctorOnboardingDTO } from "@application/mappers/doctor-onboarding.mapper.ts";
 import { findWorkingHoursOutsideClinic } from "@domain/policies/working-hours.policy.ts";
+import { isCalendarDate } from "@shared/utils/calendar-date.ts";
 
 const STEP_FIELDS: Record<DoctorOnboardingStep, string[]> = {
   basic: ["firstName", "lastName", "gender", "dateOfBirth"],
@@ -109,7 +110,7 @@ export class UpdateDoctorOnboardingUseCase implements IUpdateDoctorOnboardingUse
     let dateOfBirth: Date | null | undefined;
     if (updates.dateOfBirth !== undefined) {
       if (updates.dateOfBirth === null) dateOfBirth = null;
-      else if (typeof updates.dateOfBirth === "string") dateOfBirth = new Date(updates.dateOfBirth);
+      else if (typeof updates.dateOfBirth === "string" && isCalendarDate(updates.dateOfBirth)) dateOfBirth = new Date(`${updates.dateOfBirth}T00:00:00.000Z`);
       else throw new ValidationError("dateOfBirth must be an ISO date string or null");
       if (dateOfBirth && Number.isNaN(dateOfBirth.getTime())) throw new ValidationError("dateOfBirth must be a valid date");
     }

@@ -4,6 +4,7 @@ import type { ICheckInAppointmentUseCase } from "@application/interfaces/use-cas
 import type { IListClinicQueueUseCase } from "@application/interfaces/use-cases/clinic/IListClinicQueueUseCase.ts";
 import type { IListQueueDoctorsUseCase } from "@application/interfaces/use-cases/clinic/IListQueueDoctorsUseCase.ts";
 import type { ITransitionQueueEntryUseCase } from "@application/interfaces/use-cases/clinic/ITransitionQueueEntryUseCase.ts";
+import type { ListCheckInAppointmentsUseCase } from "@application/use-cases/clinic/list-check-in-appointments.use-case.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { BadRequestError } from "@shared/errors/index.ts";
 
@@ -14,6 +15,7 @@ export class ClinicQueueController {
     private readonly listQueue: IListClinicQueueUseCase,
     private readonly listDoctors: IListQueueDoctorsUseCase,
     private readonly transitionQueueEntry: ITransitionQueueEntryUseCase,
+    private readonly listCheckInAppointments: ListCheckInAppointmentsUseCase,
   ) {}
 
   createWalkIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -55,6 +57,14 @@ export class ClinicQueueController {
     try {
       if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
       ApiResponse.success(res, "Queue doctors retrieved", await this.listDoctors.execute({ clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role }));
+    } catch (error) { next(error); }
+  };
+
+  getCheckInAppointments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      const result = await this.listCheckInAppointments.execute({ clinicId: req.user.clinicId, actorRole: req.user.role });
+      ApiResponse.success(res, "Today's confirmed appointments retrieved", result);
     } catch (error) { next(error); }
   };
 

@@ -9,6 +9,8 @@ import type { IOtpService } from "@application/interfaces/services/IOtpService.t
 import type { IEmailService } from "@application/interfaces/services/IEmailService.ts";
 
 import type { ResendOtpDto } from "@application/dto/auth/resend-otp.dto.ts";
+import { normalizeValidatedEmail } from "@shared/utils/email-validation.ts";
+import { ValidationError } from "@shared/errors/index.ts";
 
 export class ResendOtpUseCase implements IResendOtpUseCase{
   constructor(
@@ -20,7 +22,9 @@ export class ResendOtpUseCase implements IResendOtpUseCase{
   ) {}
 
   public async execute(dto: ResendOtpDto): Promise<void> {
-    const user = await this._userRepository.findByEmail(dto.email);
+    const email = normalizeValidatedEmail(dto.email);
+    if (!email) throw new ValidationError("Enter a valid email address");
+    const user = await this._userRepository.findByEmail(email);
 
     if (!user) {
       throw new NotFoundError("User");

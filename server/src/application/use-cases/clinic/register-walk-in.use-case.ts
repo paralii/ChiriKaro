@@ -27,8 +27,8 @@ export class RegisterWalkInUseCase implements IRegisterWalkInUseCase {
     const email = typeof input.patientEmail === "string" ? input.patientEmail.trim().toLowerCase() : "";
     const guestName = typeof input.guestName === "string" ? input.guestName.trim().replace(/\s+/g, " ") : "";
     if (Boolean(email) === Boolean(guestName)) throw new BadRequestError("Provide either an existing patient's email or a guest name");
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new BadRequestError("Patient email is invalid");
-    if (guestName.length > 120) throw new BadRequestError("Guest name is invalid");
+    if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new BadRequestError("Enter a valid patient email address");
+    if (guestName && (guestName.length < 2 || guestName.length > 120)) throw new BadRequestError("Guest name must be between 2 and 120 characters");
     const fingerprint = createHash("sha256").update(JSON.stringify({ doctorUserId, patientEmail: email || null, guestName: guestName || null })).digest("hex");
     const idempotencyKey = input.idempotencyKey as string;
     const existing = await this.queue.findByIdempotencyKey(input.clinicId, idempotencyKey);

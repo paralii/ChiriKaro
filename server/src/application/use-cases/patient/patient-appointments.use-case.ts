@@ -15,6 +15,7 @@ import { BOOKING_DEFAULTS } from "@domain/policies/booking-concurrency.policy.ts
 import { APPOINTMENT_CHANGE_POLICY } from "@domain/policies/appointment-change.policy.ts";
 import { AppointmentPaymentModel } from "@infrastructure/database/mongodb/models/AppointmentPaymentModel.ts";
 import { BadRequestError, ConflictError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
+import { isCalendarDate } from "@shared/utils/calendar-date.ts";
 
 function toDTO(appointment: AppointmentRecord, listingIdService: IPublicListingIdService): AppointmentDTO {
   return {
@@ -51,7 +52,7 @@ export class PatientAppointmentsUseCase implements IPatientAppointmentsUseCase {
 
   async create(input: CreateAppointmentInput): Promise<AppointmentDTO> {
     if (!/^[a-f\d]{24}$/i.test(input.patientUserId)) throw new BadRequestError("Authenticated patient identity is invalid");
-    if (typeof input.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(input.date)) throw new ValidationError("date must use YYYY-MM-DD format");
+    if (typeof input.date !== "string" || !isCalendarDate(input.date)) throw new ValidationError("Choose a valid appointment date");
     if (typeof input.startsAt !== "string" || Number.isNaN(Date.parse(input.startsAt))) throw new ValidationError("startsAt must be a valid slot start timestamp");
     if (typeof input.idempotencyKey !== "string" || !/^[A-Za-z0-9._:-]{16,128}$/.test(input.idempotencyKey)) {
       throw new ValidationError("Idempotency-Key must contain 16 to 128 safe characters");
@@ -203,7 +204,7 @@ export class PatientAppointmentsUseCase implements IPatientAppointmentsUseCase {
 
   async reschedule(input: RescheduleAppointmentInput): Promise<AppointmentDTO> {
     if (!Types.ObjectId.isValid(input.patientUserId) || !Types.ObjectId.isValid(input.appointmentId)) throw new BadRequestError("Appointment or patient identity is invalid");
-    if (typeof input.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(input.date)) throw new ValidationError("date must use YYYY-MM-DD format");
+    if (typeof input.date !== "string" || !isCalendarDate(input.date)) throw new ValidationError("Choose a valid appointment date");
     if (typeof input.startsAt !== "string" || Number.isNaN(Date.parse(input.startsAt))) throw new ValidationError("startsAt must be a valid slot start timestamp");
     if (typeof input.listingId !== "string" || input.listingId.length > 512) throw new ValidationError("Directory listing handle is invalid");
     const current = await this._appointmentRepository.findOwnedById(input.appointmentId, input.patientUserId);

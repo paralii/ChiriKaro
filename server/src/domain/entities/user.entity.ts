@@ -32,19 +32,19 @@ type NewUserProps = Pick<
     >
   >;
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function requireNonBlank(value: string, field: string): string {
   const trimmed = value?.trim();
-  if (!trimmed) {
-    throw new InvalidUserDataError(`User ${field} must not be blank`);
+  if (!trimmed || (field === "name" && (trimmed.length < 2 || trimmed.length > 100))) {
+    throw new InvalidUserDataError(field === "name" ? "Name must be between 2 and 100 characters" : `User ${field} must not be blank`);
   }
   return trimmed;
 }
 
 function requireEmail(value: string): string {
   const email = requireNonBlank(value, "email");
-  if (!EMAIL_PATTERN.test(email)) {
+  if (email.length > 254 || !EMAIL_PATTERN.test(email)) {
     throw new InvalidUserDataError("User email is not a valid email address");
   }
   return email;

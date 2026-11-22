@@ -17,26 +17,26 @@ export function AuthTemplate({
   actionText?: ReactNode;
 }) {
   return (
-    <main className="grid min-h-screen grid-cols-[minmax(330px,0.82fr)_1.18fr] bg-white max-md:grid-cols-1">
-      <div className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#eef3ff] px-[8%] py-8 max-md:hidden">
-        <i className="absolute -right-32.5 bottom-[13%] size-92.5 rounded-full border border-[#cad7f2]" />
-        <i className="absolute -right-11.25 bottom-[20%] size-57.5 rounded-full border border-[#cad7f2]" />
+    <main className="grid min-h-screen grid-cols-[minmax(320px,0.82fr)_minmax(0,1.18fr)] bg-surface-elevated lg:grid-cols-[minmax(360px,0.82fr)_minmax(0,1.18fr)] max-md:grid-cols-1">
+      <div className="relative hidden min-h-screen flex-col justify-between overflow-hidden bg-primary-soft px-[8%] py-8 md:flex">
+        <i aria-hidden="true" className="absolute -right-32.5 bottom-[13%] size-92.5 rounded-full border border-primary/15" />
+        <i aria-hidden="true" className="absolute -right-11.25 bottom-[20%] size-57.5 rounded-full border border-primary/15" />
 
         <BrandLockup />
 
-        <div className="relative z-10 my-auto max-w-[400px] py-[60px]">
-          <Eyebrow className="text-brand-deep">CARE, CONNECTED</Eyebrow>
+        <div className="relative z-10 my-auto max-w-md py-14 lg:py-16">
+          <Eyebrow className="text-primary-hover">CARE, CONNECTED</Eyebrow>
 
-          <h1 className="my-[13px] max-w-[360px] text-4xl leading-[1.18]">
+          <h1 className="my-4 max-w-sm text-3xl leading-tight font-semibold tracking-tight text-text-primary lg:text-4xl">
             A little more clarity for every smile.
           </h1>
 
-          <p className="max-w-[320px] text-sm leading-[1.7] text-[#5f6678]">
+          <p className="max-w-sm text-base leading-relaxed text-text-secondary">
             Thoughtful tools for the people who make dental care happen.
           </p>
         </div>
 
-        <div className="relative z-10 flex justify-between gap-5 text-[10px] text-[#777e90]">
+        <div className="relative z-10 flex justify-between gap-5 text-xs text-text-muted">
           <span>Designed around trust.</span>
           <span>
             ChiriKaro <i className="px-0.75 not-italic">/</i> 2026
@@ -44,39 +44,39 @@ export function AuthTemplate({
         </div>
       </div>
 
-      <section className="flex min-h-screen flex-col px-[7%] py-[30px] max-md:px-[22px] max-md:py-5 max-[420px]:px-[17px]">
-        <div className="hidden max-md:block">
+      <section className="flex min-h-screen flex-col px-5 py-5 sm:px-8 sm:py-7 lg:px-[8%] lg:py-8">
+        <div className="mb-8 md:hidden">
           <BrandLockup />
         </div>
 
-        <div className="m-auto w-[min(100%,420px)] animate-rise-in py-8 max-md:w-[min(100%,450px)] max-md:py-7">
+        <div className="m-auto w-full max-w-md animate-rise-in py-6 sm:py-8">
           <Link
             to="/"
-            className="mb-[31px] inline-block text-xs text-[#777d8b] hover:text-brand-deep max-md:mb-[25px]"
+            className="mb-7 inline-flex min-h-9 items-center rounded-sm text-sm text-text-muted underline-offset-4 transition-colors duration-interactive hover:text-primary-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:mb-8"
           >
             &#8592; Back to home
           </Link>
 
-          <Eyebrow className="text-brand-deep">{kicker}</Eyebrow>
+          <Eyebrow className="text-primary-hover">{kicker}</Eyebrow>
 
-          <h2 className="mt-2.5 mb-2 text-[29px] leading-[1.2]">
+          <h2 className="mt-2 mb-2 text-2xl leading-tight font-semibold tracking-tight text-text-primary sm:text-3xl">
             {title}
           </h2>
 
-          <p className="mb-6 text-[13px] leading-[1.65] text-[#686d7b]">
+          <p className="mb-6 text-sm leading-relaxed text-text-secondary sm:text-base">
             {intro}
           </p>
 
           {children}
 
           {actionText && (
-            <p className="mt-5 text-center text-xs text-[#717584] [&_a]:font-semibold [&_a]:text-brand-deep [&_a:hover]:underline">
+            <p className="mt-5 text-center text-sm text-text-muted [&_a]:font-semibold [&_a]:text-primary-hover [&_a:hover]:underline [&_a:focus-visible]:outline-focus">
               {actionText}
             </p>
           )}
         </div>
 
-        <footer className="flex justify-between gap-3 border-t border-[#eeedf3] pt-4 text-[10px] text-[#888b96] max-md:text-[9px] max-[420px]:flex-col max-[420px]:gap-1.5">
+        <footer className="flex flex-col justify-between gap-1.5 border-t border-border pt-4 text-xs text-text-muted sm:flex-row sm:gap-3">
           <span>Private by design</span>
           <span>Need help? Contact your clinic</span>
         </footer>

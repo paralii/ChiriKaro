@@ -10,6 +10,7 @@ import { appointmentService } from '@/features/patient/services/appointmentServi
 import type { PatientAppointment, PublicDirectoryPage } from '@/shared/types';
 import type { DatedAvailability } from '@/shared/types';
 import { isRealDate } from '@/shared/utils/validators';
+import { ListPagination } from '@/components/molecules/ListPagination';
 
 const EMPTY_PAGE: PublicDirectoryPage = { items: [], page: 1, limit: 12, totalItems: 0, totalPages: 0 };
 
@@ -59,6 +60,13 @@ export default function PatientClinicsPage() {
     if (draft.city.trim()) next.city = draft.city.trim();
     if (draft.specialization.trim()) next.specialization = draft.specialization.trim();
     updateFilters(next);
+  };
+
+  const resetFilters = () => {
+    setDraft({ q: '', city: '', specialization: '' });
+    setSelection(null);
+    setAvailability({});
+    updateFilters({ page: 1, limit: 12 });
   };
 
   const loadAvailability = async (listingId: string) => {
@@ -119,12 +127,12 @@ export default function PatientClinicsPage() {
           <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Specialization
             <Input value={draft.specialization} maxLength={100} onChange={(event) => setDraft({ ...draft, specialization: event.target.value })} placeholder="For example, orthodontics" />
           </label>
-          <Button type="submit" className="self-end">Search</Button>
+          <div className="flex gap-2 self-end"><Button type="submit">Search</Button><Button type="button" variant="secondary" disabled={loading || (!draft.q && !draft.city && !draft.specialization && !filters.q && !filters.city && !filters.specialization)} onClick={resetFilters}>Reset</Button></div>
         </form>
 
         <div className="mt-5 flex items-center justify-between gap-3">
           <h2 className="m-0 text-sm font-semibold">Clinic and doctor listings</h2>
-          <span className="text-xs text-[#777d8a]">{loading ? 'Searching…' : `${result.totalItems} results`}</span>
+          <span className="text-xs text-[#777d8a]">{loading ? 'Searching…' : `${result.totalItems} results · Page ${result.page} of ${Math.max(result.totalPages, 1)}`}</span>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Appointment date
@@ -183,11 +191,7 @@ export default function PatientClinicsPage() {
           <p className="mb-3 mt-1 text-xs text-[#686e7b]">Required payment: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: selection.currency }).format(selection.amountMinor / 100)}</p>
           <Button type="button" disabled={booking} onClick={() => void createAppointment()}>{booking ? 'Holding appointment…' : 'Request appointment hold'}</Button>
         </section> : null}
-        {result.totalPages > 1 ? <nav aria-label="Search result pages" className="mt-5 flex items-center justify-center gap-3">
-          <Button size="sm" variant="secondary" disabled={loading || result.page <= 1} onClick={() => updateFilters({ ...filters, page: result.page - 1 })}>Previous</Button>
-          <span className="text-xs text-[#686e7b]">Page {result.page} of {result.totalPages}</span>
-          <Button size="sm" variant="secondary" disabled={loading || result.page >= result.totalPages} onClick={() => updateFilters({ ...filters, page: result.page + 1 })}>Next</Button>
-        </nav> : null}
+        <div className="mt-5"><ListPagination page={result.page} totalPages={result.totalPages} totalItems={result.totalItems} busy={loading} size="sm" onPageChange={(page) => updateFilters({ ...filters, page })} /></div>
       </div>
     </Card>
   );

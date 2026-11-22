@@ -14,6 +14,7 @@ import { superAdminService } from '@/features/admin/services/superAdminService';
 import { useAction } from '@/shared/hooks/useAction';
 import type { Clinic } from '@/shared/types';
 import { openSignedUrl } from '@/services/storageService';
+import { ListPagination } from '@/components/molecules/ListPagination';
 
 export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?: boolean }) {
   const dispatch = useAppDispatch();
@@ -28,6 +29,7 @@ export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?
   useEffect(() => { void dispatch(loadAdminClinics({ page: requestedPage, search: appliedSearch, status: pendingOnly ? 'PENDING' : appliedStatus })); }, [dispatch, requestedPage, appliedSearch, appliedStatus, pendingOnly]);
   const list = items;
   const applyFilters = (event: React.FormEvent) => { event.preventDefault(); setRequestedPage(1); setAppliedSearch(searchDraft.trim()); setAppliedStatus(statusDraft); };
+  const resetFilters = () => { setSearchDraft(''); setStatusDraft(''); setRequestedPage(1); setAppliedSearch(''); setAppliedStatus(''); };
   const showDetails = (id: string) => void run(async () => setSelectedClinic(await superAdminService.getClinic(id)), { fallback: 'Could not load clinic details.' });
   const reviewDocuments = Array.isArray(selectedClinic?.documents)
     ? selectedClinic.documents.filter((doc) => doc && typeof doc.documentType === 'string' && doc.documentType.trim().length > 0)
@@ -45,20 +47,14 @@ export default function AdminClinicsPage({ pendingOnly = false }: { pendingOnly?
     <>
       <Notices error={error} message={message} />
       <Card>
-        <SectionHeading title={pendingOnly ? 'Applications awaiting review' : 'Clinic directory'} description={`${pendingOnly ? list.length : totalItems} clinic${(pendingOnly ? list.length : totalItems) === 1 ? '' : 's'} found`} action={<Badge>PAGE {page}{totalPages ? ` OF ${totalPages}` : ''}</Badge>} />
+        <SectionHeading title={pendingOnly ? 'Applications awaiting review' : 'Clinic directory'} description={`${totalItems} clinic${totalItems === 1 ? '' : 's'} found`} action={<Badge>PAGE {page}{totalPages ? ` OF ${totalPages}` : ''}</Badge>} />
         <Form onSubmit={applyFilters} className="grid grid-cols-[minmax(180px,1fr)_180px_auto] items-end gap-2 px-[15px] pb-3 max-md:grid-cols-1">
           <label className="grid gap-1 text-[10px] text-[#777c8a]">Search clinics<Input value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} maxLength={100} placeholder="Name, email, address, city" /></label>
           {!pendingOnly ? <label className="grid gap-1 text-[10px] text-[#777c8a]">Status<select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)} className="h-[38px] rounded border border-[#cfd2df] bg-white px-2 text-xs"><option value="">All statuses</option>{['PENDING', 'APPROVED', 'REJECTED', 'BLOCKED'].map((status) => <option key={status} value={status}>{status}</option>)}</select></label> : null}
-          <Button size="xs" disabled={busy}>Apply</Button>
+          <div className="flex gap-2"><Button size="xs" disabled={busy}>Apply</Button><Button type="button" size="xs" variant="ghost" disabled={busy || (!searchDraft && !statusDraft && !appliedSearch && !appliedStatus)} onClick={resetFilters}>Reset</Button></div>
         </Form>
         <ClinicTable clinics={list} onStatus={changeStatus} onDetails={showDetails} busy={busy || detailBusy} />
-        {totalPages > 1 ? (
-          <div className="flex items-center justify-end gap-2 border-t border-[#eff0f4] px-[15px] py-3">
-            <Button size="xs" variant="ghost" disabled={busy || page <= 1} onClick={() => setRequestedPage(page - 1)}>Previous</Button>
-            <span className="text-[10px] text-[#656a79]">Page {page} of {totalPages}</span>
-            <Button size="xs" variant="ghost" disabled={busy || page >= totalPages} onClick={() => setRequestedPage(page + 1)}>Next</Button>
-          </div>
-        ) : null}
+        <ListPagination page={page} totalPages={totalPages} totalItems={totalItems} busy={busy} onPageChange={setRequestedPage} />
       </Card>
       {detailError ? <Notices error={detailError} /> : null}
       {selectedClinic ? (

@@ -1,8 +1,50 @@
 @import "tailwindcss";
 
 @theme {
+  /* Typography */
   --font-sans: Inter, "Segoe UI", sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Semantic colors */
+  --color-primary: #2563eb;
+  --color-primary-hover: #004ac6;
+  --color-primary-soft: #eaf0ff;
+  --color-secondary: #006b68;
+  --color-accent: #bc4800;
+  --color-page: #fafbfe;
   --color-surface: #faf8ff;
+  --color-surface-elevated: #ffffff;
+  --color-text-primary: #191b23;
+  --color-text-secondary: #424756;
+  --color-text-muted: #666a79;
+  --color-border: #e1e2ed;
+  --color-border-strong: #cfd2df;
+  --color-focus: #2563eb;
+  --color-focus-ring: #2563eb1a;
+  --color-success: #286b5a;
+  --color-success-soft: #eff9f5;
+  --color-warning: #795612;
+  --color-warning-soft: #fff8e9;
+  --color-danger: #8e2d2b;
+  --color-danger-soft: #fff2f0;
+  --color-info: #1e4fa8;
+  --color-info-soft: #eef4ff;
+
+  /* Existing utility names preserved for current components. */
   --color-ink: #191b23;
   --color-muted: #666a79;
   --color-line: #e1e2ed;
@@ -11,7 +53,20 @@
   --color-brand-soft: #eaf0ff;
   --color-ck-teal: #006b68;
   --color-ck-coral: #bc4800;
+
+  /* 4px spacing base, shared shape and elevation tokens. */
+  --spacing: 0.25rem;
   --radius-ui: 8px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgb(25 27 35 / 0.06);
+  --shadow-md: 0 4px 12px rgb(25 27 35 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(25 27 35 / 0.12);
+  --ease-interactive: cubic-bezier(0.2, 0, 0, 1);
+  --duration-interactive: 160ms;
   --animate-rise-in: rise-in 0.4s ease both;
 
   @keyframes rise-in {

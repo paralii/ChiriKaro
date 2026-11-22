@@ -8,8 +8,8 @@ import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 import { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
 import { generateDatedSlots } from "@domain/policies/dated-slot-generation.policy.ts";
 import { BadRequestError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
+import { isCalendarDate } from "@shared/utils/calendar-date.ts";
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_BOOKING_HORIZON_DAYS = 90;
 
 export class GetPublicListingAvailabilityUseCase implements IGetPublicListingAvailabilityUseCase {
@@ -21,9 +21,8 @@ export class GetPublicListingAvailabilityUseCase implements IGetPublicListingAva
   ) {}
 
   async execute(listingId: string, date: string): Promise<DatedDoctorAvailabilityDTO> {
-    if (!DATE_PATTERN.test(date)) throw new ValidationError("date must use YYYY-MM-DD format");
+    if (!isCalendarDate(date)) throw new ValidationError("Choose a valid date in YYYY-MM-DD format");
     const requested = new Date(`${date}T00:00:00.000Z`);
-    if (Number.isNaN(requested.getTime()) || requested.toISOString().slice(0, 10) !== date) throw new ValidationError("date must be a valid calendar date");
 
     const claims = this._listingIdService.read(listingId);
     const clinic = await this._clinicRepository.findById(claims.clinicId);

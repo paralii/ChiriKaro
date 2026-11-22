@@ -10,6 +10,8 @@ export interface ClinicDocumentDTO {
 export interface ClinicProfileDTO {
   id: string;
   name: string;
+  clinicType: string | null;
+  description: string | null;
   address: string | null;
   city: string | null;
   state: string | null;

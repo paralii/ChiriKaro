@@ -7,6 +7,7 @@ import { appointmentService } from '@/features/patient/services/appointmentServi
 import { publicDirectoryService } from '@/features/patient/services/publicDirectoryService';
 import { getErrorMessage } from '@/shared/lib/http';
 import type { DatedAvailability, PatientAppointment } from '@/shared/types';
+import { isRealDate } from '@/shared/utils/validators';
 
 type RazorpayCheckoutOptions = {
   key: string; amount: number; currency: string; name: string; description: string; order_id: string;
@@ -51,6 +52,7 @@ export default function PatientAppointmentsPage() {
     setRescheduleDate(date);
     setRescheduleAvailability(null);
     setRescheduleTarget('');
+    if (!isRealDate(date)) { setError('Choose a valid appointment date.'); return; }
     try {
       setRescheduleAvailability(await publicDirectoryService.availability(appointment.listingId, date));
     } catch (reason) { setError(getErrorMessage(reason, 'Could not load new appointment times.')); }
@@ -162,14 +164,12 @@ export default function PatientAppointmentsPage() {
           <div>
             <p className="m-0 text-sm font-semibold">{appointment.clinicName} · {appointment.doctorName}</p>
             <p className="mt-1 mb-0 text-sm">{appointment.localDate} · {appointment.localStartTime}–{appointment.localEndTime}</p>
-            <p className="mt-1 mb-0 text-xs text-[#737987]">Clinic local time ({appointment.timeZone})</p>
-            <p className="mt-2 mb-0 text-[10px] text-[#8a8e9a]">Appointment {appointment.appointmentId}</p>
           </div>
           <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">{appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? 'HOLD EXPIRED' : appointment.status.replaceAll('_', ' ')}</span>
         </div>
         <div className="mt-3 border-t border-[#eff0f4] pt-3">
           <p className="m-0 text-sm font-semibold">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: appointment.feeCurrency }).format(appointment.feeAmountMinor / 100)}</p>
-          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">Payment is required before this appointment is confirmed. The slot hold expires {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}.</p> : null}
+          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">Payment is required before this appointment is confirmed. The slot hold expires at {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}.</p> : null}
           {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Button size="sm" className="mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void payForAppointment(appointment)}>{paymentBusy === appointment.appointmentId ? 'Processing payment…' : 'Continue to payment'}</Button> : null}
           {['PENDING_PAYMENT', 'CANCELLED'].includes(appointment.status) ? <Button size="sm" variant="secondary" className="ml-2 mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void refreshPaymentStatus(appointment.appointmentId)}>Check payment status{paymentStatuses[appointment.appointmentId] ? ` · ${paymentStatuses[appointment.appointmentId].toLowerCase()}` : ''}</Button> : null}
           {appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">This payment hold expired. Start a new booking to request another slot.</p> : null}
@@ -184,10 +184,10 @@ export default function PatientAppointmentsPage() {
             }}>Reschedule once</Button> : <span className="self-center text-xs text-[#737987]">Reschedule limit used</span>}
           </div> : null}
           {reschedulingId === appointment.appointmentId ? <section className="mt-3 rounded-md bg-[#f8f9ff] p-3" aria-label="Choose a new appointment time">
-            <label className="grid max-w-xs gap-1.5 text-xs font-semibold text-[#555b69]">New appointment date
-              <input type="date" value={rescheduleDate} min={new Date().toISOString().slice(0, 10)} onChange={(event) => void loadRescheduleAvailability(appointment, event.target.value)} className="rounded-md border border-[#dce2f1] bg-white px-3 py-2 text-sm" />
+              <label className="grid max-w-xs gap-1.5 text-xs font-semibold text-[#555b69]">New appointment date
+              <input type="date" required value={rescheduleDate} onChange={(event) => void loadRescheduleAvailability(appointment, event.target.value)} className="rounded-md border border-[#dce2f1] bg-white px-3 py-2 text-sm" />
             </label>
-            {rescheduleAvailability ? <div className="mt-3"><p className="m-0 text-xs text-[#737987]">Clinic local time ({rescheduleAvailability.clinicTimeZone})</p>
+            {rescheduleAvailability ? <div className="mt-3"><p className="m-0 text-xs text-[#737987]">Available appointment times</p>
               {rescheduleAvailability.slots.length ? <div className="mt-2 flex flex-wrap gap-2">{rescheduleAvailability.slots.map((slot) => <Button key={slot.startAt} size="sm" variant={rescheduleTarget === slot.startAt ? 'primary' : 'secondary'} onClick={() => setRescheduleTarget(slot.startAt)}>{slot.localStartTime}–{slot.localEndTime}</Button>)}</div> : <p className="mb-0 mt-2 text-xs text-[#737987]">No available times on this date.</p>}
             </div> : <p className="mb-0 mt-2 text-xs text-[#737987]">Loading available times…</p>}
             <p className="mb-2 mt-3 text-xs text-[#737987]">One reschedule is allowed, at least 24 hours before the current appointment. The existing fee/payment remains unchanged.</p>

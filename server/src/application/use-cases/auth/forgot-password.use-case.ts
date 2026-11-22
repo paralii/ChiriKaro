@@ -8,6 +8,7 @@ import type { ForgotPasswordDto } from "@application/dto/auth/reset-password.dto
 
 import type { IPasswordResetLinkGenerator } from "@application/interfaces/services/ILinkGenerator.ts";
 import type { IForgotPasswordUseCase } from "@application/interfaces/use-cases/auth/IForgotPasswordUseCase.ts";
+import { normalizeValidatedEmail } from "@shared/utils/email-validation.ts";
 
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase{
   constructor(
@@ -19,7 +20,9 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase{
   ) {}
 
   public async execute(dto: ForgotPasswordDto): Promise<void> {
-    const user = await this._userRepository.findByEmail(dto.email);
+    const email = normalizeValidatedEmail(dto.email);
+    if (!email) return;
+    const user = await this._userRepository.findByEmail(email);
     if (!user) {
       return;
     }

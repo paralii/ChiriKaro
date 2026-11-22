@@ -90,6 +90,8 @@ export class ClinicRepository
     return Clinic.fromPersistence({
       _id: doc._id.toString(),
       name: doc.name,
+      clinicType: doc.clinicType ?? null,
+      description: doc.description ?? null,
       address: doc.address ?? null,
       city: doc.city ?? null,
       state: doc.state ?? null,
@@ -113,6 +115,8 @@ export class ClinicRepository
   private toPersistence(clinic: Clinic) {
     return {
       name: clinic.name,
+      clinicType: clinic.clinicType,
+      description: clinic.description,
       address: clinic.address ?? null,
       phone: clinic.phone ?? null,
       city: clinic.city ?? null,

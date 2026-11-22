@@ -9,7 +9,7 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { InviteForm } from '@/features/clinic/components/InviteForm';
 import { useAction } from '@/shared/hooks/useAction';
 import { clinicService } from '@/features/clinic/services/clinicService';
-import { normalizeEmail } from '@/shared/utils/validators';
+import { normalizeEmail, validateEmail } from '@/shared/utils/validators';
 import type { Invitation } from '@/shared/types';
 
 export default function ClinicInvitationsPage({ invitee }: { invitee: 'doctor' | 'staff' }) {
@@ -29,7 +29,7 @@ export default function ClinicInvitationsPage({ invitee }: { invitee: 'doctor' |
   }, [refresh, run]);
 
   const invite = (email: string) => {
-    if (!email.trim()) return setError('Enter an email address.');
+    if (!validateEmail(email)) return setError('Enter a valid email address of 254 characters or fewer.');
     void run(async () => {
       const normalized = normalizeEmail(email);
       const existing = invitations.find((item) => item.email.toLowerCase() === normalized);

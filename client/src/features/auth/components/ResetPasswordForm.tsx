@@ -7,6 +7,7 @@ import { AuthSubmitButton } from "@components/molecules/AuthSubmitButton";
 import { Notices } from "@components/molecules/Notices";
 import { useAction } from "@shared/hooks/useAction";
 import { authService } from "@/features/auth/services/authService";
+import { validatePassword } from "@shared/utils/validators";
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -29,8 +30,8 @@ export function ResetPasswordForm() {
           throw new Error("Invalid or missing reset token.");
         }
 
-        if (password.length < 8) {
-          throw new Error("Password must contain at least 8 characters.");
+        if (!validatePassword(password)) {
+          throw new Error("Use 8–128 characters with an uppercase letter, a number, and a special character. Spaces are not allowed.");
         }
 
         if (password !== confirm) {
@@ -71,9 +72,11 @@ export function ResetPasswordForm() {
             label="New password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 8 characters"
+            placeholder="8+ characters, uppercase, number, symbol"
             autoComplete="new-password"
             minLength={8}
+            maxLength={128}
+            title="Use 8–128 characters with an uppercase letter, a number, and a special character. Spaces are not allowed."
             required
           />
 
@@ -84,7 +87,7 @@ export function ResetPasswordForm() {
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="Enter your password again"
             autoComplete="new-password"
-            minLength={8}
+            maxLength={128}
             required
           />
 

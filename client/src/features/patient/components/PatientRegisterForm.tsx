@@ -15,7 +15,7 @@ import { useOtpStep } from "@/features/auth/hooks/useOtpStep";
 
 import { authService } from "@/features/auth/services/authService";
 
-import { normalizeEmail, validateEmail } from "@/shared/utils/validators";
+import { normalizeEmail, validateEmail, validatePassword } from "@/shared/utils/validators";
 
 export function PatientRegisterForm({
   onVerifyingChange,
@@ -35,16 +35,16 @@ export function PatientRegisterForm({
   const navigate = useNavigate();
 
   function validateDetails() {
-    if (name.trim().length < 2) {
-      throw new Error("Name must be at least 2 characters long.");
+    if (name.trim().length < 2 || name.trim().length > 100) {
+      throw new Error("Name must be between 2 and 100 characters long.");
     }
 
     if (!validateEmail(email)) {
       throw new Error("A valid email address is required.");
     }
 
-    if (password.length < 8) {
-      throw new Error("Password must contain at least 8 characters.");
+    if (!validatePassword(password)) {
+      throw new Error("Use 8–128 characters with an uppercase letter, a number, and a special character. Spaces are not allowed.");
     }
 
     if (password !== confirmPassword) {
@@ -121,12 +121,14 @@ export function PatientRegisterForm({
               placeholder="Your full name"
               autoComplete="name"
               minLength={2}
+              maxLength={100}
               required
             />
 
             <TextField
               label="Email address"
               type="email"
+              maxLength={254}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -140,9 +142,11 @@ export function PatientRegisterForm({
             <PasswordField
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
+              placeholder="8+ characters, uppercase, number, symbol"
               autoComplete="new-password"
               minLength={8}
+              maxLength={128}
+              title="Use 8–128 characters with an uppercase letter, a number, and a special character. Spaces are not allowed."
               required
             />
 
@@ -151,6 +155,7 @@ export function PatientRegisterForm({
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm your password"
               autoComplete="new-password"
+              maxLength={128}
               required
             />
           </>

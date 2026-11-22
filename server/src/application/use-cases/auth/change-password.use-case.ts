@@ -4,6 +4,7 @@ import type { IUserRepository } from "@application/interfaces/repositories/IUser
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
 import type { ChangePasswordDto } from "@application/dto/auth/change-password.dto.ts";
 import type { IChangePasswordUseCase } from "@application/interfaces/use-cases/auth/IChangePasswordUseCase.ts";
+import { assertValidNewPassword } from "@shared/utils/password.policy.ts";
 
 export class ChangePasswordUseCase implements IChangePasswordUseCase{
   constructor(
@@ -38,6 +39,8 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase{
         "New password must differ from the current password",
       );
     }
+
+    assertValidNewPassword(dto.newPassword);
 
     const newPasswordHash = await this._passwordService.hash(dto.newPassword);
 

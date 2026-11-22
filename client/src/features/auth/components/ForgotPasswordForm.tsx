@@ -43,6 +43,7 @@ export function ForgotPasswordForm() {
         <TextField
           label="Email address"
           type="email"
+          maxLength={254}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"

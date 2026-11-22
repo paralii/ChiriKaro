@@ -51,7 +51,7 @@ export default function PatientQueuePage() {
       {loading ? <p className="mt-4 text-sm text-[#737987]">Loading your queue status…</p> : null}
       {!loading && !error && entries.length === 0 ? <div className="mt-4 rounded-md bg-[#f7f8fb] p-4"><p className="m-0 text-sm text-[#686e7b]">You have no queue entries yet.</p><p className="mb-0 mt-1 text-xs text-[#737987]">When clinic staff check you in, your token and status will appear here.</p></div> : null}
       <div className="mt-4 grid gap-3">{entries.map((entry, index) => <article key={`${entry.createdAt}-${entry.tokenNumber}-${index}`} className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[#e6e7ee] p-4">
-        <div><p className="m-0 text-sm font-semibold">{entry.clinicName}</p><p className="mb-0 mt-1 text-xs text-[#737987]">{entry.doctorName} · {entry.kind === 'APPOINTMENT' ? 'Appointment check-in' : 'Walk-in'} · {entry.localDate}</p><p className="mb-0 mt-1 text-[10px] text-[#8a8e9a]">Clinic local time ({entry.timeZone})</p></div>
+        <div><p className="m-0 text-sm font-semibold">{entry.clinicName}</p><p className="mb-0 mt-1 text-xs text-[#737987]">{entry.doctorName} · {entry.kind === 'APPOINTMENT' ? 'Appointment check-in' : 'Walk-in'} · {entry.localDate}</p></div>
         <div className="flex items-center gap-3"><div className="text-right"><p className="m-0 text-[10px] font-semibold uppercase tracking-wide text-[#737987]">Token</p><p className="m-0 text-2xl font-bold text-brand-deep">{entry.tokenNumber}</p></div><span className="rounded-full bg-[#f3f5ff] px-3 py-1.5 text-xs font-semibold text-brand-deep">{statusLabel(entry.status)}</span></div>
       </article>)}</div>
     </div>

@@ -6,6 +6,7 @@ import type { IClinicRepository } from "@application/interfaces/repositories/ICl
 import type { IInvitationRepository } from "@application/interfaces/repositories/IInvitationRepository.ts";
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
 import type { IPasswordService } from "@application/interfaces/services/IPasswordService.ts";
+import { assertValidNewPassword } from "@shared/utils/password.policy.ts";
 import type { IInvitationTokenService } from "@application/interfaces/services/IInvitationTokenService.ts";
 import type { IAcceptInvitationUseCase } from "@application/interfaces/use-cases/invitation/IAcceptInvitationUseCase.ts";
 import type {
@@ -35,12 +36,10 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
     if (typeof dto.token !== "string" || !/^[a-f\d]{64}$/i.test(dto.token)) {
       throw new BadRequestError("Invitation token is invalid");
     }
-    if (typeof dto.name !== "string" || dto.name.trim().length < 2) {
-      throw new ValidationError("Name must be at least 2 characters long");
+    if (typeof dto.name !== "string" || dto.name.trim().length < 2 || dto.name.trim().length > 100) {
+      throw new ValidationError("Name must be between 2 and 100 characters long");
     }
-    if (typeof dto.password !== "string" || dto.password.length < 8) {
-      throw new ValidationError("Password must be at least 8 characters long");
-    }
+    assertValidNewPassword(dto.password);
 
     const tokenHash = this._tokenService.hash(dto.token);
     const invitation = await this._invitationRepository.findByTokenHash(tokenHash);

@@ -10,6 +10,7 @@ export function ClinicQueueRouter(
   const router = Router();
   router.get(API_ROUTES.CLINIC.QUEUE, middleware.authenticate, middleware.authorizeQueueRead, controller.getQueue);
   router.get(API_ROUTES.CLINIC.QUEUE_DOCTORS, middleware.authenticate, middleware.authorizeQueueRead, controller.getDoctors);
+  router.get(API_ROUTES.CLINIC.QUEUE_APPOINTMENTS, middleware.authenticate, middleware.authorizeWalkIn, controller.getCheckInAppointments);
   router.patch(API_ROUTES.CLINIC.QUEUE_STATUS, middleware.authenticate, middleware.authorizeQueueRead, controller.updateStatus);
   router.post(API_ROUTES.CLINIC.QUEUE_WALK_INS, middleware.authenticate, middleware.authorizeWalkIn, controller.createWalkIn);
   router.post(API_ROUTES.CLINIC.QUEUE_APPOINTMENT_CHECK_IN, middleware.authenticate, middleware.authorizeWalkIn, controller.checkInAppointment);

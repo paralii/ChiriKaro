@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "@shared/errors/index.ts";
+import { UnauthorizedError, ValidationError } from "@shared/errors/index.ts";
 import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 
 import type { LoginDto, LoginResult } from "@application/dto/auth/login.dto.ts";
@@ -10,6 +10,7 @@ import type {
   TokenPayload,
 } from "@application/interfaces/services/ITokenService.ts";
 import type { ILoginUseCase } from "@application/interfaces/use-cases/auth/ILoginUseCase.ts";
+import { normalizeValidatedEmail } from "@shared/utils/email-validation.ts";
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
@@ -19,7 +20,9 @@ export class LoginUseCase implements ILoginUseCase {
   ) {}
 
   public async execute(dto: LoginDto): Promise<LoginResult> {
-    const user = await this._userRepository.findByEmail(dto.email);
+    const email = normalizeValidatedEmail(dto.email);
+    if (!email) throw new ValidationError("Enter a valid email address");
+    const user = await this._userRepository.findByEmail(email);
     if (!user) {
       throw new UnauthorizedError("Invalid email");
     }

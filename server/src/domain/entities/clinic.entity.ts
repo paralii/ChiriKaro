@@ -25,6 +25,8 @@ export interface ClinicReviewDecision {
 export interface ClinicProps {
   _id: string | null;
   name: string;
+  clinicType: string | null;
+  description: string | null;
   address?: string | null;
   city?: string | null;
   state?: string | null;
@@ -50,6 +52,8 @@ type NewClinicProps = Pick<ClinicProps, "name"> &
       ClinicProps,
       | "_id"
       | "address"
+      | "clinicType"
+      | "description"
       | "city"
       | "state"
       | "pincode"
@@ -68,16 +72,23 @@ type NewClinicProps = Pick<ClinicProps, "name"> &
   >;
 
 const MIN_NAME_LENGTH = 2;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
-const PHONE_PATTERN = /^[0-9\s-]{7,15}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PINCODE_PATTERN = /^\d{6}$/;
 
-function optionalTrimmed(
-  value: string | null | undefined,
-  field: string,
-): string | null {
-  if (value == null) return null;
-  return requireNonBlank(value, field);
+function boundedText(value: string | null | undefined, field: string, max: number, required: boolean): string | null {
+  if (value == null || (typeof value === "string" && !value.trim() && !required)) return null;
+  const trimmed = value?.trim();
+  if (!trimmed || trimmed.length > max) throw new InvalidClinicDataError(`${field} must be ${required ? "1 to " : "at most "}${max} characters`);
+  return trimmed;
+}
+
+function normalizePhone(value: string | null | undefined): string | null {
+  if (value == null || !value.trim()) return null;
+  const trimmed = value.trim();
+  if (!/^\+?[0-9 ()-]+$/.test(trimmed)) throw new InvalidClinicDataError("Phone must contain only digits and common phone separators");
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length < 7 || digits.length > 15) throw new InvalidClinicDataError("Phone must contain 7 to 15 digits");
+  return `${trimmed.startsWith("+") ? "+" : ""}${digits}`;
 }
 
 function optionalMatching(
@@ -85,7 +96,7 @@ function optionalMatching(
   field: string,
   pattern: RegExp,
 ): string | null {
-  const trimmed = optionalTrimmed(value, field);
+  const trimmed = value == null || !value.trim() ? null : value.trim();
   if (trimmed !== null && !pattern.test(trimmed)) {
     throw new InvalidClinicDataError(`Clinic ${field} is not valid`);
   }
@@ -108,21 +119,21 @@ export class Clinic {
 
   static create(props: NewClinicProps): Clinic {
     const name = props.name?.trim();
-    if (!name || name.length < MIN_NAME_LENGTH) {
+    if (!name || name.length < MIN_NAME_LENGTH || name.length > 150) {
       throw new InvalidClinicDataError(
-        `Clinic name must be at least ${MIN_NAME_LENGTH} characters`,
+        `Clinic name must be between ${MIN_NAME_LENGTH} and 150 characters`,
       );
     }
     const contactEmail =
       props.contactEmail == null
         ? null
         : requireNonBlank(props.contactEmail, "contactEmail");
-    if (contactEmail !== null && !EMAIL_PATTERN.test(contactEmail)) {
+    if (contactEmail !== null && (contactEmail.length > 254 || !EMAIL_PATTERN.test(contactEmail))) {
       throw new InvalidClinicDataError(
         "Clinic contactEmail is not a valid email address",
       );
     }
-    const phone = optionalMatching(props.phone, "phone", PHONE_PATTERN);
+    const phone = normalizePhone(props.phone);
     const pincode = optionalMatching(props.pincode, "pincode", PINCODE_PATTERN);
 
     const ownerAdminId =
@@ -135,16 +146,15 @@ export class Clinic {
     return new Clinic({
       _id: props._id ?? null,
       name,
-      address: optionalTrimmed(props.address, "address"),
-      city: optionalTrimmed(props.city, "city"),
-      state: optionalTrimmed(props.state, "state"),
+      clinicType: boundedText(props.clinicType, "Clinic type", 100, false),
+      description: boundedText(props.description, "Clinic description", 500, false),
+      address: boundedText(props.address, "Address", 250, false),
+      city: boundedText(props.city, "City", 100, false),
+      state: boundedText(props.state, "State", 100, false),
       pincode,
       phone,
-      registrationNumber: optionalTrimmed(
-        props.registrationNumber,
-        "registrationNumber",
-      ),
-      contactEmail,
+      registrationNumber: boundedText(props.registrationNumber, "Registration number", 100, false),
+      contactEmail: contactEmail?.toLowerCase() ?? null,
       ownerAdminId,
       status,
       specializations: props.specializations ?? [],
@@ -194,6 +204,8 @@ export class Clinic {
 
   updateProfile(updates: {
     name?: string;
+    clinicType?: string | null;
+    description?: string | null;
     address?: string | null;
     city?: string | null;
     state?: string | null;
@@ -204,45 +216,45 @@ export class Clinic {
   }): void {
     if (updates.name !== undefined) {
       const name = updates.name.trim();
-      if (name.length < MIN_NAME_LENGTH) {
+      if (name.length < MIN_NAME_LENGTH || name.length > 150) {
         throw new InvalidClinicDataError(
-          `Clinic name must be at least ${MIN_NAME_LENGTH} characters`,
+          `Clinic name must be between ${MIN_NAME_LENGTH} and 150 characters`,
         );
       }
       this.props.name = name;
     }
 
+    if (updates.clinicType !== undefined) this.props.clinicType = boundedText(updates.clinicType, "Clinic type", 100, false);
+    if (updates.description !== undefined) this.props.description = boundedText(updates.description, "Clinic description", 500, false);
+
     if (updates.address !== undefined) {
-      this.props.address = optionalTrimmed(updates.address, "address");
+      this.props.address = boundedText(updates.address, "Address", 250, false);
     }
     if (updates.city !== undefined) {
-      this.props.city = optionalTrimmed(updates.city, "city");
+      this.props.city = boundedText(updates.city, "City", 100, false);
     }
     if (updates.state !== undefined) {
-      this.props.state = optionalTrimmed(updates.state, "state");
+      this.props.state = boundedText(updates.state, "State", 100, false);
     }
     if (updates.pincode !== undefined) {
       this.props.pincode = optionalMatching(updates.pincode, "pincode", PINCODE_PATTERN);
     }
     if (updates.phone !== undefined) {
-      this.props.phone = optionalMatching(updates.phone, "phone", PHONE_PATTERN);
+      this.props.phone = normalizePhone(updates.phone);
     }
     if (updates.contactEmail !== undefined) {
       const contactEmail = updates.contactEmail === null
         ? null
         : requireNonBlank(updates.contactEmail, "contactEmail");
-      if (contactEmail !== null && !EMAIL_PATTERN.test(contactEmail)) {
+      if (contactEmail !== null && (contactEmail.length > 254 || !EMAIL_PATTERN.test(contactEmail))) {
         throw new InvalidClinicDataError(
           "Clinic contactEmail is not a valid email address",
         );
       }
-      this.props.contactEmail = contactEmail;
+      this.props.contactEmail = contactEmail?.toLowerCase() ?? null;
     }
     if (updates.registrationNumber !== undefined) {
-      this.props.registrationNumber = optionalTrimmed(
-        updates.registrationNumber,
-        "registrationNumber",
-      );
+      this.props.registrationNumber = boundedText(updates.registrationNumber, "Registration number", 100, false);
     }
 
     this.touch();
@@ -252,7 +264,12 @@ export class Clinic {
     if (!Array.isArray(values) || values.length === 0) {
       throw new InvalidClinicDataError("At least one specialization is required");
     }
-    const normalized = values.map((value) => requireNonBlank(value, "specialization"));
+    if (values.length > 20) throw new InvalidClinicDataError("A clinic can have at most 20 specializations");
+    const normalized = values.map((value) => {
+      const item = requireNonBlank(value, "specialization");
+      if (item.length > 100) throw new InvalidClinicDataError("Each specialization must be 100 characters or fewer");
+      return item;
+    });
     const keys = normalized.map((value) => value.toLocaleLowerCase());
     if (new Set(keys).size !== keys.length) {
       throw new InvalidClinicDataError("Specializations must not contain duplicates");
@@ -341,6 +358,8 @@ export class Clinic {
   get name() {
     return this.props.name;
   }
+  get clinicType() { return this.props.clinicType; }
+  get description() { return this.props.description; }
   get address() {
     return this.props.address;
   }

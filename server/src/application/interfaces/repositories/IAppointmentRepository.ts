@@ -21,6 +21,7 @@ export interface IAppointmentRepository {
   findForPatient(patientUserId: string): Promise<AppointmentRecord[]>;
   findOwnedById(appointmentId: string, patientUserId: string): Promise<AppointmentRecord | null>;
   findConfirmedForQueue(appointmentId: string, clinicId: string): Promise<AppointmentRecord | null>;
+  findConfirmedForClinicDate(clinicId: string, localDate: string): Promise<AppointmentRecord[]>;
   cancelOwned(appointmentId: string, patientUserId: string, now: Date, cutoff: Date): Promise<AppointmentRecord | null>;
   rescheduleOwned(appointmentId: string, patientUserId: string, now: Date, cutoff: Date, slot: AppointmentRecord["slot"]): Promise<AppointmentRecord | null>;
 }

@@ -9,6 +9,7 @@ import { publicDirectoryService, type PublicDirectoryFilters } from '@/features/
 import { appointmentService } from '@/features/patient/services/appointmentService';
 import type { PatientAppointment, PublicDirectoryPage } from '@/shared/types';
 import type { DatedAvailability } from '@/shared/types';
+import { isRealDate } from '@/shared/utils/validators';
 
 const EMPTY_PAGE: PublicDirectoryPage = { items: [], page: 1, limit: 12, totalItems: 0, totalPages: 0 };
 
@@ -18,13 +19,13 @@ export default function PatientClinicsPage() {
   const [result, setResult] = useState(EMPTY_PAGE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [date, setDate] = useState(() => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
+  const [date, setDate] = useState(() => new Date().toLocaleDateString('en-CA'));
   const [availability, setAvailability] = useState<Record<string, DatedAvailability>>({});
   const [availabilityError, setAvailabilityError] = useState('');
   const [loadingListingId, setLoadingListingId] = useState('');
   const [selection, setSelection] = useState<{
     listingId: string; date: string; startsAt: string; localStartTime: string; localEndTime: string;
-    timeZone: string; clinicName: string; doctorName: string; amountMinor: number; currency: string;
+    clinicName: string; doctorName: string; amountMinor: number; currency: string;
   } | null>(null);
   const [booking, setBooking] = useState(false);
   const [bookingError, setBookingError] = useState('');
@@ -61,6 +62,7 @@ export default function PatientClinicsPage() {
   };
 
   const loadAvailability = async (listingId: string) => {
+    if (!isRealDate(date)) { setAvailabilityError('Choose a valid appointment date.'); return; }
     setLoadingListingId(listingId);
     setAvailabilityError('');
     try {
@@ -125,15 +127,15 @@ export default function PatientClinicsPage() {
           <span className="text-xs text-[#777d8a]">{loading ? 'Searching…' : `${result.totalItems} results`}</span>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Appointment date <span className="font-normal text-[#777d8a]">Selected in each clinic’s timezone</span>
-            <Input type="date" value={date} onChange={(event) => { setDate(event.target.value); setAvailability({}); setAvailabilityError(''); setSelection(null); }} />
+          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Appointment date
+            <Input type="date" required value={date} onChange={(event) => { setDate(event.target.value); setAvailability({}); setAvailabilityError(''); setSelection(null); }} />
           </label>
         </div>
         {availabilityError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{availabilityError}</p> : null}
         {bookingError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{bookingError}</p> : null}
         {appointment ? <div role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <strong>Appointment held pending payment</strong>
-          <p className="mb-0 mt-1">Appointment {appointment.appointmentId} is not confirmed yet. Complete required payment within 10 minutes, by {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))} clinic time. You can pay from My appointments.</p>
+          <p className="mb-0 mt-1">Your appointment is not confirmed yet. Complete payment within 10 minutes, by {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}. You can pay from My appointments.</p>
           <Link className="mt-2 inline-block font-semibold underline" to="/patient/appointments">View appointments</Link>
         </div> : null}
         {error ? <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
@@ -163,9 +165,9 @@ export default function PatientClinicsPage() {
                     {loadingListingId === listing.listingId ? 'Loading times…' : `Show times for ${date || 'selected date'}`}
                   </Button>
                   {availability[listing.listingId]?.localDate === date ? <div className="mt-3">
-                    <p className="m-0 text-xs text-[#686e7b]">Clinic local time ({availability[listing.listingId]?.clinicTimeZone})</p>
+                    <p className="m-0 text-xs text-[#686e7b]">Available appointment times</p>
                     {availability[listing.listingId]?.slots.length ? <div className="mt-2 flex flex-wrap gap-2">
-                      {availability[listing.listingId]?.slots.map((slot) => <Button key={slot.startAt} type="button" size="sm" variant={selection?.listingId === listing.listingId && selection.startsAt === slot.startAt ? 'primary' : 'secondary'} onClick={() => { setBookingError(''); setSelection({ listingId: listing.listingId, date, startsAt: slot.startAt, localStartTime: slot.localStartTime, localEndTime: slot.localEndTime, timeZone: availability[listing.listingId]?.clinicTimeZone ?? '', clinicName: listing.clinicName, doctorName: listing.doctorName, amountMinor: Math.round(listing.consultationFee * 100), currency: listing.currency }); }}>{slot.localStartTime}–{slot.localEndTime}</Button>)}
+                      {availability[listing.listingId]?.slots.map((slot) => <Button key={slot.startAt} type="button" size="sm" variant={selection?.listingId === listing.listingId && selection.startsAt === slot.startAt ? 'primary' : 'secondary'} onClick={() => { setBookingError(''); setSelection({ listingId: listing.listingId, date, startsAt: slot.startAt, localStartTime: slot.localStartTime, localEndTime: slot.localEndTime, clinicName: listing.clinicName, doctorName: listing.doctorName, amountMinor: Math.round(listing.consultationFee * 100), currency: listing.currency }); }}>{slot.localStartTime}–{slot.localEndTime}</Button>)}
                     </div> : <p className="mt-2 mb-0 text-xs text-[#777d8a]">No future appointment times remain for this date. Past times and closed days are hidden; choose another clinic day.</p>}
                     {availability[listing.listingId]?.slots.length ? <p className="mt-2 mb-0 text-[10px] text-[#687568]">These times use the doctor’s saved weekly hours. Availability is checked again when you request a booking.</p> : null}
                   </div> : null}
@@ -177,7 +179,7 @@ export default function PatientClinicsPage() {
         {selection ? <section className="mt-5 rounded-lg border border-[#dce2f1] bg-[#f8f9ff] p-4" aria-labelledby="booking-review-title">
           <h2 id="booking-review-title" className="m-0 text-sm font-semibold">Review appointment request</h2>
           <p className="mb-0 mt-2 text-sm">{selection.clinicName} · {selection.doctorName}</p>
-          <p className="mb-0 mt-1 text-xs text-[#686e7b]">{selection.date}, {selection.localStartTime}–{selection.localEndTime} ({selection.timeZone})</p>
+          <p className="mb-0 mt-1 text-xs text-[#686e7b]">{selection.date}, {selection.localStartTime}–{selection.localEndTime}</p>
           <p className="mb-3 mt-1 text-xs text-[#686e7b]">Required payment: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: selection.currency }).format(selection.amountMinor / 100)}</p>
           <Button type="button" disabled={booking} onClick={() => void createAppointment()}>{booking ? 'Holding appointment…' : 'Request appointment hold'}</Button>
         </section> : null}

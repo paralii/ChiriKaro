@@ -64,9 +64,11 @@ export const api = {
     http.put<T>(path, body).then((r) => r.data),
 };
 
+type ApiErrorPayload = { message?: string; errors?: Record<string, string[]> };
+
 export const getErrorMessage = (error: unknown, fallback: string) =>
-  axios.isAxiosError<{ message?: string }>(error)
-    ? (error.response?.data?.message ?? error.message ?? fallback)
+  axios.isAxiosError<ApiErrorPayload>(error)
+    ? ([...new Set(Object.values(error.response?.data?.errors ?? {}).flat())].join(' ') || error.response?.data?.message || fallback)
     : error instanceof Error
       ? error.message
       : fallback;

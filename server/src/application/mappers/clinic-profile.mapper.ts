@@ -4,6 +4,8 @@ import type { ClinicProfileDTO } from "@application/dto/clinic/clinic-profile.dt
 export const toClinicProfileDTO = (clinic: Clinic): ClinicProfileDTO => ({
   id: clinic.id!,
   name: clinic.name,
+  clinicType: clinic.clinicType,
+  description: clinic.description,
   address: clinic.address ?? null,
   city: clinic.city ?? null,
   state: clinic.state ?? null,

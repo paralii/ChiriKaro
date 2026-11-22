@@ -196,6 +196,8 @@ export class SuperAdminClinicRepository extends BaseRepository<IClinicDocument> 
   return Clinic.fromPersistence({
     _id: doc._id.toString(),
     name: doc.name,
+    clinicType: doc.clinicType ?? null,
+    description: doc.description ?? null,
     address: doc.address ?? null,
     city: doc.city ?? null,
     state: doc.state ?? null,

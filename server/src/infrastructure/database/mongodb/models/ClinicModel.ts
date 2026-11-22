@@ -25,6 +25,8 @@ export interface IClinicReviewDecision {
 export interface IClinicDocument extends Document {
   _id: Types.ObjectId;
   name: string;
+  clinicType?: string | null;
+  description?: string | null;
   address?: string | null;
   city?: string | null;
   state?: string | null;
@@ -79,20 +81,25 @@ const clinicSchema = new Schema<IClinicDocument>(
       minlength: 2,
       maxlength: 150,
     },
+    clinicType: { type: String, trim: true, default: null, maxlength: 100 },
+    description: { type: String, trim: true, default: null, maxlength: 500 },
     address: {
       type: String,
       trim: true,
       default: null,
+      maxlength: 250,
     },
     city: {
       type: String,
       trim: true,
       default: null,
+      maxlength: 100,
     },
     state: {
       type: String,
       trim: true,
       default: null,
+      maxlength: 100,
     },
     pincode: {
       type: String,
@@ -109,11 +116,13 @@ const clinicSchema = new Schema<IClinicDocument>(
       lowercase: true,
       trim: true,
       default: null,
+      maxlength: 254,
     },
     registrationNumber: {
       type: String,
       trim: true,
       default: null,
+      maxlength: 100,
     },
     ownerAdminId: {
       type: Schema.Types.ObjectId,

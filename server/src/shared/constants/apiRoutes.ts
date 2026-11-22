@@ -104,6 +104,7 @@ export const API_ROUTES = {
     QUEUE: "/queue",
     QUEUE_STATUS: "/queue/:queueEntryId/status",
     QUEUE_DOCTORS: "/queue/doctors",
+    QUEUE_APPOINTMENTS: "/queue/appointments",
     QUEUE_WALK_INS: "/queue/walk-ins",
     QUEUE_APPOINTMENT_CHECK_IN: "/queue/appointments/:appointmentId/check-in",
 

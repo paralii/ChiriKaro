@@ -37,10 +37,10 @@ export class UpdateClinicStatusUseCase implements IUpdateClinicStatusUseCase {
     if (!ALLOWED_TRANSITIONS[clinic.status].includes(status)) {
       throw new ConflictError(`Clinic cannot transition from ${clinic.status} to ${status}`);
     }
-    if (
-      (status === ClinicStatus.APPROVED || status === ClinicStatus.REJECTED) &&
-      clinic.setupStatus !== "PENDING_VERIFICATION"
-    ) {
+    const isApplicationReview =
+      status === ClinicStatus.REJECTED ||
+      (status === ClinicStatus.APPROVED && clinic.status === ClinicStatus.PENDING);
+    if (isApplicationReview && clinic.setupStatus !== "PENDING_VERIFICATION") {
       throw new ConflictError("Clinic setup must be submitted for verification before review");
     }
 

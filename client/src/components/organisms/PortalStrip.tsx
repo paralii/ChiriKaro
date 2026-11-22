@@ -2,48 +2,48 @@ import { Link } from "react-router-dom";
 
 export function PortalStrip() {
   return (
-    <section className="border-t border-[#e9e8ef] py-24 max-md:py-16">
+    <section className="border-t border-border py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-175 text-center">
-        <span className="text-[11px] font-bold tracking-[2px] text-ck-teal">
+        <span className="text-xs font-semibold tracking-[0.14em] text-secondary">
           HOW CHIRIKARO WORKS
         </span>
 
-        <h2 className="mt-5 text-[clamp(30px,4vw,44px)] leading-[1.15] font-semibold">
+        <h2 className="mt-4 text-[clamp(1.875rem,4vw,2.75rem)] leading-tight font-semibold tracking-tight text-text-primary sm:mt-5">
           Two journeys.
-          <span className="text-brand"> One destination.</span>
+          <span className="text-primary"> One destination.</span>
         </h2>
 
-        <p className="mx-auto mt-5 max-w-130 text-sm leading-[1.9] text-[#696d7b]">
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-text-secondary sm:mt-5 sm:text-base">
           Every dental care journey is different. That's why ChiriKaro provides
           dedicated experiences for patients and dental clinics, while keeping
           everything within one platform.
         </p>
       </div>
 
-      <div className="mt-14 grid grid-cols-2 gap-6 max-md:grid-cols-1">
+      <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-2">
         {/* Patient Journey */}
-        <article className="group flex flex-col rounded-2xl border border-[#e9e8ef] bg-white p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_#344b7b12] max-md:p-6">
+        <article className="group flex flex-col rounded-xl border border-border bg-surface-elevated p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-interactive hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:p-7 lg:p-8">
           <div className="flex items-center justify-between">
-            <span className="grid size-12 place-items-center rounded-xl bg-brand-soft text-lg font-semibold text-brand">
+            <span className="grid size-12 place-items-center rounded-xl bg-primary-soft text-lg font-semibold text-primary">
               01
             </span>
 
-            <span className="rounded-full bg-brand-soft px-3 py-1.5 text-[10px] font-semibold text-brand">
+            <span className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary-hover">
               PATIENT EXPERIENCE
             </span>
           </div>
 
-          <h3 className="mt-7 text-2xl font-semibold">
+          <h3 className="mt-6 text-xl leading-tight font-semibold text-text-primary sm:text-2xl">
             Your care, made simpler.
           </h3>
 
-          <p className="mt-3 text-[13px] leading-[1.9] text-[#696d7b]">
+          <p className="mt-3 text-sm leading-relaxed text-text-secondary">
             From finding the right dental clinic to keeping your appointments
             organised, your dental care journey starts with a simpler
             experience.
           </p>
 
-          <div className="mt-8 space-y-5">
+          <div className="mt-7 space-y-5">
             {[
               {
                 number: "01",
@@ -64,14 +64,14 @@ export function PortalStrip() {
               },
             ].map((step) => (
               <div key={step.number} className="flex gap-4">
-                <span className="text-[11px] font-bold text-ck-teal">
+                <span className="text-xs font-bold text-secondary">
                   {step.number}
                 </span>
 
                 <div>
-                  <h4 className="text-[13px] font-semibold">{step.title}</h4>
+                  <h4 className="text-sm font-semibold text-text-primary">{step.title}</h4>
 
-                  <p className="mt-1 text-[11px] leading-[1.8] text-[#858895]">
+                  <p className="mt-1 text-sm leading-relaxed text-text-muted">
                     {step.description}
                   </p>
                 </div>
@@ -81,35 +81,35 @@ export function PortalStrip() {
 
           <Link
             to="/register/patient"
-            className="mt-9 inline-flex items-center gap-2 text-[12px] font-semibold text-brand transition group-hover:gap-3"
+            className="mt-8 inline-flex min-h-10 items-center gap-2 self-start rounded-sm text-sm font-semibold text-primary-hover underline-offset-4 transition-[color,gap] duration-interactive hover:gap-3 hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             Explore Clinics <span aria-hidden="true">→</span>
           </Link>
         </article>
 
         {/* Clinic Journey */}
-        <article className="group flex flex-col rounded-2xl border border-[#e9e8ef] bg-white p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_#344b7b12] max-md:p-6">
+        <article className="group flex flex-col rounded-xl border border-border bg-surface-elevated p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-interactive hover:-translate-y-0.5 hover:border-secondary/30 hover:shadow-md sm:p-7 lg:p-8">
           <div className="flex items-center justify-between">
-            <span className="grid size-12 place-items-center rounded-xl bg-[#e5f5ef] text-lg font-semibold text-ck-teal">
+            <span className="grid size-12 place-items-center rounded-xl bg-success-soft text-lg font-semibold text-success">
               02
             </span>
 
-            <span className="rounded-full bg-[#e5f5ef] px-3 py-1.5 text-[10px] font-semibold text-ck-teal">
+            <span className="rounded-full bg-success-soft px-3 py-1.5 text-xs font-semibold text-success">
               CLINIC EXPERIENCE
             </span>
           </div>
 
-          <h3 className="mt-7 text-2xl font-semibold">
+          <h3 className="mt-6 text-xl leading-tight font-semibold text-text-primary sm:text-2xl">
             Your clinic, better organised.
           </h3>
 
-          <p className="mt-3 text-[13px] leading-[1.9] text-[#696d7b]">
+          <p className="mt-3 text-sm leading-relaxed text-text-secondary">
             Bring the everyday activities of your dental clinic into one
             organised workspace, helping you coordinate operations more
             conveniently.
           </p>
 
-          <div className="mt-8 space-y-5">
+          <div className="mt-7 space-y-5">
             {[
               {
                 number: "01",
@@ -131,14 +131,14 @@ export function PortalStrip() {
               },
             ].map((step) => (
               <div key={step.number} className="flex gap-4">
-                <span className="text-[11px] font-bold text-ck-teal">
+                <span className="text-xs font-bold text-secondary">
                   {step.number}
                 </span>
 
                 <div>
-                  <h4 className="text-[13px] font-semibold">{step.title}</h4>
+                  <h4 className="text-sm font-semibold text-text-primary">{step.title}</h4>
 
-                  <p className="mt-1 text-[11px] leading-[1.8] text-[#858895]">
+                  <p className="mt-1 text-sm leading-relaxed text-text-muted">
                     {step.description}
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export function PortalStrip() {
 
           <Link
             to="/register/clinics"
-            className="mt-9 inline-flex items-center gap-2 text-[12px] font-semibold text-ck-teal transition group-hover:gap-3"
+            className="mt-8 inline-flex min-h-10 items-center gap-2 self-start rounded-sm text-sm font-semibold text-success underline-offset-4 transition-[color,gap] duration-interactive hover:gap-3 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             Discover Clinic Software <span aria-hidden="true">→</span>
           </Link>

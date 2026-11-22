@@ -7,6 +7,7 @@ import type { ITransitionQueueEntryUseCase } from "@application/interfaces/use-c
 import type { ListCheckInAppointmentsUseCase } from "@application/use-cases/clinic/list-check-in-appointments.use-case.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { BadRequestError } from "@shared/errors/index.ts";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 
 export class ClinicQueueController {
   constructor(
@@ -20,59 +21,59 @@ export class ClinicQueueController {
 
   createWalkIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      if (!req.user?.clinicId) throw new BadRequestError(MESSAGES.request.authenticatedClinicScopeMissing);
       const result = await this.registerWalkIn.execute({
         clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role,
         doctorUserId: req.body?.doctorUserId, patientEmail: req.body?.patientEmail,
         guestName: req.body?.guestName,
         idempotencyKey: req.get("Idempotency-Key"),
       });
-      ApiResponse.created(res, "Walk-in added to today's arrival queue", result);
+      ApiResponse.created(res, MESSAGES.response.walkInAddedToQueue, result);
     } catch (error) { next(error); }
   };
 
   checkInAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      if (!req.user?.clinicId) throw new BadRequestError(MESSAGES.request.authenticatedClinicScopeMissing);
       const appointmentId = req.params.appointmentId;
-      if (typeof appointmentId !== "string") throw new BadRequestError("Appointment id is required");
+      if (typeof appointmentId !== "string") throw new BadRequestError(MESSAGES.request.appointmentIdRequired);
       const result = await this.checkInAppointmentUseCase.execute({ clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role, appointmentId });
-      ApiResponse.created(res, "Patient checked into today's queue", result);
+      ApiResponse.created(res, MESSAGES.response.appointmentCheckedIntoQueue, result);
     } catch (error) { next(error); }
   };
 
   getQueue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      if (!req.user?.clinicId) throw new BadRequestError(MESSAGES.request.authenticatedClinicScopeMissing);
       const requestedDoctorUserId = typeof req.query.doctorUserId === "string" ? req.query.doctorUserId : undefined;
       const result = await this.listQueue.execute({
         clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role,
         ...(requestedDoctorUserId ? { requestedDoctorUserId } : {}),
       });
-      ApiResponse.success(res, "Today's clinic queue retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.clinicQueueRetrieved, result);
     } catch (error) { next(error); }
   };
 
   getDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
-      ApiResponse.success(res, "Queue doctors retrieved", await this.listDoctors.execute({ clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role }));
+      if (!req.user?.clinicId) throw new BadRequestError(MESSAGES.request.authenticatedClinicScopeMissing);
+      ApiResponse.success(res, MESSAGES.response.queueDoctorsRetrieved, await this.listDoctors.execute({ clinicId: req.user.clinicId, actorUserId: req.user.sub, actorRole: req.user.role }));
     } catch (error) { next(error); }
   };
 
   getCheckInAppointments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      if (!req.user?.clinicId) throw new BadRequestError(MESSAGES.request.authenticatedClinicScopeMissing);
       const result = await this.listCheckInAppointments.execute({ clinicId: req.user.clinicId, actorRole: req.user.role });
-      ApiResponse.success(res, "Today's confirmed appointments retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.checkInAppointmentsRetrieved, result);
     } catch (error) { next(error); }
   };
 
   updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!req.user?.clinicId) throw new BadRequestError("Authenticated clinic scope is missing");
+      if (!req.user?.clinicId) throw new BadRequestError(MESSAGES.request.authenticatedClinicScopeMissing);
       const queueEntryId = req.params.queueEntryId;
-      if (typeof queueEntryId !== "string") throw new BadRequestError("Queue entry id is required");
+      if (typeof queueEntryId !== "string") throw new BadRequestError(MESSAGES.request.queueEntryIdRequired);
       const result = await this.transitionQueueEntry.execute({
         clinicId: req.user.clinicId,
         actorUserId: req.user.sub,
@@ -80,7 +81,8 @@ export class ClinicQueueController {
         queueEntryId,
         nextStatus: req.body?.status,
       });
-      ApiResponse.success(res, "Queue status updated", result);
+      ApiResponse.success(res, MESSAGES.response.queueStatusUpdated, result);
     } catch (error) { next(error); }
   };
 }
+

@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { MESSAGES } from "@shared/constants/messages.constants.ts";
 import type { ISearchPublicDirectoryUseCase } from "@application/interfaces/use-cases/search/ISearchPublicDirectoryUseCase.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { ValidationError } from "@shared/errors/index.ts";
@@ -36,7 +37,7 @@ export class PublicDirectoryController {
         page: parseInteger(req.query.page, 1, "page"),
         limit: parseInteger(req.query.limit, 12, "limit"),
       });
-      ApiResponse.paginated(res, "Directory results retrieved", result.items, {
+      ApiResponse.paginated(res, MESSAGES.response.directoryResultsRetrieved, result.items, {
         page: result.page,
         limit: result.limit,
         totalItems: result.totalItems,
@@ -52,7 +53,8 @@ export class PublicDirectoryController {
       const date = parseQueryString(req.query.date, "date");
       if (!date) throw new ValidationError("date is required");
       const result = await this._availabilityUseCase.execute(listingId, date);
-      ApiResponse.success(res, "Date-specific availability retrieved", result);
+      ApiResponse.success(res, MESSAGES.response.availabilityRetrieved, result);
     } catch (error) { next(error); }
   };
 }
+

@@ -36,7 +36,7 @@ export default function PatientDashboardPage() {
         <MetricCard label="Care profile" value={busy ? 'Loading' : 'Ready'} note="Your patient account is active" to="/patient/profile" linkText="View profile" />
         <MetricCard label="Clinic association" value={clinic?.name ?? (busy ? 'Loading' : 'Not linked')} note={clinic ? `Clinic status: ${clinic.status}` : 'No clinic is linked to this account'} />
       </MetricGrid>
-      <Card>
+      <Card className="overflow-hidden">
         <SectionHeading title="Account details" description="Information associated with your patient account" />
         <DetailList items={[
           ['Name', user.name],

@@ -210,21 +210,21 @@ export default function DoctorOnboardingPage() {
   };
 
   return (
-    <div className="grid gap-[18px] [&>section]:mt-0">
+    <div className="grid gap-5 [&>section]:mt-0">
       <Notices error={error} message={message} />
-      {!profile && busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading your onboarding profile...</Card> : null}
+      {!profile && busy ? <Card className="overflow-hidden p-4 text-sm text-text-muted sm:p-5">Loading your onboarding profile...</Card> : null}
       {profile ? (
         <>
           {locked ? (
-            <Card className="pb-5">
-              <Notice tone={profile.onboardingStatus === 'VERIFIED' ? 'success' : 'warning'} className="mx-[18px] mt-[18px]">
+            <Card className="overflow-hidden pb-5">
+              <Notice tone={profile.onboardingStatus === 'VERIFIED' ? 'success' : 'warning'} className="mx-4 mt-4 sm:mx-5 sm:mt-5">
                 <strong>{profile.onboardingStatus === 'VERIFIED' ? 'Your clinic approved your profile' : 'Your profile is awaiting clinic review'}</strong>
                 <p className="mb-0 mt-1">{profile.onboardingStatus === 'VERIFIED' ? 'Your onboarding is complete. Your verified details and submitted documents are shown below.' : 'Your details and documents were submitted to your Clinic Admin. You can review them here while the decision is pending.'}</p>
               </Notice>
               <SectionHeading title="Submitted profile" description="Your saved details and verification status." />
               <DetailList items={reviewItems} />
-              <div className="px-[18px] pb-4">
-                <Link to="/doctor/availability" className="text-xs font-semibold text-brand-deep underline">Edit working hours and availability</Link>
+              <div className="px-4 pb-4 sm:px-5">
+                <Link to="/doctor/availability" className="inline-flex min-h-9 items-center rounded-sm text-sm font-semibold text-primary-hover underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Edit working hours and availability</Link>
               </div>
               <SectionHeading title="Submitted documents" description="Open a document to review the uploaded file." className="border-t" />
               <DocumentList items={documents.map((document) => ({ key: document.documentType, label: document.documentType, status: document.status }))} onOpen={openDocument} busy={busy} />
@@ -234,20 +234,20 @@ export default function DoctorOnboardingPage() {
               {profile.onboardingStatus === 'REJECTED' && profile.rejectionReason ? <Notice tone="error"><strong>Changes requested</strong><p>{profile.rejectionReason}</p></Notice> : null}
               <StepTabs steps={steps} active={step} onSelect={selectStep} />
 
-          {step === 0 ? <Card className="pb-5"><SectionHeading title="Basic information" description="Add the personal details for your clinic profile." /><DoctorBasicForm initial={profile} busy={busy || Boolean(locked)} onSave={saveBasic} /></Card> : null}
+          {step === 0 ? <Card className="overflow-hidden pb-5"><SectionHeading title="Basic information" description="Add the personal details for your clinic profile." /><DoctorBasicForm initial={profile} busy={busy || Boolean(locked)} onSave={saveBasic} /></Card> : null}
 
-          {step === 1 ? <Card className="pb-5"><SectionHeading title="Professional details" description="Add your qualifications and professional registration information." /><DoctorProfessionalForm initial={profile} busy={busy || Boolean(locked)} onSave={saveProfessional} /></Card> : null}
+          {step === 1 ? <Card className="overflow-hidden pb-5"><SectionHeading title="Professional details" description="Add your qualifications and professional registration information." /><DoctorProfessionalForm initial={profile} busy={busy || Boolean(locked)} onSave={saveProfessional} /></Card> : null}
 
-          {step === 2 ? <Card className="pb-5"><SectionHeading title="Practice details" description="Choose specializations offered by your clinic and list procedures." /><DoctorPracticeForm initial={profile} busy={busy || Boolean(locked)} clinicSpecializations={clinicSpecializations} onSave={savePractice} /></Card> : null}
+          {step === 2 ? <Card className="overflow-hidden pb-5"><SectionHeading title="Practice details" description="Choose specializations offered by your clinic and list procedures." /><DoctorPracticeForm initial={profile} busy={busy || Boolean(locked)} clinicSpecializations={clinicSpecializations} onSave={savePractice} /></Card> : null}
 
-          {step === 3 ? <Card className="pb-5"><SectionHeading title="Working hours" description="Clinic hours are preselected. Keep or remove days, and set doctor hours within the clinic’s times." /><WorkingHoursForm key={`doctor-hours-${profile.workingHours.length}-${clinicWorkingHours.length}`} initial={hours} busy={busy || Boolean(locked)} onSave={saveHours} submitLabel="Save hours and continue" /></Card> : null}
+          {step === 3 ? <Card className="overflow-hidden pb-5"><SectionHeading title="Working hours" description="Clinic hours are preselected. Keep or remove days, and set doctor hours within the clinic’s times." /><WorkingHoursForm key={`doctor-hours-${profile.workingHours.length}-${clinicWorkingHours.length}`} initial={hours} busy={busy || Boolean(locked)} onSave={saveHours} submitLabel="Save hours and continue" /></Card> : null}
 
           {step === 4 ? (
-            <Card className="pb-5">
+            <Card className="overflow-hidden pb-5">
               <SectionHeading title="Professional documents" description="Upload PDF, JPG, or PNG files up to 10 MB each." />
               <DocumentUploader types={docTypes} documents={documents}
                 busy={busy} showStatus onUpload={upload} onOpen={openDocument} onDelete={removeDocument} />
-              <div className="flex flex-wrap justify-between gap-2.5 px-[18px] pt-3.5">
+              <div className="flex flex-col-reverse justify-between gap-3 px-4 pt-4 sm:flex-row sm:px-5">
                 <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(3)}>Back to working hours</Button>
                 <Button type="button" disabled={busy} onClick={continueToReview}>Continue to review</Button>
               </div>
@@ -255,14 +255,14 @@ export default function DoctorOnboardingPage() {
           ) : null}
 
           {step === 5 ? (
-            <Card className="pb-5">
+            <Card className="overflow-hidden pb-5">
               <SectionHeading title="Review your onboarding details" description="Check your saved information and return to any step to make changes." />
               <DetailList items={reviewItems} />
               <SectionHeading title="Documents" description="Open a file to confirm the correct documents are attached." className="border-t" />
               <DocumentList items={documents.map((document) => ({ key: document.documentType, label: document.documentType, status: document.status }))} onOpen={openDocument} busy={busy} />
               {/* <SectionHeading title="Weekly working schedule" description="Review the days and hours you saved." className="border-t" />
               <DetailList items={reviewHours.map((hour) => [hour.day, hour.isOpen ? `${hour.startTime}–${hour.endTime}` : 'Closed'])} /> */}
-              <div className="flex flex-wrap justify-between gap-2.5 px-[18px] pt-3.5">
+              <div className="flex flex-col-reverse justify-between gap-3 px-4 pt-4 sm:flex-row sm:px-5">
                 <Button type="button" variant="secondary" onClick={() => setStep(4)}>Back to documents</Button>
                 <Button type="button" disabled={busy || locked || profile.onboardingStatus !== 'IN_PROGRESS' || !reviewReady} onClick={submitForVerification}>
                   {busy ? 'Submitting...' : profile.onboardingStatus === 'PENDING_VERIFICATION' ? 'Pending verification' : profile.onboardingStatus === 'VERIFIED' ? 'Verified' : profile.onboardingStatus === 'REJECTED' ? 'Save a correction to resubmit' : 'Submit for verification'}

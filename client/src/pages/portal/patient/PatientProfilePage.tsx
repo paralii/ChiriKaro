@@ -26,7 +26,7 @@ export default function PatientProfilePage() {
   return (
     <>
       <Notices error={error} message={message} />
-      <Card className="pb-5">
+      <Card className="overflow-hidden pb-5">
         <SectionHeading title="Your profile" description="Update the name and profile image for your patient account." />
         <PatientProfileForm name={user.name} email={user.email} avatar={user.avatar} busy={busy} onSave={save} />
       </Card>

@@ -52,11 +52,11 @@ export default function ClinicProfilePage() {
       {profile?.rejectionReason ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason}</p></Notice> : null}
       {profile?.setupStatus === 'PENDING_VERIFICATION' ? <Notice tone="warning">Your application is under review. Profile edits are disabled until a decision is made.</Notice> : null}
       {profile ? (
-        <Card className="pb-5">
+        <Card className="overflow-hidden pb-5">
           <SectionHeading title="Clinic profile" description="Manage the contact and registration details for your clinic." />
           <ClinicProfileForm initial={profile} busy={busy || profile.setupStatus === 'PENDING_VERIFICATION'} onSave={saveProfile} />
         </Card>
-      ) : busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading clinic profile...</Card> : null}
+      ) : busy ? <Card className="overflow-hidden p-4 text-sm text-text-muted sm:p-5">Loading clinic profile...</Card> : null}
     </>
   );
 }

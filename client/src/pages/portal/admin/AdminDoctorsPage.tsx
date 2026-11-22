@@ -4,6 +4,7 @@ import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Form } from '@/components/atoms/Form';
 import { Input } from '@/components/atoms/Input';
+import { Select } from '@/components/atoms/Select';
 import { DataTable, CellTitle, tdClass } from '@/components/molecules/DataTable';
 import { EmptyState } from '@/components/molecules/EmptyState';
 import { Notices } from '@/components/molecules/Notices';
@@ -47,14 +48,14 @@ export default function AdminDoctorsPage() {
 
   return <>
     <Notices error={error} />
-    <Card>
+    <Card className="overflow-hidden">
       <SectionHeading title="Doctor directory" description={`${totalItems} doctor${totalItems === 1 ? '' : 's'} found`} action={<Badge>PAGE {page}{totalPages ? ` OF ${totalPages}` : ''}</Badge>} />
-      <Form onSubmit={applyFilters} className="grid grid-cols-[minmax(180px,1fr)_220px_auto] items-end gap-2 px-[15px] pb-3 max-md:grid-cols-1">
-        <label className="grid gap-1 text-[10px] text-[#777c8a]">Search doctors<Input value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} maxLength={100} placeholder="Name, email, clinic, specialty" /></label>
-        <label className="grid gap-1 text-[10px] text-[#777c8a]">Verification status<select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)} className="h-[38px] rounded border border-[#cfd2df] bg-white px-2 text-xs"><option value="">All statuses</option>{statuses.map((item) => <option key={item} value={item}>{item.replaceAll('_', ' ')}</option>)}</select></label>
-        <div className="flex gap-2"><Button size="xs" disabled={busy}>Apply</Button><Button type="button" size="xs" variant="ghost" disabled={busy || (!searchDraft && !statusDraft && !search && !status)} onClick={resetFilters}>Reset</Button></div>
+      <Form onSubmit={applyFilters} className="grid grid-cols-1 items-end gap-4 bg-page px-4 pb-4 sm:mx-4 sm:mb-4 sm:grid-cols-2 sm:rounded-lg sm:p-4 lg:grid-cols-[minmax(0,1fr)_240px_auto]">
+        <label className="grid gap-2 text-sm font-medium text-text-secondary">Search doctors<Input value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} maxLength={100} placeholder="Name, email, clinic, specialty" /></label>
+        <label className="grid gap-2 text-sm font-medium text-text-secondary">Verification status<Select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)}><option value="">All statuses</option>{statuses.map((item) => <option key={item} value={item}>{item.replaceAll('_', ' ')}</option>)}</Select></label>
+        <div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-1"><Button size="sm" disabled={busy}>Apply</Button><Button type="button" size="sm" variant="ghost" disabled={busy || (!searchDraft && !statusDraft && !search && !status)} onClick={resetFilters}>Reset</Button></div>
       </Form>
-      {busy && !doctors.length ? <div className="p-4 text-xs text-[#777c8a]">Loading doctors...</div> : !doctors.length ? <EmptyState>No doctors match these filters.</EmptyState> : <DataTable headers={['DOCTOR', 'EMAIL', 'CLINIC', 'SPECIALTIES', 'STATUS', 'ACTIONS']}>
+      {busy && !doctors.length ? <div className="p-4 text-sm text-text-muted sm:px-5">Loading doctors...</div> : !doctors.length ? <EmptyState>No doctors match these filters.</EmptyState> : <DataTable headers={['DOCTOR', 'EMAIL', 'CLINIC', 'SPECIALTIES', 'STATUS', 'ACTIONS']}>
         {doctors.map((doctor) => <tr key={doctor.id}>
           <td className={tdClass}><CellTitle title={doctor.name} lines={doctor.professionalTitle ? [doctor.professionalTitle] : []} /></td>
           <td className={tdClass}>{doctor.email ?? '—'}</td>
@@ -66,24 +67,24 @@ export default function AdminDoctorsPage() {
       </DataTable>}
       <ListPagination page={page} totalPages={totalPages} totalItems={totalItems} busy={busy} onPageChange={setPage} />
     </Card>
-    {selectedDoctor ? <div role="dialog" aria-modal="true" aria-label="Doctor details" className="fixed inset-0 z-50 grid place-items-center bg-[#17203a66] p-4" onClick={() => setSelectedDoctor(null)}>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}><Card>
+    {selectedDoctor ? <div role="dialog" aria-modal="true" aria-label="Doctor details" className="fixed inset-0 z-50 grid place-items-center bg-text-primary/60 p-3 sm:p-4" onClick={() => setSelectedDoctor(null)}>
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto" onClick={(event) => event.stopPropagation()}><Card className="overflow-hidden">
         <SectionHeading title={selectedDoctor.name} description="Doctor profile details" action={<Button size="xs" variant="ghost" onClick={() => setSelectedDoctor(null)}>Close</Button>} />
-        <dl className="grid grid-cols-[150px_minmax(0,1fr)] gap-x-4 gap-y-3 px-[18px] py-4 text-xs">
-          <dt className="text-[#777c8a]">Email</dt><dd className="m-0">{selectedDoctor.email ?? '—'}</dd>
-          <dt className="text-[#777c8a]">Clinic</dt><dd className="m-0">{selectedDoctor.clinicName ?? 'Not associated'}</dd>
-          <dt className="text-[#777c8a]">Professional title</dt><dd className="m-0">{selectedDoctor.professionalTitle ?? '—'}</dd>
-          <dt className="text-[#777c8a]">Verification</dt><dd className="m-0">{selectedDoctor.verificationStatus.replaceAll('_', ' ')}</dd>
-          <dt className="text-[#777c8a]">Specializations</dt><dd className="m-0">{selectedDoctor.specializations.join(', ') || '—'}</dd>
-          <dt className="text-[#777c8a]">Procedures</dt><dd className="m-0">{selectedDoctor.procedures.join(', ') || '—'}</dd>
-          <dt className="text-[#777c8a]">Qualifications</dt><dd className="m-0">{selectedDoctor.qualifications.join(', ') || '—'}</dd>
-          <dt className="text-[#777c8a]">Experience</dt><dd className="m-0">{selectedDoctor.yearsOfExperience == null ? '—' : `${selectedDoctor.yearsOfExperience} years`}</dd>
-          <dt className="text-[#777c8a]">Registration</dt><dd className="m-0">{[selectedDoctor.registrationNumber, selectedDoctor.registrationAuthority].filter(Boolean).join(' · ') || '—'}</dd>
-          <dt className="text-[#777c8a]">Consultation fee</dt><dd className="m-0">{selectedDoctor.consultationFee == null ? '—' : `₹${selectedDoctor.consultationFee}`}</dd>
-          <dt className="text-[#777c8a]">Working hours</dt><dd className="m-0">{selectedDoctor.workingHours.length ? <ul className="m-0 grid list-none gap-1 p-0">{selectedDoctor.workingHours.map((hour) => <li key={hour.day}>{hour.day}: {hour.isOpen ? `${hour.startTime}–${hour.endTime}` : 'Closed'}</li>)}</ul> : '—'}</dd>
-          <dt className="text-[#777c8a]">Documents</dt><dd className="m-0">{selectedDoctor.documents.length ? <ul className="m-0 grid list-none gap-1 p-0">{selectedDoctor.documents.map((doc, index) => <li key={`${doc.documentType}-${index}`}>{doc.documentType.replaceAll('_', ' ')} · {doc.status.replaceAll('_', ' ')}{doc.rejectionReason ? ` · ${doc.rejectionReason}` : ''}</li>)}</ul> : '—'}</dd>
-          {selectedDoctor.rejectionReason ? <><dt className="text-[#777c8a]">Rejection reason</dt><dd className="m-0">{selectedDoctor.rejectionReason}</dd></> : null}
-          <dt className="text-[#777c8a]">Registered</dt><dd className="m-0">{new Date(selectedDoctor.createdAt).toLocaleDateString()}</dd>
+        <dl className="grid grid-cols-[minmax(7rem,0.45fr)_minmax(0,1fr)] gap-x-3 gap-y-3 px-4 py-4 text-sm leading-relaxed sm:gap-x-4 sm:px-5">
+          <dt className="text-text-muted">Email</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.email ?? '—'}</dd>
+          <dt className="text-text-muted">Clinic</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.clinicName ?? 'Not associated'}</dd>
+          <dt className="text-text-muted">Professional title</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.professionalTitle ?? '—'}</dd>
+          <dt className="text-text-muted">Verification</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.verificationStatus.replaceAll('_', ' ')}</dd>
+          <dt className="text-text-muted">Specializations</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.specializations.join(', ') || '—'}</dd>
+          <dt className="text-text-muted">Procedures</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.procedures.join(', ') || '—'}</dd>
+          <dt className="text-text-muted">Qualifications</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.qualifications.join(', ') || '—'}</dd>
+          <dt className="text-text-muted">Experience</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.yearsOfExperience == null ? '—' : `${selectedDoctor.yearsOfExperience} years`}</dd>
+          <dt className="text-text-muted">Registration</dt><dd className="m-0 wrap-break-word text-text-primary">{[selectedDoctor.registrationNumber, selectedDoctor.registrationAuthority].filter(Boolean).join(' · ') || '—'}</dd>
+          <dt className="text-text-muted">Consultation fee</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.consultationFee == null ? '—' : `₹${selectedDoctor.consultationFee}`}</dd>
+          <dt className="text-text-muted">Working hours</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.workingHours.length ? <ul className="m-0 grid list-none gap-1 p-0">{selectedDoctor.workingHours.map((hour) => <li key={hour.day}>{hour.day}: {hour.isOpen ? `${hour.startTime}–${hour.endTime}` : 'Closed'}</li>)}</ul> : '—'}</dd>
+          <dt className="text-text-muted">Documents</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.documents.length ? <ul className="m-0 grid list-none gap-1 p-0">{selectedDoctor.documents.map((doc, index) => <li key={`${doc.documentType}-${index}`}>{doc.documentType.replaceAll('_', ' ')} · {doc.status.replaceAll('_', ' ')}{doc.rejectionReason ? ` · ${doc.rejectionReason}` : ''}</li>)}</ul> : '—'}</dd>
+          {selectedDoctor.rejectionReason ? <><dt className="text-text-muted">Rejection reason</dt><dd className="m-0 wrap-break-word text-text-primary">{selectedDoctor.rejectionReason}</dd></> : null}
+          <dt className="text-text-muted">Registered</dt><dd className="m-0 wrap-break-word text-text-primary">{new Date(selectedDoctor.createdAt).toLocaleDateString()}</dd>
         </dl>
       </Card></div>
     </div> : null}

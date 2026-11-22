@@ -116,79 +116,79 @@ export default function PatientClinicsPage() {
   return (
     <Card className="overflow-hidden">
       <SectionHeading title="Find a clinic or doctor" description="Browse approved clinics and verified doctors, check a date, and request a payment hold." />
-      <div className="p-[18px]">
-        <form onSubmit={submit} className="grid gap-3 rounded-lg border border-[#e8e9ef] bg-[#fafbff] p-4 md:grid-cols-4">
-          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Clinic or doctor
+      <div className="p-4 sm:p-5">
+        <form onSubmit={submit} className="grid gap-4 rounded-lg border border-border bg-page p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-4">
+          <label className="grid gap-2 text-sm font-medium text-text-secondary">Clinic or doctor
             <Input value={draft.q} maxLength={100} onChange={(event) => setDraft({ ...draft, q: event.target.value })} placeholder="Name" />
           </label>
-          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">City
+          <label className="grid gap-2 text-sm font-medium text-text-secondary">City
             <Input value={draft.city} maxLength={100} onChange={(event) => setDraft({ ...draft, city: event.target.value })} placeholder="City" />
           </label>
-          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Specialization
+          <label className="grid gap-2 text-sm font-medium text-text-secondary">Specialization
             <Input value={draft.specialization} maxLength={100} onChange={(event) => setDraft({ ...draft, specialization: event.target.value })} placeholder="For example, orthodontics" />
           </label>
-          <div className="flex gap-2 self-end"><Button type="submit">Search</Button><Button type="button" variant="secondary" disabled={loading || (!draft.q && !draft.city && !draft.specialization && !filters.q && !filters.city && !filters.specialization)} onClick={resetFilters}>Reset</Button></div>
+          <div className="flex flex-wrap gap-2 self-end sm:col-span-2 xl:col-span-1"><Button type="submit">Search</Button><Button type="button" variant="secondary" disabled={loading || (!draft.q && !draft.city && !draft.specialization && !filters.q && !filters.city && !filters.specialization)} onClick={resetFilters}>Reset</Button></div>
         </form>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <h2 className="m-0 text-sm font-semibold">Clinic and doctor listings</h2>
-          <span className="text-xs text-[#777d8a]">{loading ? 'Searching…' : `${result.totalItems} results · Page ${result.page} of ${Math.max(result.totalPages, 1)}`}</span>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+          <h2 className="m-0 text-base font-semibold text-text-primary">Clinic and doctor listings</h2>
+          <span aria-live="polite" className="text-sm text-text-muted">{loading ? 'Searching…' : `${result.totalItems} results · Page ${result.page} of ${Math.max(result.totalPages, 1)}`}</span>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label className="grid gap-1.5 text-xs font-semibold text-[#555b69]">Appointment date
+          <label className="grid w-full max-w-xs gap-2 text-sm font-medium text-text-secondary">Appointment date
             <Input type="date" required value={date} onChange={(event) => { setDate(event.target.value); setAvailability({}); setAvailabilityError(''); setSelection(null); }} />
           </label>
         </div>
-        {availabilityError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{availabilityError}</p> : null}
-        {bookingError ? <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">{bookingError}</p> : null}
-        {appointment ? <div role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+        {availabilityError ? <p role="alert" className="mt-4 rounded-md border border-danger/25 bg-danger-soft p-4 text-sm leading-relaxed text-danger">{availabilityError}</p> : null}
+        {bookingError ? <p role="alert" className="mt-4 rounded-md border border-danger/25 bg-danger-soft p-4 text-sm leading-relaxed text-danger">{bookingError}</p> : null}
+        {appointment ? <div role="status" className="mt-4 rounded-md border border-warning/25 bg-warning-soft p-4 text-sm leading-relaxed text-warning">
           <strong>Appointment held pending payment</strong>
           <p className="mb-0 mt-1">Your appointment is not confirmed yet. Complete payment within 10 minutes, by {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}. You can pay from My appointments.</p>
-          <Link className="mt-2 inline-block font-semibold underline" to="/patient/appointments">View appointments</Link>
+          <Link className="mt-2 inline-block min-h-9 rounded-sm font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" to="/patient/appointments">View appointments</Link>
         </div> : null}
-        {error ? <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
-        {!error && !loading && result.items.length === 0 ? <p className="mt-4 rounded-md bg-[#f7f8fb] p-4 text-sm text-[#686e7b]">No verified listings matched those filters. Try a different name, city, or specialization.</p> : null}
-        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+        {error ? <p role="alert" className="mt-4 rounded-md border border-danger/25 bg-danger-soft p-4 text-sm leading-relaxed text-danger">{error}</p> : null}
+        {!error && !loading && result.items.length === 0 ? <p className="mt-4 rounded-md border border-border bg-page p-5 text-sm leading-relaxed text-text-secondary">No verified listings matched those filters. Try a different name, city, or specialization.</p> : null}
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           {result.items.map((listing, index) => (
-            <article key={`${listing.clinicName}-${listing.doctorName}-${index}`} className="rounded-lg border border-[#e6e7ee] bg-white p-4">
+            <article key={`${listing.clinicName}-${listing.doctorName}-${index}`} className="min-w-0 rounded-lg border border-border bg-surface-elevated p-4 shadow-sm sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="m-0 text-[10px] font-bold uppercase tracking-wide text-brand">Verified clinic</p>
-                  <h3 className="mt-1 mb-0 text-base font-semibold">{listing.clinicName}</h3>
-                  <p className="mt-1 mb-0 text-xs text-[#737987]">{[listing.address, listing.city, listing.state, listing.pincode].filter(Boolean).join(', ') || 'Location details unavailable'}</p>
+                  <p className="m-0 text-xs font-semibold uppercase tracking-wide text-primary-hover">Verified clinic</p>
+                  <h3 className="mt-1 mb-0 text-lg font-semibold text-text-primary">{listing.clinicName}</h3>
+                  <p className="mt-1 mb-0 text-sm leading-relaxed text-text-muted">{[listing.address, listing.city, listing.state, listing.pincode].filter(Boolean).join(', ') || 'Location details unavailable'}</p>
                 </div>
-                <div className="rounded-md bg-[#f3f5ff] px-3 py-2 text-right">
-                  <span className="block text-[10px] text-[#727887]">Consultation fee</span>
-                  <strong className="text-sm">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: listing.currency }).format(listing.consultationFee)}</strong>
+                <div className="rounded-md bg-primary-soft px-3 py-2 text-left sm:text-right">
+                  <span className="block text-xs text-text-muted">Consultation fee</span>
+                  <strong className="text-sm font-semibold text-text-primary">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: listing.currency }).format(listing.consultationFee)}</strong>
                 </div>
               </div>
-              <div className="mt-4 border-t border-[#eff0f4] pt-3">
-                <p className="m-0 text-sm font-semibold">{listing.professionalTitle ? `${listing.professionalTitle} ` : ''}{listing.doctorName}</p>
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="m-0 text-sm font-semibold text-text-primary">{listing.professionalTitle ? `${listing.professionalTitle} ` : ''}{listing.doctorName}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {listing.specializations.map((specialization) => <span key={specialization} className="rounded-full bg-[#eef5f2] px-2.5 py-1 text-[10px] text-[#376b59]">{specialization}</span>)}
+                  {listing.specializations.map((specialization) => <span key={specialization} className="rounded-full bg-success-soft px-2.5 py-1 text-xs text-success">{specialization}</span>)}
                 </div>
-                {listing.phone ? <a className="mt-3 inline-block text-xs font-semibold text-brand-deep" href={`tel:${listing.phone}`}>Contact clinic: {listing.phone}</a> : null}
-                <div className="mt-3 border-t border-[#eff0f4] pt-3">
+                {listing.phone ? <a className="mt-3 inline-flex min-h-9 items-center rounded-sm text-sm font-semibold text-primary-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" href={`tel:${listing.phone}`}>Contact clinic: {listing.phone}</a> : null}
+                <div className="mt-3 border-t border-border pt-4">
                   <Button size="sm" variant="secondary" disabled={!date || loadingListingId === listing.listingId} onClick={() => void loadAvailability(listing.listingId)}>
                     {loadingListingId === listing.listingId ? 'Loading times…' : `Show times for ${date || 'selected date'}`}
                   </Button>
                   {availability[listing.listingId]?.localDate === date ? <div className="mt-3">
-                    <p className="m-0 text-xs text-[#686e7b]">Available appointment times</p>
+                    <p className="m-0 text-sm font-medium text-text-secondary">Available appointment times</p>
                     {availability[listing.listingId]?.slots.length ? <div className="mt-2 flex flex-wrap gap-2">
                       {availability[listing.listingId]?.slots.map((slot) => <Button key={slot.startAt} type="button" size="sm" variant={selection?.listingId === listing.listingId && selection.startsAt === slot.startAt ? 'primary' : 'secondary'} onClick={() => { setBookingError(''); setSelection({ listingId: listing.listingId, date, startsAt: slot.startAt, localStartTime: slot.localStartTime, localEndTime: slot.localEndTime, clinicName: listing.clinicName, doctorName: listing.doctorName, amountMinor: Math.round(listing.consultationFee * 100), currency: listing.currency }); }}>{slot.localStartTime}–{slot.localEndTime}</Button>)}
-                    </div> : <p className="mt-2 mb-0 text-xs text-[#777d8a]">No future appointment times remain for this date. Past times and closed days are hidden; choose another clinic day.</p>}
-                    {availability[listing.listingId]?.slots.length ? <p className="mt-2 mb-0 text-[10px] text-[#687568]">These times use the doctor’s saved weekly hours. Availability is checked again when you request a booking.</p> : null}
+                    </div> : <p className="mt-2 mb-0 text-sm leading-relaxed text-text-muted">No future appointment times remain for this date. Past times and closed days are hidden; choose another clinic day.</p>}
+                    {availability[listing.listingId]?.slots.length ? <p className="mt-2 mb-0 text-xs leading-relaxed text-text-muted">These times use the doctor’s saved weekly hours. Availability is checked again when you request a booking.</p> : null}
                   </div> : null}
                 </div>
               </div>
             </article>
           ))}
         </div>
-        {selection ? <section className="mt-5 rounded-lg border border-[#dce2f1] bg-[#f8f9ff] p-4" aria-labelledby="booking-review-title">
-          <h2 id="booking-review-title" className="m-0 text-sm font-semibold">Review appointment request</h2>
-          <p className="mb-0 mt-2 text-sm">{selection.clinicName} · {selection.doctorName}</p>
-          <p className="mb-0 mt-1 text-xs text-[#686e7b]">{selection.date}, {selection.localStartTime}–{selection.localEndTime}</p>
-          <p className="mb-3 mt-1 text-xs text-[#686e7b]">Required payment: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: selection.currency }).format(selection.amountMinor / 100)}</p>
+        {selection ? <section className="mt-5 rounded-lg border border-primary/20 bg-primary-soft/50 p-4 sm:p-5" aria-labelledby="booking-review-title">
+          <h2 id="booking-review-title" className="m-0 text-base font-semibold text-text-primary">Review appointment request</h2>
+          <p className="mb-0 mt-2 text-sm text-text-secondary">{selection.clinicName} · {selection.doctorName}</p>
+          <p className="mb-0 mt-1 text-sm text-text-muted">{selection.date}, {selection.localStartTime}–{selection.localEndTime}</p>
+          <p className="mb-3 mt-1 text-sm text-text-muted">Required payment: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: selection.currency }).format(selection.amountMinor / 100)}</p>
           <Button type="button" disabled={booking} onClick={() => void createAppointment()}>{booking ? 'Holding appointment…' : 'Request appointment hold'}</Button>
         </section> : null}
         <div className="mt-5"><ListPagination page={result.page} totalPages={result.totalPages} totalItems={result.totalItems} busy={loading} size="sm" onPageChange={(page) => updateFilters({ ...filters, page })} /></div>

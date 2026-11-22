@@ -54,10 +54,10 @@ export default function ClinicDoctorReviewPage() {
   }, { fallback: 'Could not open this doctor document.' });
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <SectionHeading title="Doctor verification" description="Review submitted profiles and either approve them or request corrections." />
-      <div className="px-[18px] pt-4"><Notices error={error} message={message} /></div>
-      {busy && !doctors.length ? <div className="px-[18px] py-5 text-sm text-[#777c8a]">Loading pending doctor verifications...</div> : !doctors.length ? <EmptyState>No doctor profiles are awaiting verification.</EmptyState> : (
+      <div className="px-4 pt-4 sm:px-5"><Notices error={error} message={message} /></div>
+      {busy && !doctors.length ? <div className="px-4 py-5 text-sm text-text-muted sm:px-5">Loading pending doctor verifications...</div> : !doctors.length ? <EmptyState>No doctor profiles are awaiting verification.</EmptyState> : (
         <DataTable headers={['DOCTOR', 'STATUS', 'CONSULTATION FEE', 'UPDATED', 'ACTIONS']}>
           {doctors.map((doctor) => {
             const name = `${doctor.firstName} ${doctor.lastName}`.trim();
@@ -75,16 +75,16 @@ export default function ClinicDoctorReviewPage() {
           })}
         </DataTable>
       )}
-      <section className="border-t border-[#eff0f4] px-[18px] py-5">
+      <section className="border-t border-border px-4 py-5 sm:px-5">
         <SectionHeading title="Consultation fee requests" description="Review requests from doctors in your clinic. The active fee changes only when you approve a request." />
-        {feeRequests.length ? <div className="grid gap-2 pt-4">{feeRequests.map((request) => <div key={request.requestId} className="flex flex-wrap items-center justify-between gap-3 rounded border border-[#ececf1] p-3">
-          <div className="min-w-[220px] flex-1 text-xs text-[#555a69]">
-            <strong className="text-[#292d38]">{request.doctorName ?? 'Doctor'}</strong>
+        {feeRequests.length ? <div className="grid gap-3 pt-4">{feeRequests.map((request) => <div key={request.requestId} className="flex flex-col items-start justify-between gap-3 rounded-md border border-border bg-surface-elevated p-4 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1 text-sm leading-relaxed text-text-secondary">
+            <strong className="text-base font-semibold text-text-primary">{request.doctorName ?? 'Doctor'}</strong>
             <p className="mb-0 mt-1">Current at request: {request.currentFeeAtRequest == null ? 'Not set' : request.currentFeeAtRequest.toFixed(2)} · Requested: {request.requestedFee.toFixed(2)}</p>
             {request.reason ? <p className="mb-0 mt-1">Reason: {request.reason}</p> : null}
-            <p className="mb-0 mt-1 text-[#777c8a]">Submitted {new Date(request.requestedAt).toLocaleString()}</p>
+            <p className="mb-0 mt-1 text-xs text-text-muted">Submitted {new Date(request.requestedAt).toLocaleString()}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <Button size="xs" disabled={busy} onClick={() => reviewFeeRequest(request, 'APPROVED')}>Approve</Button>
             <Button size="xs" variant="ghost" disabled={busy} onClick={() => { const note = window.prompt(`Optional note for ${request.doctorName ?? 'this doctor'}?`); if (note !== null) reviewFeeRequest(request, 'REJECTED', note.trim() || undefined); }}>Reject</Button>
           </div>

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { BrandLockup } from '@/components/atoms/BrandLockup';
 import { PageHeading } from '@/components/molecules/PageHeading';
 import { SideMark } from '@/components/molecules/NavItem';

@@ -40,10 +40,10 @@ export function OtpField({ email, value, onChange, onRequest, onError, disabled,
 
   return (
     <FormField label={label}>
-      <div className="flex items-end gap-2.5">
+      <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end sm:gap-3">
         <Input name="otp" value={value} placeholder="123456" inputMode="numeric" maxLength={6} autoComplete="one-time-code"
           onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, 6))} />
-        <Button type="button" variant="secondary" className="shrink-0" disabled={disabled || requesting || cooldown > 0} onClick={handleRequest}>
+        <Button type="button" variant="secondary" size="sm" className="w-full shrink-0 sm:w-auto" disabled={disabled || requesting || cooldown > 0} onClick={handleRequest}>
           {requesting ? 'Sending...' : cooldown > 0 ? `Resend (${cooldown}s)` : sent ? 'Resend code' : 'Send code'}
         </Button>
       </div>

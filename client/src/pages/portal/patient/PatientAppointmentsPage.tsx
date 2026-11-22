@@ -154,28 +154,28 @@ export default function PatientAppointmentsPage() {
 
   return <Card className="overflow-hidden">
     <SectionHeading title="My appointments" description="Booking status and appointment details associated with your account." />
-    <div className="grid gap-3 p-[18px]">
-      {loading ? <p className="m-0 text-sm text-[#777d8a]">Loading appointments…</p> : null}
-      {error ? <p role="alert" className="m-0 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
-      {paymentMessage ? <p role="status" className="m-0 rounded-md bg-blue-50 p-3 text-sm text-blue-800">{paymentMessage}</p> : null}
-      {!loading && !error && appointments.length === 0 ? <div className="rounded-md bg-[#f7f8fb] p-4"><p className="m-0 text-sm text-[#686e7b]">You don’t have appointment requests yet.</p><Link to="/patient/clinics" className="mt-2 inline-block text-sm font-semibold text-brand-deep">Find a clinic</Link></div> : null}
-      {appointments.map((appointment) => <article key={appointment.appointmentId} className="rounded-lg border border-[#e6e7ee] p-4">
+    <div className="grid gap-3 p-4.5">
+      {loading ? <p className="m-0 text-sm text-text-muted">Loading appointments…</p> : null}
+      {error ? <p role="alert" className="m-0 rounded-md border border-danger/20 bg-danger-soft p-3 text-sm text-danger">{error}</p> : null}
+      {paymentMessage ? <p role="status" className="m-0 rounded-md border border-info/20 bg-info-soft p-3 text-sm text-info">{paymentMessage}</p> : null}
+      {!loading && !error && appointments.length === 0 ? <div className="rounded-lg border border-border bg-surface p-5"><p className="m-0 text-sm text-text-secondary">You don’t have appointment requests yet.</p><Link to="/patient/clinics" className="mt-3 inline-flex rounded-sm text-sm font-semibold text-primary-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Find a clinic</Link></div> : null}
+      {appointments.map((appointment) => <article key={appointment.appointmentId} className="rounded-lg border border-border bg-surface-elevated p-4 shadow-sm sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="m-0 text-sm font-semibold">{appointment.clinicName} · {appointment.doctorName}</p>
             <p className="mt-1 mb-0 text-sm">{appointment.localDate} · {appointment.localStartTime}–{appointment.localEndTime}</p>
           </div>
-          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">{appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? 'HOLD EXPIRED' : appointment.status.replaceAll('_', ' ')}</span>
+          <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${appointment.status === 'CONFIRMED' ? 'bg-success-soft text-success' : appointment.status === 'CANCELLED' ? 'bg-danger-soft text-danger' : appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? 'bg-surface text-text-muted' : 'bg-warning-soft text-warning'}`}>{appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? 'HOLD EXPIRED' : appointment.status.replaceAll('_', ' ')}</span>
         </div>
-        <div className="mt-3 border-t border-[#eff0f4] pt-3">
+        <div className="mt-4 border-t border-border pt-4">
           <p className="m-0 text-sm font-semibold">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: appointment.feeCurrency }).format(appointment.feeAmountMinor / 100)}</p>
-          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">Payment is required before this appointment is confirmed. The slot hold expires at {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}.</p> : null}
+          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <p className="mb-0 mt-1 text-sm text-warning">Payment is required before this appointment is confirmed. The slot hold expires at {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}.</p> : null}
           {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Button size="sm" className="mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void payForAppointment(appointment)}>{paymentBusy === appointment.appointmentId ? 'Processing payment…' : 'Continue to payment'}</Button> : null}
           {['PENDING_PAYMENT', 'CANCELLED'].includes(appointment.status) ? <Button size="sm" variant="secondary" className="ml-2 mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void refreshPaymentStatus(appointment.appointmentId)}>Check payment status{paymentStatuses[appointment.appointmentId] ? ` · ${paymentStatuses[appointment.appointmentId].toLowerCase()}` : ''}</Button> : null}
-          {appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">This payment hold expired. Start a new booking to request another slot.</p> : null}
-          {appointment.cancellationRefundReviewStatus === 'PENDING_REVIEW' ? <p className="mb-0 mt-1 text-xs text-[#7b5e20]">Paid cancellation is pending manual refund review. No automatic refund has been issued.</p> : null}
-          {['PENDING_PAYMENT', 'CONFIRMED'].includes(appointment.status) ? <p className="mb-0 mt-2 text-xs text-[#737987]">Cancellation and rescheduling close 24 hours before the appointment. One reschedule is allowed; paid cancellation may require manual refund review.</p> : null}
-          {appointment.changeHistory.length > 0 ? <details className="mt-2 text-xs text-[#737987]"><summary className="cursor-pointer">Appointment change history ({appointment.changeHistory.length})</summary>{appointment.changeHistory.map((change, index) => <p key={`${change.type}-${index}`} className="mb-0 mt-1">{change.type === 'CANCELLED' ? 'Cancelled' : 'Rescheduled'} · previous time {change.previousLocalDate}, {change.previousLocalStartTime}–{change.previousLocalEndTime} · {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(change.changedAt))}</p>)}</details> : null}
+          {appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? <p className="mb-0 mt-1 text-sm text-warning">This payment hold expired. Start a new booking to request another slot.</p> : null}
+          {appointment.cancellationRefundReviewStatus === 'PENDING_REVIEW' ? <p className="mb-0 mt-1 text-sm text-warning">Paid cancellation is pending manual refund review. No automatic refund has been issued.</p> : null}
+          {['PENDING_PAYMENT', 'CONFIRMED'].includes(appointment.status) ? <p className="mb-0 mt-2 text-sm text-text-muted">Cancellation and rescheduling close 24 hours before the appointment. One reschedule is allowed; paid cancellation may require manual refund review.</p> : null}
+          {appointment.changeHistory.length > 0 ? <details className="mt-3 text-sm text-text-secondary"><summary className="w-fit cursor-pointer rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Appointment change history ({appointment.changeHistory.length})</summary>{appointment.changeHistory.map((change, index) => <p key={`${change.type}-${index}`} className="mb-0 mt-2">{change.type === 'CANCELLED' ? 'Cancelled' : 'Rescheduled'} · previous time {change.previousLocalDate}, {change.previousLocalStartTime}–{change.previousLocalEndTime} · {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(change.changedAt))}</p>)}</details> : null}
           {(['CONFIRMED'].includes(appointment.status) || (appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired)) && appointment.changeWindowOpen ? <div className="mt-3 flex flex-wrap gap-2">
             <Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => void cancelAppointment(appointment)}>Cancel appointment</Button>
             {appointment.rescheduleCount < 1 ? <Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => {
@@ -183,15 +183,15 @@ export default function PatientAppointmentsPage() {
               void loadRescheduleAvailability(appointment, appointment.localDate);
             }}>Reschedule once</Button> : <span className="self-center text-xs text-[#737987]">Reschedule limit used</span>}
           </div> : null}
-          {reschedulingId === appointment.appointmentId ? <section className="mt-3 rounded-md bg-[#f8f9ff] p-3" aria-label="Choose a new appointment time">
-              <label className="grid max-w-xs gap-1.5 text-xs font-semibold text-[#555b69]">New appointment date
-              <input type="date" required value={rescheduleDate} onChange={(event) => void loadRescheduleAvailability(appointment, event.target.value)} className="rounded-md border border-[#dce2f1] bg-white px-3 py-2 text-sm" />
+          {reschedulingId === appointment.appointmentId ? <section className="mt-4 rounded-lg border border-border bg-primary-soft/50 p-4 sm:p-5" aria-label="Choose a new appointment time">
+              <label className="grid max-w-xs gap-2 text-sm font-semibold text-text-primary">New appointment date
+              <input type="date" required value={rescheduleDate} onChange={(event) => void loadRescheduleAvailability(appointment, event.target.value)} className="min-h-11 rounded-md border border-border-strong bg-surface-elevated px-3 py-2 text-sm text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" />
             </label>
-            {rescheduleAvailability ? <div className="mt-3"><p className="m-0 text-xs text-[#737987]">Available appointment times</p>
+            {rescheduleAvailability ? <div className="mt-4"><p className="m-0 text-sm text-text-secondary">Available appointment times</p>
               {rescheduleAvailability.slots.length ? <div className="mt-2 flex flex-wrap gap-2">{rescheduleAvailability.slots.map((slot) => <Button key={slot.startAt} size="sm" variant={rescheduleTarget === slot.startAt ? 'primary' : 'secondary'} onClick={() => setRescheduleTarget(slot.startAt)}>{slot.localStartTime}–{slot.localEndTime}</Button>)}</div> : <p className="mb-0 mt-2 text-xs text-[#737987]">No available times on this date.</p>}
             </div> : <p className="mb-0 mt-2 text-xs text-[#737987]">Loading available times…</p>}
-            <p className="mb-2 mt-3 text-xs text-[#737987]">One reschedule is allowed, at least 24 hours before the current appointment. The existing fee/payment remains unchanged.</p>
-            <div className="flex gap-2"><Button size="sm" disabled={!rescheduleTarget || changeBusy} onClick={() => void submitReschedule(appointment)}>{changeBusy ? 'Updating…' : 'Confirm new time'}</Button><Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => setReschedulingId('')}>Close</Button></div>
+            <p className="mb-3 mt-4 text-sm text-text-muted">One reschedule is allowed, at least 24 hours before the current appointment. The existing fee/payment remains unchanged.</p>
+            <div className="flex flex-wrap gap-2"><Button size="sm" disabled={!rescheduleTarget || changeBusy} onClick={() => void submitReschedule(appointment)}>{changeBusy ? 'Updating…' : 'Confirm new time'}</Button><Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => setReschedulingId('')}>Close</Button></div>
           </section> : null}
         </div>
       </article>)}

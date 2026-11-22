@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
+import { Input } from '@/components/atoms/Input';
 import { Card } from '@/components/atoms/Card';
 import { DetailList } from '@/components/molecules/DetailList';
 import { Notices } from '@/components/molecules/Notices';
@@ -75,24 +76,24 @@ export default function TeamAccessPage() {
         <SectionHeading title="Workspace details" description={busy ? 'Loading your clinic association...' : 'Information associated with your account'} />
         <DetailList items={details} />
       </Card>
-      {user.role === 'STAFF' ? <Card className="mt-[18px]"><SectionHeading title="Clinic queue" description="Register patients arriving at your clinic and see today’s queue." action={<Link to="/staff/queue" className="text-xs font-semibold text-brand-deep">Open today’s queue →</Link>} /></Card> : null}
-      {user.role === 'DOCTOR' ? <Card className="mt-[18px] pb-5">
+      {user.role === 'STAFF' ? <Card className="mt-4.5"><SectionHeading title="Clinic queue" description="Register patients arriving at your clinic and see today’s queue." action={<Link to="/staff/queue" className="text-xs font-semibold text-brand-deep">Open today’s queue →</Link>} /></Card> : null}
+      {user.role === 'DOCTOR' ? <Card className="mt-4.5 pb-5">
         <SectionHeading title="Consultation fee" description="The active fee is managed by your Clinic Admin. Request a change for their review." />
-        <div className="grid gap-3 px-[18px] pt-4 md:grid-cols-[180px_1fr_auto] md:items-end">
-          <label className="grid gap-1 text-xs text-[#656a79]">Requested fee
-            <input type="number" min="0" step="0.01" value={requestedFee} disabled={feeBusy || feeRequests.some((request) => request.status === 'PENDING')} onChange={(event) => setRequestedFee(event.target.value)} className="h-9 rounded border border-[#cfd2df] px-2" />
+        <div className="grid gap-3 px-4.5 pt-4 md:grid-cols-[180px_1fr_auto] md:items-end">
+          <label className="grid gap-1.5 text-sm font-medium text-text-secondary">Requested fee
+            <Input type="number" min="0" step="0.01" value={requestedFee} disabled={feeBusy || feeRequests.some((request) => request.status === 'PENDING')} onChange={(event) => setRequestedFee(event.target.value)} />
           </label>
-          <label className="grid gap-1 text-xs text-[#656a79]">Reason (optional)
-            <input value={feeReason} maxLength={1000} disabled={feeBusy || feeRequests.some((request) => request.status === 'PENDING')} onChange={(event) => setFeeReason(event.target.value)} className="h-9 rounded border border-[#cfd2df] px-2" />
+          <label className="grid gap-1.5 text-sm font-medium text-text-secondary">Reason (optional)
+            <Input value={feeReason} maxLength={1000} disabled={feeBusy || feeRequests.some((request) => request.status === 'PENDING')} onChange={(event) => setFeeReason(event.target.value)} />
           </label>
           <Button type="button" disabled={feeBusy || feeRequests.some((request) => request.status === 'PENDING') || !requestedFee.trim() || !Number.isFinite(Number(requestedFee)) || Number(requestedFee) < 0 || Math.abs(Number(requestedFee) * 100 - Math.round(Number(requestedFee) * 100)) > 1e-8} onClick={submitFeeRequest}>Submit request</Button>
         </div>
-        <div className="grid gap-2 px-[18px] pt-5">
-          <h3 className="m-0 text-xs font-semibold text-[#393d49]">Request history</h3>
-          {feeRequests.length ? feeRequests.map((request) => <div key={request.requestId} className="flex flex-wrap items-center justify-between gap-2 rounded border border-[#ececf1] p-3 text-xs">
+        <div className="grid gap-3 px-4 pt-5 sm:px-5">
+          <h3 className="m-0 text-sm font-semibold text-text-primary">Request history</h3>
+          {feeRequests.length ? feeRequests.map((request) => <div key={request.requestId} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-surface p-4 text-sm text-text-secondary">
             <span>{request.currentFeeAtRequest == null ? 'No active fee' : request.currentFeeAtRequest.toFixed(2)} → {request.requestedFee.toFixed(2)} · {new Date(request.requestedAt).toLocaleDateString()}{request.reason ? ` · ${request.reason}` : ''}{request.reviewReason ? ` · Review note: ${request.reviewReason}` : ''}</span>
             <Badge tone={request.status === 'APPROVED' ? 'approved' : request.status === 'REJECTED' ? 'rejected' : 'pending'}>{request.status}</Badge>
-          </div>) : <p className="m-0 text-xs text-[#777c8a]">No fee change requests yet.</p>}
+          </div>) : <p className="m-0 text-sm text-text-muted">No fee change requests yet.</p>}
         </div>
       </Card> : null}
     </>

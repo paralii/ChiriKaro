@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
 import { setUser } from '@/features/auth/store/authSlice';
 import { authService } from '@/features/auth/services/authService';
+import { Notice } from '@/components/atoms/Notice';
+import { TextLink } from '@/components/atoms/TextLink';
 
 const destinations = {
   SUPER_ADMIN: '/app/dashboard',
@@ -39,14 +41,14 @@ export default function GoogleAuthCallbackPage() {
   }, [dispatch, navigate, params]);
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[#f7f8fc] p-6">
-      <section className="w-full max-w-md rounded-xl border border-[#e5e7eb] bg-white p-7 text-center shadow-sm">
+    <main className="grid min-h-screen place-items-center bg-page p-4 sm:p-6">
+      <section className="w-full max-w-md rounded-xl border border-border bg-surface-elevated p-6 text-center shadow-md sm:p-8">
         {error ? (
           <>
-            <p role="alert" className="mb-5 text-sm text-red-700">{error}</p>
-            <a className="font-semibold text-brand-deep hover:underline" href="/register/patient">Return to patient registration</a>
+            <Notice tone="error" className="mb-5 text-left">{error}</Notice>
+            <TextLink to="/register/patient" className="min-h-10 justify-center">Return to patient registration</TextLink>
           </>
-        ) : <p role="status" className="text-sm text-[#686d7b]">Completing Google sign-up…</p>}
+        ) : <p role="status" className="m-0 text-base leading-relaxed text-text-secondary">Completing Google sign-up…</p>}
       </section>
     </main>
   );

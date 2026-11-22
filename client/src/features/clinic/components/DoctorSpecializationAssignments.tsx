@@ -16,17 +16,18 @@ function DoctorAssignmentRow({ doctor, options, busy, onSave }: {
   const changed = selected.length !== doctor.specializations.length || selected.some((value, index) => keyOf(value) !== keyOf(doctor.specializations[index] ?? ''));
 
   return (
-    <div className="grid gap-3 border-b border-[#ececf1] py-4 last:border-b-0">
+    <div className="grid gap-4 border-b border-border py-4 last:border-b-0">
       <div>
-        <p className="m-0 text-sm font-semibold text-[#242736]">{doctor.firstName} {doctor.lastName}</p>
-        <p className="m-0 mt-1 text-xs text-[#777c8a]">{doctor.verificationStatus.replaceAll('_', ' ')}</p>
+        <p className="m-0 text-sm font-semibold text-text-primary">{doctor.firstName} {doctor.lastName}</p>
+        <p className="m-0 mt-1 text-sm text-text-muted">{doctor.verificationStatus.replaceAll('_', ' ')}</p>
       </div>
-      <fieldset className="flex flex-wrap gap-x-4 gap-y-2">
+      <fieldset className="flex flex-wrap gap-x-5 gap-y-3">
         <legend className="sr-only">Specializations for {doctor.firstName} {doctor.lastName}</legend>
         {choices.map((specialization) => (
-          <label key={keyOf(specialization)} className="flex items-center gap-2 text-xs text-[#555a69]">
+          <label key={keyOf(specialization)} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm text-text-secondary">
             <input
               type="checkbox"
+              className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               checked={selected.some((value) => keyOf(value) === keyOf(specialization))}
               disabled={busy}
               onChange={(event) => setSelected((current) => event.target.checked
@@ -48,10 +49,10 @@ export function DoctorSpecializationAssignments({ doctors, clinicSpecializations
   busy: boolean;
   onSave: (doctorId: string, specializations: string[]) => void;
 }) {
-  if (!doctors.length) return <p className="px-[18px] pb-5 text-sm text-[#777c8a]">No doctor profiles are linked to this clinic yet.</p>;
+  if (!doctors.length) return <p className="px-4 pb-5 text-sm text-text-muted sm:px-5">No doctor profiles are linked to this clinic yet.</p>;
   return (
-    <div className="px-[18px] pb-2">
-      <p className="m-0 text-xs text-[#777c8a]">Reassign doctors before removing a specialization used by a doctor. At least one specialization is required per doctor.</p>
+    <div className="px-4 pb-2 sm:px-5">
+      <p className="m-0 text-sm leading-relaxed text-text-secondary">Reassign doctors before removing a specialization used by a doctor. At least one specialization is required per doctor.</p>
       {doctors.map((doctor) => (
         <DoctorAssignmentRow key={doctor.doctorId} doctor={doctor} options={clinicSpecializations} busy={busy}
           onSave={(specializations) => onSave(doctor.doctorId, specializations)} />

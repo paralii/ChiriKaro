@@ -10,7 +10,7 @@ export function DoctorReviewDetail({ profile, onClose, onOpenDocument }: {
   onOpenDocument: (type: string) => void;
 }) {
   return (
-    <section className="mt-4 border-t border-[#ececf1]">
+    <section className="mt-4 border-t border-border">
       <SectionHeading as="h3" title={`${profile.firstName} ${profile.lastName}`}
         description={profile.professionalTitle ?? 'Professional title not provided'}
         action={<TextButton onClick={onClose}>Close</TextButton>} />

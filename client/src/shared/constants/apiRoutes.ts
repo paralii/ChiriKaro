@@ -2,6 +2,8 @@ export const API_ROUTES = {
   SEARCH: {
     DIRECTORY: "/search/directory",
     DIRECTORY_AVAILABILITY: (listingId: string) => `/search/directory/${encodeURIComponent(listingId)}/availability`,
+    DIRECTORY_CLINIC_PROFILE: (listingId: string) => `/search/directory/${encodeURIComponent(listingId)}/clinic-profile`,
+    DIRECTORY_DOCTOR_PROFILE: (listingId: string) => `/search/directory/${encodeURIComponent(listingId)}/doctor-profile`,
   },
 
   AUTH: {

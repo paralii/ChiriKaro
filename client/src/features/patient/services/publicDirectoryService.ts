@@ -1,6 +1,6 @@
 import { api } from '@/shared/lib/http';
 import { API_ROUTES } from '@/shared/constants/apiRoutes';
-import type { DatedAvailability, PublicDirectoryPage } from '@/shared/types';
+import type { DatedAvailability, PublicClinicProfile, PublicDirectoryPage, PublicDoctorProfile } from '@/shared/types';
 
 export type PublicDirectoryFilters = { q?: string; city?: string; specialization?: string; page?: number; limit?: number };
 
@@ -18,6 +18,16 @@ export const publicDirectoryService = {
   availability: (listingId: string, date: string) =>
     api.get<{ success: boolean; message: string; data?: DatedAvailability }>(`${API_ROUTES.SEARCH.DIRECTORY_AVAILABILITY(listingId)}?date=${encodeURIComponent(date)}`).then((response) => {
       if (!response.data) throw new Error('Date-specific availability was not returned.');
+      return response.data;
+    }),
+  clinicProfile: (listingId: string) =>
+    api.get<{ data?: PublicClinicProfile }>(API_ROUTES.SEARCH.DIRECTORY_CLINIC_PROFILE(listingId)).then((response) => {
+      if (!response.data) throw new Error('Clinic profile was not returned.');
+      return response.data;
+    }),
+  doctorProfile: (listingId: string) =>
+    api.get<{ data?: PublicDoctorProfile }>(API_ROUTES.SEARCH.DIRECTORY_DOCTOR_PROFILE(listingId)).then((response) => {
+      if (!response.data) throw new Error('Doctor profile was not returned.');
       return response.data;
     }),
 };

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/atoms/Badge';
 import { Card } from '@/components/atoms/Card';
 import type { PublicDirectoryListing } from '@/shared/types';
@@ -16,7 +17,7 @@ export function DirectoryListingCard({ listing, children }: DirectoryListingCard
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <Badge tone="approved">Verified clinic</Badge>
-          <h3 className="mt-2 mb-0 break-words text-lg font-semibold text-text-primary">{listing.clinicName}</h3>
+          <h3 className="mt-2 mb-0 break-words text-lg font-semibold text-text-primary"><Link to={`/patient/clinics/${encodeURIComponent(listing.listingId)}`} className="rounded-sm text-inherit no-underline hover:text-primary-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">{listing.clinicName}</Link></h3>
           <p className="mt-1 mb-0 text-sm leading-relaxed text-text-muted">{address || 'Location details unavailable'}</p>
         </div>
         <div className="shrink-0 rounded-md bg-primary-soft px-3 py-2 sm:text-right">
@@ -26,9 +27,7 @@ export function DirectoryListingCard({ listing, children }: DirectoryListingCard
       </div>
 
       <div className="mt-4 border-t border-border pt-4">
-        <p className="m-0 text-sm font-semibold text-text-primary">
-          {listing.professionalTitle ? `${listing.professionalTitle} ` : ''}{listing.doctorName}
-        </p>
+        <p className="m-0 text-sm font-semibold text-text-primary"><Link to={`/patient/doctors/${encodeURIComponent(listing.listingId)}`} className="rounded-sm text-inherit no-underline hover:text-primary-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">{listing.professionalTitle ? `${listing.professionalTitle} ` : ''}{listing.doctorName}</Link></p>
         {listing.specializations.length ? <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Specializations">
           {listing.specializations.map((specialization) => <Badge key={specialization} tone="pill">{specialization}</Badge>)}
         </div> : <p className="mb-0 mt-2 text-sm text-text-muted">No specializations listed</p>}

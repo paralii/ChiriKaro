@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
+import { Dialog, DialogAction } from '@/components/atoms/Dialog';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { appointmentService } from '@/features/patient/services/appointmentService';
 import { publicDirectoryService } from '@/features/patient/services/publicDirectoryService';
@@ -47,6 +48,7 @@ export default function PatientAppointmentsPage() {
   const [rescheduleAvailability, setRescheduleAvailability] = useState<DatedAvailability | null>(null);
   const [rescheduleTarget, setRescheduleTarget] = useState('');
   const [changeBusy, setChangeBusy] = useState(false);
+  const [cancellationTarget, setCancellationTarget] = useState<PatientAppointment | null>(null);
 
   const loadRescheduleAvailability = async (appointment: PatientAppointment, date: string) => {
     setRescheduleDate(date);
@@ -58,9 +60,9 @@ export default function PatientAppointmentsPage() {
     } catch (reason) { setError(getErrorMessage(reason, 'Could not load new appointment times.')); }
   };
 
-  const cancelAppointment = async (appointment: PatientAppointment) => {
-    const message = 'Cancel this appointment? If payment has been captured, the cancellation will go to manual refund review. No automatic refund will be issued.';
-    if (!window.confirm(message)) return;
+  const cancelAppointment = async () => {
+    if (!cancellationTarget || changeBusy) return;
+    const appointment = cancellationTarget;
     setChangeBusy(true);
     setError('');
     try {
@@ -68,6 +70,7 @@ export default function PatientAppointmentsPage() {
       setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
       if (updated.cancellationRefundReviewStatus === 'PENDING_REVIEW') setPaymentMessage('Appointment cancelled. Your paid cancellation is pending manual refund review.');
       setReschedulingId('');
+      setCancellationTarget(null);
     } catch (reason) { setError(getErrorMessage(reason, 'Could not cancel this appointment.')); }
     finally { setChangeBusy(false); }
   };
@@ -177,7 +180,7 @@ export default function PatientAppointmentsPage() {
           {['PENDING_PAYMENT', 'CONFIRMED'].includes(appointment.status) ? <p className="mb-0 mt-2 text-sm text-text-muted">Cancellation and rescheduling close 24 hours before the appointment. One reschedule is allowed; paid cancellation may require manual refund review.</p> : null}
           {appointment.changeHistory.length > 0 ? <details className="mt-3 text-sm text-text-secondary"><summary className="w-fit cursor-pointer rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Appointment change history ({appointment.changeHistory.length})</summary>{appointment.changeHistory.map((change, index) => <p key={`${change.type}-${index}`} className="mb-0 mt-2">{change.type === 'CANCELLED' ? 'Cancelled' : 'Rescheduled'} · previous time {change.previousLocalDate}, {change.previousLocalStartTime}–{change.previousLocalEndTime} · {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(change.changedAt))}</p>)}</details> : null}
           {(['CONFIRMED'].includes(appointment.status) || (appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired)) && appointment.changeWindowOpen ? <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => void cancelAppointment(appointment)}>Cancel appointment</Button>
+            <Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => { setError(''); setCancellationTarget(appointment); }}>Cancel appointment</Button>
             {appointment.rescheduleCount < 1 ? <Button size="sm" variant="secondary" disabled={changeBusy} onClick={() => {
               setError(''); setReschedulingId(appointment.appointmentId); setRescheduleTarget('');
               void loadRescheduleAvailability(appointment, appointment.localDate);
@@ -197,5 +200,28 @@ export default function PatientAppointmentsPage() {
       </article>)}
       <div><Link to="/patient/clinics"><Button size="sm" variant="secondary">Find care</Button></Link></div>
     </div>
+    <Dialog
+      open={cancellationTarget !== null}
+      onClose={() => { if (!changeBusy) setCancellationTarget(null); }}
+      title="Cancel appointment?"
+      description="Please review this appointment before confirming its cancellation."
+      variant="warning"
+      closeOnBackdrop={!changeBusy}
+      closeOnEscape={!changeBusy}
+      footer={(
+        <>
+          <DialogAction variant="secondary" disabled={changeBusy} onClick={() => setCancellationTarget(null)}>Keep appointment</DialogAction>
+          <DialogAction disabled={changeBusy} onClick={() => void cancelAppointment()}>
+            {changeBusy ? 'Cancelling…' : 'Confirm cancellation'}
+          </DialogAction>
+        </>
+      )}
+    >
+      {cancellationTarget ? <div className="space-y-3 text-sm leading-relaxed text-text-secondary">
+        <p className="m-0 font-semibold text-text-primary">{cancellationTarget.clinicName} · {cancellationTarget.doctorName}</p>
+        <p className="m-0">{cancellationTarget.localDate} · {cancellationTarget.localStartTime}–{cancellationTarget.localEndTime}</p>
+        <p className="m-0">If payment has been captured, the cancellation will go to manual refund review. No automatic refund will be issued.</p>
+      </div> : null}
+    </Dialog>
   </Card>;
 }

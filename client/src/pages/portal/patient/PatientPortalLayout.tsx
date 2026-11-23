@@ -12,7 +12,7 @@ const items = [
   { path: '/patient/clinics', label: 'Find care' },
   { path: '/patient/appointments', label: 'Appointments' },
   { path: '/patient/queue', label: 'My queue' },
-  // { path: '/patient/profile', label: 'My profile' },
+  { path: '/patient/profile', label: 'Profile & settings' },
 ];
 
 export default function PatientPortalLayout() {
@@ -39,7 +39,7 @@ export default function PatientPortalLayout() {
           <div className="mt-auto max-md:hidden"><button className={`${sideLinkClass()} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus`} onClick={logout}><SideMark />Sign out</button></div>
         </aside>
       )}
-      topbar={<PortalTopbar title={title} userName={user.name.split(' ')[0]} />}
+      topbar={<PortalTopbar title={title} userName={user.name.split(' ')[0]} profileTo="/patient/profile" />}
     >
       <Outlet />
     </PortalTemplate>

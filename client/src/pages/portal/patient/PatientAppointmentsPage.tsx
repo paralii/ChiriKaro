@@ -7,7 +7,9 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { EmptyState } from '@/components/molecules/EmptyState';
 import { ListPagination } from '@/components/molecules/ListPagination';
 import { PatientAppointmentStatusBadge } from '@/features/patient/components/PatientAppointmentStatusBadge';
-import { appointmentService } from '@/features/patient/services/appointmentService';
+import { PatientPaymentSummary } from '@/features/patient/components/PatientPaymentSummary';
+import { getPaymentPresentation } from '@/features/patient/components/paymentPresentation';
+import { appointmentService, type AppointmentPaymentStatus } from '@/features/patient/services/appointmentService';
 import { publicDirectoryService } from '@/features/patient/services/publicDirectoryService';
 import { getErrorMessage } from '@/shared/lib/http';
 import type { DatedAvailability, PatientAppointment } from '@/shared/types';
@@ -18,6 +20,7 @@ type RazorpayCheckoutOptions = {
   handler: (result: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => void;
   modal: { ondismiss: () => void };
 };
+type PaymentDialogStage = 'summary' | 'processing' | 'pending' | 'success' | 'failure' | 'dismissed' | 'initialization-error';
 declare global { interface Window { Razorpay?: new (options: RazorpayCheckoutOptions) => { open: () => void }; } }
 
 function loadRazorpay(): Promise<boolean> {
@@ -47,7 +50,12 @@ export default function PatientAppointmentsPage() {
   const [error, setError] = useState('');
   const [paymentBusy, setPaymentBusy] = useState('');
   const [paymentMessage, setPaymentMessage] = useState('');
-  const [paymentStatuses, setPaymentStatuses] = useState<Record<string, string>>({});
+  const [paymentStatuses, setPaymentStatuses] = useState<Record<string, AppointmentPaymentStatus>>({});
+  const [paymentTarget, setPaymentTarget] = useState<PatientAppointment | null>(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentDialogStage, setPaymentDialogStage] = useState<PaymentDialogStage>('summary');
+  const [paymentDialogError, setPaymentDialogError] = useState('');
+  const [paymentOrderAmount, setPaymentOrderAmount] = useState<number | undefined>();
   const [reschedulingId, setReschedulingId] = useState('');
   const [rescheduleDate, setRescheduleDate] = useState('');
   const [rescheduleAvailability, setRescheduleAvailability] = useState<DatedAvailability | null>(null);
@@ -122,25 +130,53 @@ export default function PatientAppointmentsPage() {
       const payment = await appointmentService.getPaymentStatus(appointmentId);
       const appointment = await appointmentService.get(appointmentId);
       setAppointments((current) => current.map((item) => item.appointmentId === appointmentId ? appointment : item));
-      setPaymentStatuses((current) => ({ ...current, [appointmentId]: payment.paymentStatus }));
-      setPaymentMessage(payment.refundReviewStatus === 'PENDING_REVIEW' ? 'Payment was captured after cancellation or hold expiry and is pending manual refund review.' : payment.appointmentStatus === 'CONFIRMED' ? 'Payment verified and appointment confirmed.' : payment.paymentStatus === 'FAILED' ? 'Payment failed. You can retry while the hold is active.' : 'Payment is pending verification.');
+      setPaymentStatuses((current) => ({ ...current, [appointmentId]: payment }));
+      const presentation = getPaymentPresentation(appointment, payment);
+      setPaymentTarget(appointment);
+      setPaymentMessage(presentation.message);
+      setPaymentDialogStage(presentation.confirmed ? 'success' : payment.paymentStatus === 'FAILED' ? 'failure' : 'pending');
+      setPaymentDialogOpen(true);
     } catch (reason) {
       setError(getErrorMessage(reason, 'Could not refresh payment status.'));
+      setPaymentDialogError(getErrorMessage(reason, 'Could not refresh payment status.'));
+      setPaymentDialogStage('pending');
+      setPaymentDialogOpen(true);
     } finally { setPaymentBusy(''); }
   };
 
+  const applyPaymentResult = (appointment: PatientAppointment, payment: AppointmentPaymentStatus, stage: 'pending' | 'success' | 'failure' | 'dismissed') => {
+    setPaymentTarget(appointment);
+    setPaymentStatuses((current) => ({ ...current, [appointment.appointmentId]: payment }));
+    const presentation = getPaymentPresentation(appointment, payment);
+    setPaymentMessage(presentation.message);
+    setPaymentDialogStage(presentation.confirmed ? 'success' : payment.paymentStatus === 'FAILED' ? 'failure' : stage);
+    setPaymentDialogError('');
+    setPaymentDialogOpen(true);
+  };
+
   const payForAppointment = async (appointment: PatientAppointment) => {
+    if (paymentBusy) return;
     setPaymentBusy(appointment.appointmentId);
     setPaymentMessage('');
     setError('');
+    setPaymentDialogError('');
+    setPaymentDialogStage('processing');
     try {
       const order = await appointmentService.createPaymentOrder(appointment.appointmentId);
+      setPaymentOrderAmount(order.amountMinor);
+      setPaymentStatuses((current) => ({ ...current, [appointment.appointmentId]: { appointmentId: appointment.appointmentId, paymentStatus: order.status, appointmentStatus: appointment.status } }));
       if (order.mode === 'MOCK') {
-        const payment = await appointmentService.confirmTestPayment(appointment.appointmentId);
-        const updated = await appointmentService.get(appointment.appointmentId);
-        setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
-        setPaymentStatuses((current) => ({ ...current, [appointment.appointmentId]: payment.paymentStatus }));
-        setPaymentMessage('Test payment completed. Appointment confirmed; no real payment was charged.');
+        const testResult = await appointmentService.confirmTestPayment(appointment.appointmentId);
+        const testAppointment = { ...appointment, status: testResult.appointmentStatus };
+        applyPaymentResult(testAppointment, testResult, 'pending');
+        try {
+          const [updated, payment] = await Promise.all([appointmentService.get(appointment.appointmentId), appointmentService.getPaymentStatus(appointment.appointmentId)]);
+          setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
+          applyPaymentResult(updated, payment, 'pending');
+        } catch {
+          setPaymentDialogError('The test payment response was received, but the latest appointment details could not be refreshed. Check status again.');
+        }
+        setPaymentMessage(testResult.appointmentStatus === 'CONFIRMED' && testResult.paymentStatus === 'SUCCEEDED' ? 'Test payment was confirmed by the server; no real payment was charged.' : getPaymentPresentation(testAppointment, testResult).message);
         setPaymentBusy('');
         return;
       }
@@ -153,19 +189,48 @@ export default function PatientAppointmentsPage() {
         description: `Appointment with ${appointment.doctorName}`,
         order_id: order.orderId,
         handler: (result) => {
-          void appointmentService.verifyPayment(appointment.appointmentId, result).then(async () => {
-            const [updated, payment] = await Promise.all([appointmentService.get(appointment.appointmentId), appointmentService.getPaymentStatus(appointment.appointmentId)]);
-            setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
-            setPaymentMessage(payment.refundReviewStatus === 'PENDING_REVIEW' ? 'Payment was captured after cancellation or hold expiry and is pending manual refund review.' : payment.appointmentStatus === 'CONFIRMED' ? 'Payment verified and appointment confirmed.' : 'Payment was received and is being reconciled. Refresh the status shortly.');
-          }).catch((reason: unknown) => setError(getErrorMessage(reason, 'Payment is not yet verified. Check status before trying again.'))).finally(() => setPaymentBusy(''));
+          void (async () => {
+            try {
+              const verified = await appointmentService.verifyPayment(appointment.appointmentId, result);
+              applyPaymentResult({ ...appointment, status: verified.appointmentStatus }, verified, 'pending');
+              try {
+                const [updated, payment] = await Promise.all([appointmentService.get(appointment.appointmentId), appointmentService.getPaymentStatus(appointment.appointmentId)]);
+                setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
+                applyPaymentResult(updated, payment, 'pending');
+              } catch {
+                setPaymentDialogError('The server returned a payment verification result, but the latest appointment state could not be refreshed. Refresh status before taking another action.');
+              }
+            } catch (reason: unknown) {
+              try {
+                const [updated, payment] = await Promise.all([appointmentService.get(appointment.appointmentId), appointmentService.getPaymentStatus(appointment.appointmentId)]);
+                setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
+                applyPaymentResult(updated, payment, 'pending');
+                setPaymentDialogError(`${getErrorMessage(reason, 'Payment verification is not complete.')}. The server status shown above is authoritative; refresh it before retrying.`);
+              } catch {
+                setPaymentDialogError(`${getErrorMessage(reason, 'Payment verification is not complete.')}. The checkout callback does not confirm payment; refresh the server status before retrying.`);
+                setPaymentDialogStage('pending');
+                setPaymentDialogOpen(true);
+              }
+            } finally { setPaymentBusy(''); }
+          })();
         },
-        modal: { ondismiss: () => { void appointmentService.getPaymentStatus(appointment.appointmentId).then((payment) => {
-          setPaymentMessage(payment.appointmentStatus === 'CONFIRMED' ? 'Payment verified and appointment confirmed.' : 'Checkout closed. Payment status remains pending until verified.');
-        }).catch(() => setPaymentMessage('Checkout closed. You can safely check payment status or retry.')).finally(() => setPaymentBusy('')); } },
+        modal: { ondismiss: () => {
+          void Promise.all([appointmentService.get(appointment.appointmentId), appointmentService.getPaymentStatus(appointment.appointmentId)]).then(([updated, payment]) => {
+            setAppointments((current) => current.map((item) => item.appointmentId === updated.appointmentId ? updated : item));
+            applyPaymentResult(updated, payment, 'dismissed');
+          }).catch(() => {
+            setPaymentDialogError('Checkout was closed. Payment status could not be refreshed; this is not a verified payment failure.');
+            setPaymentDialogStage('dismissed');
+            setPaymentDialogOpen(true);
+          }).finally(() => setPaymentBusy(''));
+        } },
       });
-      checkout.open();
+      setPaymentDialogOpen(false);
+      window.setTimeout(() => checkout.open(), 0);
     } catch (reason) {
-      setError(getErrorMessage(reason, 'Could not start payment.'));
+      setPaymentDialogError(getErrorMessage(reason, 'Could not start secure payment.'));
+      setPaymentDialogStage('initialization-error');
+      setPaymentDialogOpen(true);
       setPaymentBusy('');
     }
   };
@@ -211,8 +276,9 @@ export default function PatientAppointmentsPage() {
           <p className="m-0 text-sm font-semibold">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: appointment.feeCurrency }).format(appointment.feeAmountMinor / 100)}</p>
           <Link to={`/patient/appointments/${encodeURIComponent(appointment.appointmentId)}`} className="mt-2 inline-flex min-h-9 items-center text-sm font-semibold text-primary-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">View appointment details</Link>
           {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <p className="mb-0 mt-1 text-sm text-warning">Payment is required before this appointment is confirmed. The slot hold expires at {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: appointment.timeZone }).format(new Date(appointment.holdExpiresAt))}.</p> : null}
-          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Button size="sm" className="mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void payForAppointment(appointment)}>{paymentBusy === appointment.appointmentId ? 'Processing payment…' : 'Continue to payment'}</Button> : null}
-          {['PENDING_PAYMENT', 'CANCELLED'].includes(appointment.status) ? <Button size="sm" variant="secondary" className="ml-2 mt-3" disabled={paymentBusy === appointment.appointmentId} onClick={() => void refreshPaymentStatus(appointment.appointmentId)}>Check payment status{paymentStatuses[appointment.appointmentId] ? ` · ${paymentStatuses[appointment.appointmentId].toLowerCase()}` : ''}</Button> : null}
+          {appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Button size="sm" className="mt-3" disabled={Boolean(paymentBusy)} onClick={() => { setPaymentTarget(appointment); setPaymentOrderAmount(undefined); setPaymentDialogError(''); setPaymentDialogStage('summary'); setPaymentDialogOpen(true); }}>{paymentBusy === appointment.appointmentId ? 'Processing payment…' : 'Review payment'}</Button> : null}
+          {['PENDING_PAYMENT', 'CANCELLED'].includes(appointment.status) ? <Button size="sm" variant="secondary" className="ml-2 mt-3" disabled={Boolean(paymentBusy)} onClick={() => { setPaymentTarget(appointment); setPaymentOrderAmount(undefined); setPaymentDialogStage('processing'); setPaymentDialogError(''); setPaymentDialogOpen(true); void refreshPaymentStatus(appointment.appointmentId); }}>Check payment status{paymentStatuses[appointment.appointmentId] ? ` · ${paymentStatuses[appointment.appointmentId].paymentStatus.toLowerCase()}` : ''}</Button> : null}
+          {paymentStatuses[appointment.appointmentId] ? <p role="status" className="mb-0 mt-2 text-sm text-text-secondary">{getPaymentPresentation(appointment, paymentStatuses[appointment.appointmentId]).title}</p> : null}
           {appointment.status === 'PENDING_PAYMENT' && appointment.holdExpired ? <p className="mb-0 mt-1 text-sm text-warning">This payment hold expired. Start a new booking to request another slot.</p> : null}
           {appointment.cancellationRefundReviewStatus === 'PENDING_REVIEW' ? <p className="mb-0 mt-1 text-sm text-warning">Paid cancellation is pending manual refund review. No automatic refund has been issued.</p> : null}
           {['PENDING_PAYMENT', 'CONFIRMED'].includes(appointment.status) ? <p className="mb-0 mt-2 text-sm text-text-muted">Cancellation and rescheduling close 24 hours before the appointment. One reschedule is allowed; paid cancellation may require manual refund review.</p> : null}
@@ -284,6 +350,33 @@ export default function PatientAppointmentsPage() {
         <p className="m-0">{rescheduleDate} · {(() => { const slot = rescheduleAvailability?.slots.find((item) => item.startAt === rescheduleTarget); return slot ? `${slot.localStartTime}–${slot.localEndTime}` : 'Selected time'; })()}</p>
       </div> : null}
       {error ? <p role="alert" className="mt-3 rounded-md border border-danger/20 bg-danger-soft p-3 text-sm text-danger">{error}</p> : null}
+    </Dialog>
+    <Dialog
+      open={paymentDialogOpen && paymentTarget !== null}
+      onClose={() => { if (!paymentBusy) setPaymentDialogOpen(false); }}
+      title={paymentDialogStage === 'summary' ? 'Review appointment payment' : paymentDialogStage === 'processing' ? 'Processing payment…' : paymentDialogStage === 'success' ? 'Payment confirmed' : paymentDialogStage === 'failure' ? 'Payment failed' : paymentDialogStage === 'initialization-error' ? 'Could not start payment' : paymentDialogStage === 'dismissed' ? 'Checkout closed' : 'Payment status pending'}
+      description={paymentDialogStage === 'summary' ? 'Review the appointment and amount before continuing to secure checkout.' : paymentDialogStage === 'success' ? 'The server has verified payment and appointment confirmation.' : 'Payment and appointment statuses are based on the server response.'}
+      variant={paymentDialogStage === 'success' ? 'success' : paymentDialogStage === 'failure' || paymentDialogStage === 'initialization-error' ? 'error' : 'default'}
+      closeOnBackdrop={!paymentBusy}
+      closeOnEscape={!paymentBusy}
+      footer={paymentTarget ? <>
+        {paymentDialogStage === 'summary' ? <>
+          <DialogAction variant="secondary" disabled={Boolean(paymentBusy)} onClick={() => setPaymentDialogOpen(false)}>Cancel</DialogAction>
+          <DialogAction disabled={Boolean(paymentBusy)} onClick={() => void payForAppointment(paymentTarget)}>Continue to secure payment</DialogAction>
+        </> : null}
+        {paymentDialogStage === 'processing' ? <DialogAction disabled onClick={() => undefined}>Processing…</DialogAction> : null}
+        {paymentDialogStage === 'success' ? <DialogAction onClick={() => setPaymentDialogOpen(false)}>Done</DialogAction> : null}
+        {paymentDialogStage !== 'summary' && paymentDialogStage !== 'processing' && paymentDialogStage !== 'success' ? <>
+          <DialogAction variant="secondary" disabled={Boolean(paymentBusy)} onClick={() => setPaymentDialogOpen(false)}>Close</DialogAction>
+          {paymentDialogStage === 'pending' || paymentDialogStage === 'dismissed' ? <DialogAction variant="secondary" disabled={Boolean(paymentBusy)} onClick={() => void refreshPaymentStatus(paymentTarget.appointmentId)}>Refresh status</DialogAction> : null}
+          {getPaymentPresentation(paymentTarget, paymentStatuses[paymentTarget.appointmentId] ?? null).retryAvailable ? <DialogAction disabled={Boolean(paymentBusy)} onClick={() => void payForAppointment(paymentTarget)}>Retry payment</DialogAction> : null}
+        </> : null}
+      </> : null}
+    >
+      {paymentTarget ? <PatientPaymentSummary appointment={paymentTarget} payment={paymentStatuses[paymentTarget.appointmentId] ?? null} amountMinor={paymentOrderAmount} /> : null}
+      {paymentDialogStage === 'processing' ? <p role="status" aria-live="polite" className="m-0 text-sm text-text-secondary">{paymentBusy ? 'Preparing secure checkout or refreshing payment status…' : 'Waiting for the server payment result…'}</p> : null}
+      {paymentDialogStage === 'dismissed' ? <p className="mb-0 mt-3 text-sm text-text-secondary">Checkout was dismissed. The server status is shown above; dismissal alone does not mean payment failed or succeeded.</p> : null}
+      {paymentDialogError ? <p role="alert" className="mt-3 rounded-md border border-danger/20 bg-danger-soft p-3 text-sm text-danger">{paymentDialogError}</p> : null}
     </Dialog>
   </Card>;
 }

@@ -8,6 +8,7 @@ import { DetailList } from '@/components/molecules/DetailList';
 import { PageHeading } from '@/components/molecules/PageHeading';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { PatientAppointmentStatusBadge } from '@/features/patient/components/PatientAppointmentStatusBadge';
+import { PatientPaymentSummary } from '@/features/patient/components/PatientPaymentSummary';
 import { appointmentService, type AppointmentPaymentStatus } from '@/features/patient/services/appointmentService';
 import { getErrorMessage } from '@/shared/lib/http';
 import type { PatientAppointment } from '@/shared/types';
@@ -71,16 +72,12 @@ export default function PatientAppointmentDetailsPage() {
       <Card className="mt-0 overflow-hidden"><SectionHeading title="Payment status" description="Payment status is supplied by the appointment payment service." />
         <div className="p-4 sm:p-5">{paymentLoading ? <p role="status" className="m-0 text-sm text-text-muted">Loading payment status…</p> : null}
           {paymentError ? <Notice tone="error" className="mb-3">{paymentError}</Notice> : null}
-          {payment ? <DetailList items={[
-            ['Payment', payment.paymentStatus.replaceAll('_', ' ')],
-            ['Appointment', payment.appointmentStatus.replaceAll('_', ' ')],
-            ...(payment.refundReviewStatus ? [['Refund review', payment.refundReviewStatus.replaceAll('_', ' ')] as [string, string]] : []),
-          ]} /> : null}
+          {payment ? <PatientPaymentSummary appointment={appointment} payment={payment} compact /> : null}
           <Button type="button" size="sm" variant="secondary" disabled={paymentLoading} onClick={() => void refreshPayment(appointmentId)}>{paymentLoading ? 'Refreshing…' : 'Refresh payment status'}</Button>
-          <p className="mb-0 mt-3 text-xs leading-relaxed text-text-muted">A pending appointment hold is not confirmation. The appointment is confirmed only when the server reports its confirmed status.</p>
+          <p className="mb-0 mt-3 text-xs leading-relaxed text-text-muted">A pending appointment hold is not confirmation. Successful payment and confirmed appointment status must both be returned by the server.</p>
         </div>
       </Card>
-      <Card className="mt-0 p-4 sm:p-5 lg:col-span-2"><h2 className="m-0 text-base font-semibold text-text-primary">Manage appointment</h2><p className="mb-3 mt-1 text-sm text-text-secondary">Cancellation, rescheduling, and pending payment actions remain subject to server policy.</p><Link to={backToManagement}><Button size="sm">Open appointment actions</Button></Link></Card>
+      <Card className="mt-0 p-4 sm:p-5 lg:col-span-2"><h2 className="m-0 text-base font-semibold text-text-primary">Manage appointment</h2><p className="mb-3 mt-1 text-sm text-text-secondary">Cancellation, rescheduling, and pending payment actions remain subject to server policy.</p><div className="flex flex-wrap gap-2">{appointment.status === 'PENDING_PAYMENT' && !appointment.holdExpired ? <Link to={backToManagement}><Button size="sm">Continue to payment</Button></Link> : null}<Link to={backToManagement}><Button size="sm" variant="secondary">Open appointment actions</Button></Link></div></Card>
     </div> : null}
   </>;
 }

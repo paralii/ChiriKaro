@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Input } from '@/components/atoms/Input';
+import { EmptyState } from '@/components/molecules/EmptyState';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
+import { DirectoryListingCard, DirectoryListingSkeleton } from '@/features/patient/components/DirectoryListingCard';
 import { getErrorMessage } from '@/shared/lib/http';
 import { publicDirectoryService, type PublicDirectoryFilters } from '@/features/patient/services/publicDirectoryService';
 import { appointmentService } from '@/features/patient/services/appointmentService';
@@ -32,6 +34,12 @@ export default function PatientClinicsPage() {
   const [bookingError, setBookingError] = useState('');
   const [appointment, setAppointment] = useState<PatientAppointment | null>(null);
   const idempotencyKeys = useRef<Record<string, string>>({});
+
+  const activeFilters = [
+    ...(filters.q ? [{ key: 'q' as const, label: 'Search', value: filters.q }] : []),
+    ...(filters.city ? [{ key: 'city' as const, label: 'City', value: filters.city }] : []),
+    ...(filters.specialization ? [{ key: 'specialization' as const, label: 'Specialization', value: filters.specialization }] : []),
+  ];
 
   useEffect(() => {
     let active = true;
@@ -117,22 +125,45 @@ export default function PatientClinicsPage() {
     <Card className="overflow-hidden">
       <SectionHeading title="Find a clinic or doctor" description="Browse approved clinics and verified doctors, check a date, and request a payment hold." />
       <div className="p-4 sm:p-5">
-        <form onSubmit={submit} className="grid gap-4 rounded-lg border border-border bg-page p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-4">
+        <form onSubmit={submit} className="rounded-lg border border-border bg-page p-4 sm:p-5">
+          <div className="mb-4">
+            <h2 className="m-0 text-sm font-semibold text-text-primary">Search care near you</h2>
+            <p className="mb-0 mt-1 text-sm text-text-muted">Find verified clinics and doctors by name, city, or specialization.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,1fr))]">
           <label className="grid gap-2 text-sm font-medium text-text-secondary">Clinic or doctor
-            <Input value={draft.q} maxLength={100} onChange={(event) => setDraft({ ...draft, q: event.target.value })} placeholder="Name" />
+            <Input aria-label="Search clinic or doctor" value={draft.q} maxLength={100} onChange={(event) => setDraft({ ...draft, q: event.target.value })} placeholder="Search names" />
           </label>
           <label className="grid gap-2 text-sm font-medium text-text-secondary">City
-            <Input value={draft.city} maxLength={100} onChange={(event) => setDraft({ ...draft, city: event.target.value })} placeholder="City" />
+            <Input aria-label="Filter by city" value={draft.city} maxLength={100} onChange={(event) => setDraft({ ...draft, city: event.target.value })} placeholder="Enter a city" />
           </label>
           <label className="grid gap-2 text-sm font-medium text-text-secondary">Specialization
-            <Input value={draft.specialization} maxLength={100} onChange={(event) => setDraft({ ...draft, specialization: event.target.value })} placeholder="For example, orthodontics" />
+            <Input aria-label="Filter by specialization" value={draft.specialization} maxLength={100} onChange={(event) => setDraft({ ...draft, specialization: event.target.value })} placeholder="For example, orthodontics" />
           </label>
-          <div className="flex flex-wrap gap-2 self-end sm:col-span-2 xl:col-span-1"><Button type="submit">Search</Button><Button type="button" variant="secondary" disabled={loading || (!draft.q && !draft.city && !draft.specialization && !filters.q && !filters.city && !filters.specialization)} onClick={resetFilters}>Reset</Button></div>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+            <Button type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search clinics and doctors'}</Button>
+            <Button type="button" variant="secondary" disabled={loading || (!draft.q.trim() && !draft.city.trim() && !draft.specialization.trim() && activeFilters.length === 0)} onClick={resetFilters}>Clear filters</Button>
+          </div>
         </form>
+
+        {activeFilters.length ? <div className="mt-4 flex flex-wrap items-center gap-2" aria-label="Active search filters">
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">Active filters</span>
+          {activeFilters.map((filter) => <button key={filter.key} type="button" onClick={() => {
+            setDraft((current) => ({ ...current, [filter.key]: '' }));
+            const next = { ...filters, page: 1 };
+            delete next[filter.key];
+            setSelection(null);
+            setAvailability({});
+            updateFilters(next);
+          }} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-border bg-surface-elevated px-3 text-xs font-medium text-text-secondary transition-colors hover:border-primary hover:bg-primary-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
+            <span>{filter.label}: {filter.value}</span><span aria-hidden="true" className="text-sm">×</span><span className="sr-only">Remove {filter.label.toLowerCase()} filter</span>
+          </button>)}
+        </div> : null}
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
           <h2 className="m-0 text-base font-semibold text-text-primary">Clinic and doctor listings</h2>
-          <span aria-live="polite" className="text-sm text-text-muted">{loading ? 'Searching…' : `${result.totalItems} results · Page ${result.page} of ${Math.max(result.totalPages, 1)}`}</span>
+          <span aria-live="polite" className="text-sm text-text-muted">{loading ? 'Searching…' : error ? 'Results unavailable' : `${result.totalItems} ${result.totalItems === 1 ? 'result' : 'results'}`}</span>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="grid w-full max-w-xs gap-2 text-sm font-medium text-text-secondary">Appointment date
@@ -147,28 +178,15 @@ export default function PatientClinicsPage() {
           <Link className="mt-2 inline-block min-h-9 rounded-sm font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" to="/patient/appointments">View appointments</Link>
         </div> : null}
         {error ? <p role="alert" className="mt-4 rounded-md border border-danger/25 bg-danger-soft p-4 text-sm leading-relaxed text-danger">{error}</p> : null}
-        {!error && !loading && result.items.length === 0 ? <p className="mt-4 rounded-md border border-border bg-page p-5 text-sm leading-relaxed text-text-secondary">No verified listings matched those filters. Try a different name, city, or specialization.</p> : null}
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {result.items.map((listing, index) => (
-            <article key={`${listing.clinicName}-${listing.doctorName}-${index}`} className="min-w-0 rounded-lg border border-border bg-surface-elevated p-4 shadow-sm sm:p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="m-0 text-xs font-semibold uppercase tracking-wide text-primary-hover">Verified clinic</p>
-                  <h3 className="mt-1 mb-0 text-lg font-semibold text-text-primary">{listing.clinicName}</h3>
-                  <p className="mt-1 mb-0 text-sm leading-relaxed text-text-muted">{[listing.address, listing.city, listing.state, listing.pincode].filter(Boolean).join(', ') || 'Location details unavailable'}</p>
-                </div>
-                <div className="rounded-md bg-primary-soft px-3 py-2 text-left sm:text-right">
-                  <span className="block text-xs text-text-muted">Consultation fee</span>
-                  <strong className="text-sm font-semibold text-text-primary">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: listing.currency }).format(listing.consultationFee)}</strong>
-                </div>
-              </div>
-              <div className="mt-4 border-t border-border pt-4">
-                <p className="m-0 text-sm font-semibold text-text-primary">{listing.professionalTitle ? `${listing.professionalTitle} ` : ''}{listing.doctorName}</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {listing.specializations.map((specialization) => <span key={specialization} className="rounded-full bg-success-soft px-2.5 py-1 text-xs text-success">{specialization}</span>)}
-                </div>
-                {listing.phone ? <a className="mt-3 inline-flex min-h-9 items-center rounded-sm text-sm font-semibold text-primary-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" href={`tel:${listing.phone}`}>Contact clinic: {listing.phone}</a> : null}
-                <div className="mt-3 border-t border-border pt-4">
+        {!error && !loading && result.items.length === 0 ? <div className="mt-4 rounded-lg border border-border bg-page"><EmptyState>
+          <p className="m-0 font-semibold text-text-secondary">No verified listings found</p>
+          <p className="mb-0 mt-1">Try another name, city, or specialization, or clear your filters.</p>
+          {activeFilters.length ? <Button type="button" className="mt-4" size="sm" variant="secondary" onClick={resetFilters}>Clear filters</Button> : null}
+        </EmptyState></div> : null}
+        <div aria-busy={loading} className="mt-4 grid gap-4 lg:grid-cols-2">
+          {loading ? Array.from({ length: 4 }, (_, index) => <DirectoryListingSkeleton key={index} />) : null}
+          {!loading && !error ? result.items.map((listing) => (
+            <DirectoryListingCard key={listing.listingId} listing={listing}>
                   <Button size="sm" variant="secondary" disabled={!date || loadingListingId === listing.listingId} onClick={() => void loadAvailability(listing.listingId)}>
                     {loadingListingId === listing.listingId ? 'Loading times…' : `Show times for ${date || 'selected date'}`}
                   </Button>
@@ -179,10 +197,8 @@ export default function PatientClinicsPage() {
                     </div> : <p className="mt-2 mb-0 text-sm leading-relaxed text-text-muted">No future appointment times remain for this date. Past times and closed days are hidden; choose another clinic day.</p>}
                     {availability[listing.listingId]?.slots.length ? <p className="mt-2 mb-0 text-xs leading-relaxed text-text-muted">These times use the doctor’s saved weekly hours. Availability is checked again when you request a booking.</p> : null}
                   </div> : null}
-                </div>
-              </div>
-            </article>
-          ))}
+            </DirectoryListingCard>
+          )) : null}
         </div>
         {selection ? <section className="mt-5 rounded-lg border border-primary/20 bg-primary-soft/50 p-4 sm:p-5" aria-labelledby="booking-review-title">
           <h2 id="booking-review-title" className="m-0 text-base font-semibold text-text-primary">Review appointment request</h2>
@@ -191,7 +207,9 @@ export default function PatientClinicsPage() {
           <p className="mb-3 mt-1 text-sm text-text-muted">Required payment: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: selection.currency }).format(selection.amountMinor / 100)}</p>
           <Button type="button" disabled={booking} onClick={() => void createAppointment()}>{booking ? 'Holding appointment…' : 'Request appointment hold'}</Button>
         </section> : null}
-        <div className="mt-5"><ListPagination page={result.page} totalPages={result.totalPages} totalItems={result.totalItems} busy={loading} size="sm" onPageChange={(page) => updateFilters({ ...filters, page })} /></div>
+        {!error && !loading ? <div className="mt-5 rounded-lg border border-border bg-surface-elevated">
+          <ListPagination page={result.page} totalPages={result.totalPages} totalItems={result.totalItems} busy={loading} size="sm" onPageChange={(page) => updateFilters({ ...filters, page })} />
+        </div> : null}
       </div>
     </Card>
   );

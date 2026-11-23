@@ -13,15 +13,15 @@ export function DoctorReviewStep({ profile, busy, onSubmit }: { profile: DoctorP
   const locked = profile.verificationStatus === 'PENDING_VERIFICATION' || profile.verificationStatus === 'VERIFIED';
   return (
     <>
-      <div className="grid grid-cols-[minmax(120px,0.45fr)_1fr] px-[18px] py-[9px]">
+      <div className="grid grid-cols-1 px-4 py-3 sm:grid-cols-[minmax(140px,0.45fr)_minmax(0,1fr)] sm:px-5">
         {rows.map(([k, v]) => (
           <Fragment key={k}>
-            <span className="border-b border-[#f0f0f4] py-2.5 text-[11px] text-[#7e8290]">{k}</span>
-            <strong className="border-b border-[#f0f0f4] py-2.5 text-[11px] font-medium break-words text-[#333744]">{v}</strong>
+            <span className="border-b border-border py-2 text-sm font-medium text-text-muted sm:py-3">{k}</span>
+            <strong className="min-w-0 border-b border-border py-2 text-sm font-medium wrap-break-word text-text-primary sm:py-3">{v}</strong>
           </Fragment>
         ))}
       </div>
-      <div className="flex justify-end px-[18px] pt-3.5"><Button disabled={busy || locked} onClick={onSubmit}>{busy ? 'Submitting...' : 'Submit for review'}</Button></div>
+      <div className="flex justify-end px-4 pt-4 sm:px-5"><Button disabled={busy || locked} onClick={onSubmit}>{busy ? 'Submitting...' : 'Submit for review'}</Button></div>
     </>
   );
 }

@@ -19,13 +19,13 @@ export default function AdminDashboardPage() {
   return (
     <>
       <Notices error={error} message={message} />
-      {pendingCount > 0 ? <Notice tone="warning"><strong>{pendingCount} clinic{pendingCount === 1 ? '' : 's'} waiting for review</strong><p className="mb-2 mt-1">Review each clinic’s submitted details and documents before approval.</p><Link to="/app/pending"><Button size="xs">Open review queue</Button></Link></Notice> : null}
-      <MetricGrid>
+      {pendingCount > 0 ? <Notice tone="warning"><strong>{pendingCount} clinic{pendingCount === 1 ? '' : 's'} waiting for review</strong><p className="mb-2 mt-1">Review each clinic’s submitted details and documents before approval.</p><Link className="inline-flex rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" to="/app/pending"><Button size="xs">Open review queue</Button></Link></Notice> : null}
+      <MetricGrid cols={3}>
         <MetricCard label="Total clinics" value={summary.total} note="Registered on ChiriKaro" />
         <MetricCard label="Pending review" value={summary.pending} note="Awaiting a decision" />
         <MetricCard label="Approved" value={summary.approved} note="Active clinic accounts" />
       </MetricGrid>
-      <Card><SectionHeading title="Review clinics" description="Open the review queue to inspect submitted clinic information and make an approval decision." action={<Link to="/app/pending" className="text-xs font-semibold text-brand-deep">Pending clinics →</Link>} /></Card>
+      <Card className="overflow-hidden"><SectionHeading title="Review clinics" description="Open the review queue to inspect submitted clinic information and make an approval decision." action={<Link to="/app/pending" className="inline-flex min-h-9 items-center rounded-sm text-sm font-semibold text-primary-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Pending clinics →</Link>} /></Card>
     </>
   );
 }

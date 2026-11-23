@@ -4,6 +4,8 @@ import type { ISearchPublicDirectoryUseCase } from "@application/interfaces/use-
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { ValidationError } from "@shared/errors/index.ts";
 import type { IGetPublicListingAvailabilityUseCase } from "@application/interfaces/use-cases/search/IGetPublicListingAvailabilityUseCase.ts";
+import type { IGetPublicClinicProfileUseCase } from "@application/interfaces/use-cases/search/IGetPublicClinicProfileUseCase.ts";
+import type { IGetPublicDoctorProfileUseCase } from "@application/interfaces/use-cases/search/IGetPublicDoctorProfileUseCase.ts";
 
 function parseQueryString(value: unknown, field: string): string | undefined {
   if (value === undefined) return undefined;
@@ -23,6 +25,8 @@ export class PublicDirectoryController {
   constructor(
     private readonly _searchUseCase: ISearchPublicDirectoryUseCase,
     private readonly _availabilityUseCase: IGetPublicListingAvailabilityUseCase,
+    private readonly _clinicProfileUseCase: IGetPublicClinicProfileUseCase,
+    private readonly _doctorProfileUseCase: IGetPublicDoctorProfileUseCase,
   ) {}
 
   search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -43,6 +47,24 @@ export class PublicDirectoryController {
         totalItems: result.totalItems,
         totalPages: result.totalPages,
       });
+    } catch (error) { next(error); }
+  };
+
+  clinicProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const listingId = req.params.listingId;
+      if (typeof listingId !== "string") throw new ValidationError("Directory listing is required");
+      const result = await this._clinicProfileUseCase.execute(listingId);
+      ApiResponse.success(res, "Clinic profile retrieved", result);
+    } catch (error) { next(error); }
+  };
+
+  doctorProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const listingId = req.params.listingId;
+      if (typeof listingId !== "string") throw new ValidationError("Directory listing is required");
+      const result = await this._doctorProfileUseCase.execute(listingId);
+      ApiResponse.success(res, "Doctor profile retrieved", result);
     } catch (error) { next(error); }
   };
 

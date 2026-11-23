@@ -3,7 +3,7 @@ import { cn } from '@shared/lib/cn';
 import { Input } from '@components/atoms/Input';
 
 export function FormField({ label, className, children }: { label: ReactNode; className?: string; children: ReactNode }) {
-  return <label className={cn('grid gap-[7px] text-xs font-semibold text-[#424756]', className)}>{label}{children}</label>;
+  return <label className={cn('grid gap-2 text-sm leading-normal font-medium text-text-secondary', className)}>{label}{children}</label>;
 }
 
 type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & { label: ReactNode; fieldClassName?: string };

@@ -3,6 +3,8 @@ export const API_ROUTES = {
     BASE: "/api/search",
     DIRECTORY: "/directory",
     DIRECTORY_AVAILABILITY: "/directory/:listingId/availability",
+    DIRECTORY_CLINIC_PROFILE: "/directory/:listingId/clinic-profile",
+    DIRECTORY_DOCTOR_PROFILE: "/directory/:listingId/doctor-profile",
   },
 
   AUTH: {

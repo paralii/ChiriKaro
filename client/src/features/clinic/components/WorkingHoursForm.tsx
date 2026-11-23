@@ -36,20 +36,20 @@ export function WorkingHoursForm({
     onSave(hours);
   };
 
-  const time = 'h-[38px] rounded-[5px] px-2 text-xs';
+  const time = 'h-11';
 
   return (
     <Form onSubmit={submit} className="gap-0">
-      <div className="grid px-[18px]">
+      <div className="grid px-4 sm:px-5">
         {hours.map((h, i) => (
           <div
             key={`${h.day || 'day'}-${i}`}
-            className="grid grid-cols-[minmax(125px,1fr)_repeat(2,minmax(115px,170px))] items-center gap-3.5 border-b border-[#eff0f4] py-[11px] max-md:grid-cols-2 max-md:gap-[9px]"
+            className="grid grid-cols-[minmax(0,1fr)_repeat(2,minmax(0,1fr))] items-center gap-3 border-b border-border py-3 sm:grid-cols-[minmax(125px,1fr)_repeat(2,minmax(115px,170px))] sm:gap-4"
           >
-            <label className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-[#656a79] max-md:col-span-full">
+            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-text-secondary max-sm:col-span-full">
               <input
                 type="checkbox"
-                className="size-3.5 accent-brand"
+                className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 checked={Boolean(h.isOpen)}
                 disabled={busy}
                 onChange={(e) => patch(i, { isOpen: e.target.checked })}
@@ -57,7 +57,7 @@ export function WorkingHoursForm({
               <span>{h.day || `Day ${i + 1}`}</span>
             </label>
 
-            <FormField label={startLabel} className="gap-[5px] text-[10px] font-normal text-[#777b89]">
+            <FormField label={startLabel} className="gap-1.5 text-sm font-medium text-text-secondary">
               <Input
                 type="time"
                 className={time}
@@ -67,7 +67,7 @@ export function WorkingHoursForm({
               />
             </FormField>
 
-            <FormField label={endLabel} className="gap-[5px] text-[10px] font-normal text-[#777b89]">
+            <FormField label={endLabel} className="gap-1.5 text-sm font-medium text-text-secondary">
               <Input
                 type="time"
                 className={time}
@@ -80,7 +80,7 @@ export function WorkingHoursForm({
         ))}
       </div>
 
-      <Button className="mx-[18px] mt-[18px] justify-self-start" disabled={busy}>
+      <Button className="mx-4 mt-4 justify-self-start sm:mx-5 sm:mt-5" disabled={busy}>
         {busy ? 'Saving...' : submitLabel}
       </Button>
     </Form>

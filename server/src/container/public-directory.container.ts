@@ -7,10 +7,18 @@ import { ClinicRepository } from "@infrastructure/repositories/clinic.repository
 import { DoctorRepository } from "@infrastructure/repositories/doctor.repository.ts";
 import { GetPublicListingAvailabilityUseCase } from "@application/use-cases/search/get-public-listing-availability.use-case.ts";
 import { AppointmentRepository } from "@infrastructure/repositories/appointment.repository.ts";
+import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
+import { GetPublicClinicProfileUseCase } from "@application/use-cases/search/get-public-clinic-profile.use-case.ts";
+import { GetPublicDoctorProfileUseCase } from "@application/use-cases/search/get-public-doctor-profile.use-case.ts";
 
 const repository = new PublicDirectoryRepository();
 const listingIdService = new PublicListingIdService();
 const searchUseCase = new SearchPublicDirectoryUseCase(repository, listingIdService);
 const appointmentRepository = new AppointmentRepository();
-const availabilityUseCase = new GetPublicListingAvailabilityUseCase(listingIdService, new ClinicRepository(), new DoctorRepository(), appointmentRepository);
-export const publicDirectoryRouter = PublicDirectoryRouter(new PublicDirectoryController(searchUseCase, availabilityUseCase));
+const clinicRepository = new ClinicRepository();
+const doctorRepository = new DoctorRepository();
+const availabilityUseCase = new GetPublicListingAvailabilityUseCase(listingIdService, clinicRepository, doctorRepository, appointmentRepository);
+const userRepository = new MongoUserRepository();
+const clinicProfileUseCase = new GetPublicClinicProfileUseCase(listingIdService, clinicRepository, doctorRepository, userRepository);
+const doctorProfileUseCase = new GetPublicDoctorProfileUseCase(listingIdService, clinicRepository, doctorRepository, userRepository);
+export const publicDirectoryRouter = PublicDirectoryRouter(new PublicDirectoryController(searchUseCase, availabilityUseCase, clinicProfileUseCase, doctorProfileUseCase));

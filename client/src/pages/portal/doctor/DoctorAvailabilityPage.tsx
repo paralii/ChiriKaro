@@ -83,25 +83,25 @@ export default function DoctorAvailabilityPage() {
     : clinicHours.length ? clinicHours : defaultHours;
 
   return (
-    <div className="grid gap-[18px] [&>section]:mt-0">
+    <div className="grid gap-5 [&>section]:mt-0">
       <Notices error={error} message={message} />
-      {!availability && busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading doctor availability...</Card> : null}
+      {!availability && busy ? <Card className="overflow-hidden p-4 text-sm text-text-muted sm:p-5">Loading doctor availability...</Card> : null}
       {!availability && !busy ? (
-        <Card className="p-[18px] text-sm text-[#777c8a]">
-          Availability could not be loaded. Complete basic doctor onboarding if needed, then reload this page. <Link className="ml-1 font-semibold text-brand-deep underline" to="/doctor/dashboard">Continue onboarding</Link>
+        <Card className="overflow-hidden p-4 text-sm leading-relaxed text-text-secondary sm:p-5">
+          Availability could not be loaded. Complete basic doctor onboarding if needed, then reload this page. <Link className="ml-1 inline-flex min-h-9 items-center rounded-sm font-semibold text-primary-hover underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus" to="/doctor/dashboard">Continue onboarding</Link>
         </Card>
       ) : null}
       {availability ? (
         <>
-          <Card className="pb-5">
+          <Card className="overflow-hidden pb-5">
             <SectionHeading title="Working hours" description="Doctor hours must be within the clinic’s configured working hours. Adjust saved breaks before narrowing a shift." />
             <WorkingHoursForm initial={hours} busy={busy} onSave={saveHours} submitLabel="Save working hours" />
           </Card>
-          <Card className="pb-5">
+          <Card className="overflow-hidden pb-5">
             <SectionHeading title="Breaks" description="Add breaks inside an open working day. Breaks on the same day cannot overlap." />
             <DoctorBreaksForm initial={availability.breaks} busy={busy} onSave={saveBreaks} />
           </Card>
-          <Card className="pb-5">
+          <Card className="overflow-hidden pb-5">
             <SectionHeading title="Slot settings and preview" description="Set slot duration and buffer time, then generate a preview of available times." />
             <DoctorAvailabilityStep slotDurationMinutes={availability.slotDurationMinutes} bufferTimeMinutes={availability.bufferTimeMinutes}
               slots={slots} busy={busy} onSaveConfig={saveSettings} onGenerate={generate} />

@@ -1,7 +1,10 @@
 import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel.ts";
 import { DentistModel } from "@infrastructure/database/mongodb/models/DentistModel.ts";
+import { UserModel } from "@infrastructure/database/mongodb/models/UserModel.ts";
 import { ClinicStatus } from "@domain/enum/clinic-status.enum.ts";
 import { ClinicSetupStatus } from "@domain/enum/clinic-setup-status.enum.ts";
+import { UserStatus } from "@domain/enum/user-statues.enum.ts";
+import { Role } from "@domain/value-objects/Role.ts";
 import type { PipelineStage } from "mongoose";
 import type { IPublicDirectoryRepository, PublicDirectoryCandidateDTO, PublicDirectoryRepositoryQuery, PublicDirectoryRepositoryPage } from "@application/interfaces/repositories/IPublicDirectoryRepository.ts";
 import type { PublicDirectoryListingDTO } from "@application/dto/search/public-directory.dto.ts";
@@ -98,6 +101,17 @@ export class PublicDirectoryRepository implements IPublicDirectoryRepository {
         as: "doctor",
       } },
       { $unwind: "$doctor" },
+      { $lookup: {
+        from: UserModel.collection.name,
+        let: { doctorUserId: "$doctor.userId" },
+        pipeline: [{ $match: { $expr: { $and: [
+          { $eq: ["$_id", "$$doctorUserId"] },
+          { $eq: ["$role", Role.DOCTOR] },
+          { $eq: ["$status", UserStatus.ACTIVE] },
+        ] } } }, { $project: { _id: 1 } }],
+        as: "activeDoctorUser",
+      } },
+      { $match: { "activeDoctorUser.0": { $exists: true } } },
       { $match: { $expr: scheduleOverlap } },
       ...(textMatch ? [{ $match: textMatch }] : []),
       { $sort: { name: 1, "doctor.firstName": 1, "doctor.lastName": 1, _id: 1 } },

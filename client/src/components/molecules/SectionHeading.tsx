@@ -5,12 +5,12 @@ export function SectionHeading({ title, description, action, as: Tag = 'h2', cla
   title: ReactNode; description?: ReactNode; action?: ReactNode; as?: 'h2' | 'h3'; className?: string;
 }) {
   return (
-    <div className={cn('flex items-center justify-between gap-[15px] border-b border-[#ececf1] px-[18px] py-[17px] max-[420px]:px-3', className)}>
-      <div>
-        <Tag className="m-0 text-sm max-[420px]:text-xs">{title}</Tag>
-        {description ? <p className="mt-[5px] mb-0 text-[10px] text-[#7c808d]">{description}</p> : null}
+    <div className={cn('flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-4 sm:gap-4 sm:px-5', className)}>
+      <div className="min-w-0 flex-1">
+        <Tag className="m-0 text-base leading-tight font-semibold text-text-primary">{title}</Tag>
+        {description ? <p className="mt-1.5 mb-0 text-sm leading-relaxed text-text-muted">{description}</p> : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }

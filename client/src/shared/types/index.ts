@@ -31,6 +31,30 @@ export type PublicDirectoryListing = {
   consultationFee: number;
   currency: 'INR';
 };
+export type PublicClinicProfile = {
+  name: string;
+  description: string | null;
+  clinicType: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
+  phone: string | null;
+  specializations: string[];
+  doctors: Array<Pick<PublicDirectoryListing, 'listingId' | 'doctorName' | 'professionalTitle' | 'specializations' | 'consultationFee' | 'currency'>>;
+};
+export type PublicDoctorProfile = {
+  listingId: string;
+  name: string;
+  avatar: string | null;
+  professionalTitle: string | null;
+  qualifications: string[];
+  yearsOfExperience: number | null;
+  specializations: string[];
+  consultationFee: number;
+  currency: 'INR';
+  clinic: { listingId: string; name: string; address: string | null; city: string | null; state: string | null; pincode: string | null; phone: string | null };
+};
 export type PublicDirectoryPage = { items: PublicDirectoryListing[]; page: number; limit: number; totalItems: number; totalPages: number };
 export type DatedAvailability = { clinicTimeZone: string; localDate: string; slots: Array<{ startAt: string; endAt: string; localStartTime: string; localEndTime: string }> };
 export type PatientAppointment = {

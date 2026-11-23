@@ -93,7 +93,7 @@ export const superAdminService = {
   getClinicDocument: async (id: string, documentType: string) =>
     (
       await http.get<Blob>(
-        `${API_ROUTES.SUPER_ADMIN.CLINIC_DOCUMENT_BY_TYPE(id, documentType)}`,
+        API_ROUTES.SUPER_ADMIN.CLINIC_DOCUMENTS(id, documentType),
         { responseType: "blob" },
       )
     ).data,

@@ -2,11 +2,11 @@ import type { ReactNode } from 'react';
 
 export function PortalTemplate({ sidebar, topbar, children }: { sidebar: ReactNode; topbar: ReactNode; children: ReactNode }) {
   return (
-    <div className="grid min-h-screen grid-cols-[248px_minmax(0,1fr)] bg-[#fafbfe] max-[1050px]:grid-cols-[220px_minmax(0,1fr)] max-md:grid-cols-1">
+    <div className="grid min-h-screen grid-cols-[minmax(220px,248px)_minmax(0,1fr)] bg-page max-md:grid-cols-1">
       {sidebar}
-      <main className="min-w-0">
+      <main className="min-h-screen min-w-0 bg-page max-md:min-h-0">
         {topbar}
-        <div className="mx-auto w-[min(100%,1180px)] p-[34px] max-[1050px]:px-[23px] max-[1050px]:py-[27px] max-md:px-4 max-md:pt-6 max-md:pb-[35px] max-[420px]:px-3">{children}</div>
+        <div className="mx-auto w-full max-w-310 px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-8 xl:px-10">{children}</div>
       </main>
     </div>
   );

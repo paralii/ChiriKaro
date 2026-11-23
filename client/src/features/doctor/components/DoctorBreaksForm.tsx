@@ -23,15 +23,15 @@ export function DoctorBreaksForm({ initial, busy, onSave }: {
   const submit = (event: FormEvent) => { event.preventDefault(); onSave(breaks); };
 
   return (
-    <Form onSubmit={submit} className="gap-0 p-[18px]">
+    <Form onSubmit={submit} className="gap-0 p-4.5">
       {breaks.length ? breaks.map((item, index) => (
-        <div key={`${item.day}-${index}`} className="grid grid-cols-[minmax(125px,1fr)_minmax(105px,150px)_minmax(105px,150px)_auto] items-end gap-3 border-b border-[#eff0f4] py-3 max-md:grid-cols-2">
+        <div key={`${item.day}-${index}`} className="grid grid-cols-1 items-end gap-3 border-b border-border py-4 sm:grid-cols-2 lg:grid-cols-[minmax(125px,1fr)_minmax(105px,150px)_minmax(105px,150px)_auto]">
           <FormField label="Day"><Select value={item.day} onChange={(event) => patch(index, { day: event.target.value as DoctorDayOfWeek })}>{days.map((day) => <option key={day.value} value={day.value}>{day.label}</option>)}</Select></FormField>
           <FormField label="Break starts"><Input type="time" value={item.startTime} onChange={(event) => patch(index, { startTime: event.target.value })} required /></FormField>
           <FormField label="Break ends"><Input type="time" value={item.endTime} onChange={(event) => patch(index, { endTime: event.target.value })} required /></FormField>
           <Button type="button" size="sm" variant="ghost" aria-label={`Remove ${item.day.toLowerCase()} break`} onClick={() => setBreaks((current) => current.filter((_, i) => i !== index))}>Remove</Button>
         </div>
-      )) : <p className="m-0 pb-3 text-xs text-[#777b89]">No breaks added.</p>}
+      )) : <p className="m-0 pb-3 text-sm text-text-muted">No breaks added.</p>}
       <div className="flex flex-wrap gap-2 pt-3">
         <Button type="button" variant="secondary" disabled={busy} onClick={() => setBreaks((current) => [...current, { day: 'MONDAY', startTime: '12:00', endTime: '13:00' }])}>Add break</Button>
         <Button disabled={busy}>{busy ? 'Saving...' : 'Save breaks'}</Button>

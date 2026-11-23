@@ -134,24 +134,24 @@ export default function ClinicSetupPage() {
   const workingHoursDisabled = busy || reviewPending;
 
   return (
-    <div className="grid gap-[18px] [&>section]:mt-0">
+    <div className="grid gap-5 [&>section]:mt-0">
       <Notices error={error} message={message} />
-      {!profile && busy ? <Card className="p-[18px] text-sm text-[#777c8a]">Loading clinic setup...</Card> : null}
+      {!profile && busy ? <Card className="overflow-hidden p-4 text-sm text-text-muted sm:p-5">Loading clinic setup...</Card> : null}
       {profile ? (
         <>
           {isRejected ? <Notice tone="error"><strong>Application rejected</strong><p className="mb-0 mt-1">{profile.rejectionReason || 'Update the requested details and resubmit your application.'}</p></Notice> : null}
           {reviewPending ? <Notice tone="warning">Your application is under review. Editing and document uploads are disabled until a decision is made.</Notice> : null}
-          <Card className="pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={editingDisabled} onSave={saveProfile} setupOnly /></Card>
-          <Card className="pb-5"><SectionHeading title="Specializations" description={profile.setupStatus === 'VERIFIED' ? 'Manage the services offered by your approved clinic. Assigned specializations must be reassigned before removal.' : 'List the services your clinic provides.'} /><SpecializationsForm initial={profile.specializations} busy={specializationsDisabled} onSave={saveSpecializations} /></Card>
-          <Card className="pb-5"><SectionHeading title="Doctor specializations" description="Assign each doctor only specializations offered by this clinic." /><DoctorSpecializationAssignments doctors={doctorAssignments} clinicSpecializations={profile.specializations} busy={busy} onSave={saveDoctorSpecializations} /></Card>
-          <Card className="pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic. Doctor schedules must fit within these hours." /><WorkingHoursForm initial={profile.workingHours} busy={workingHoursDisabled} onSave={saveHours} /></Card>
-          <Card className="pb-5"><SectionHeading title="Doctor working hours" description="Set schedules for doctors in this clinic. Doctor hours must fit clinic operating hours." /><ClinicDoctorWorkingHours doctors={doctorSchedules} busy={busy} onSave={saveDoctorHours} /></Card>
-          <Card className="pb-5">
+          <Card className="overflow-hidden pb-5"><SectionHeading title="Clinic location" description="Add the complete location required for clinic verification." /><ClinicProfileForm initial={profile} busy={editingDisabled} onSave={saveProfile} setupOnly /></Card>
+          <Card className="overflow-hidden pb-5"><SectionHeading title="Specializations" description={profile.setupStatus === 'VERIFIED' ? 'Manage the services offered by your approved clinic. Assigned specializations must be reassigned before removal.' : 'List the services your clinic provides.'} /><SpecializationsForm initial={profile.specializations} busy={specializationsDisabled} onSave={saveSpecializations} /></Card>
+          <Card className="overflow-hidden pb-5"><SectionHeading title="Doctor specializations" description="Assign each doctor only specializations offered by this clinic." /><DoctorSpecializationAssignments doctors={doctorAssignments} clinicSpecializations={profile.specializations} busy={busy} onSave={saveDoctorSpecializations} /></Card>
+          <Card className="overflow-hidden pb-5"><SectionHeading title="Working hours" description="Set the hours patients can contact your clinic. Doctor schedules must fit within these hours." /><WorkingHoursForm initial={profile.workingHours} busy={workingHoursDisabled} onSave={saveHours} /></Card>
+          <Card className="overflow-hidden pb-5"><SectionHeading title="Doctor working hours" description="Set schedules for doctors in this clinic. Doctor hours must fit clinic operating hours." /><ClinicDoctorWorkingHours doctors={doctorSchedules} busy={busy} onSave={saveDoctorHours} /></Card>
+          <Card className="overflow-hidden pb-5">
             <SectionHeading title="Clinic documents" description="Private PDF, JPG, or PNG files up to 10 MB." />
             <DocumentUploader types={['Clinic registration', 'Operating license', 'Insurance certificate', 'Other']} documents={documents} busy={editingDisabled} onUpload={upload} onOpen={open} />
           </Card>
-          <Card className="flex flex-wrap items-center justify-between gap-4 p-[18px]">
-            <div><strong className="text-sm">Setup status: {profile.setupStatus?.replaceAll('_', ' ') ?? 'IN PROGRESS'}</strong><p className="mt-1 text-xs text-[#777b89]">Submit completed clinic information and documents for verification.</p></div>
+          <Card className="flex flex-col items-start justify-between gap-4 overflow-hidden p-4 sm:flex-row sm:items-center sm:p-5">
+            <div><strong className="text-base font-semibold text-text-primary">Setup status: {profile.setupStatus?.replaceAll('_', ' ') ?? 'IN PROGRESS'}</strong><p className="mt-1 text-sm text-text-muted">Submit completed clinic information and documents for verification.</p></div>
             <Button disabled={busy || profile.setupStatus === 'PENDING_VERIFICATION' || profile.setupStatus === 'VERIFIED'} onClick={submitSetup}>
               {profile.setupStatus === 'PENDING_VERIFICATION' ? 'Submitted for verification' : profile.setupStatus === 'VERIFIED' ? 'Clinic setup verified' : busy ? 'Submitting...' : 'Submit for verification'}
             </Button>

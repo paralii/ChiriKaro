@@ -51,8 +51,8 @@ export default function ClinicInvitationsPage({ invitee }: { invitee: 'doctor' |
   return (
     <>
       <Notices error={error} message={message} />
-      <Card className="pb-5"><InviteForm invitee={invitee === 'doctor' ? 'doctor' : 'staff member'} busy={busy} invitation={invitation?.role === (invitee === 'doctor' ? 'DOCTOR' : 'STAFF') ? invitation : null} onInvite={invite} /></Card>
-      <Card>
+      <Card className="overflow-hidden pb-5"><InviteForm invitee={invitee === 'doctor' ? 'doctor' : 'staff member'} busy={busy} invitation={invitation?.role === (invitee === 'doctor' ? 'DOCTOR' : 'STAFF') ? invitation : null} onInvite={invite} /></Card>
+      <Card className="overflow-hidden">
         <SectionHeading title="Pending invitations" description={`${invitations.length} invitation${invitations.length === 1 ? '' : 's'} awaiting acceptance.`} />
         {invitations.length ? (
           <DataTable headers={['EMAIL', 'ROLE', 'CREATED', 'EXPIRES', 'STATUS', 'ACTIONS']}>

@@ -32,15 +32,15 @@ export default function DoctorPortalLayout() {
   return (
     <PortalTemplate
       sidebar={(
-        <aside className="sticky top-0 flex h-screen flex-col border-r border-[#e7e8ef] bg-white px-[15px] pt-[23px] pb-[15px] max-md:static max-md:h-auto max-md:border-r-0 max-md:border-b max-md:pt-3 max-md:pb-2.5">
-          <BrandLockup className="px-[9px] max-md:px-[3px]" />
-          <div className="mx-[9px] mt-[37px] mb-2.5 text-[9px] font-bold text-[#9295a2] max-md:hidden">DOCTOR WORKSPACE</div>
-          <div className="mx-[9px] truncate rounded-[7px] border border-[#e8e9ef] px-2 py-2.5 text-[11px] font-semibold max-md:hidden">{user.name}</div>
-          <nav aria-label="Doctor navigation" className="mt-[25px] grid gap-[3px] max-md:mt-[11px] max-md:flex max-md:overflow-x-auto">
-            {items.map((item) => <NavLink key={item.path} to={item.path} className={({ isActive }) => sideLinkClass(isActive)}>{({ isActive }) => <><SideMark active={isActive} />{item.label}</>}</NavLink>)}
+        <aside className="sticky top-0 flex h-screen flex-col border-r border-border bg-surface-elevated px-4 pt-6 pb-4 max-md:static max-md:h-auto max-md:border-r-0 max-md:border-b max-md:pt-3 max-md:pb-2.5">
+          <BrandLockup className="px-2 max-md:px-1" />
+          <div className="mx-2 mt-9 mb-3 text-xs font-semibold tracking-wide text-text-muted max-md:hidden">DOCTOR WORKSPACE</div>
+          <div className="mx-2 truncate rounded-md border border-border bg-surface-elevated px-2.5 py-3 text-sm font-semibold text-text-primary max-md:hidden">{user.name}</div>
+          <nav aria-label="Doctor navigation" className="mt-6 grid gap-1 max-md:mt-3 max-md:flex max-md:overflow-x-auto max-md:pb-1">
+            {items.map((item) => <NavLink key={item.path} to={item.path} className={({ isActive }) => `${sideLinkClass(isActive)} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus`}>{({ isActive }) => <><SideMark active={isActive} />{item.label}</>}</NavLink>)}
           </nav>
           <div className="mt-auto max-md:hidden">
-            <button className={sideLinkClass()} onClick={logout}><SideMark />Sign out</button>
+            <button className={`${sideLinkClass()} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus`} onClick={logout}><SideMark />Sign out</button>
           </div>
         </aside>
       )}

@@ -28,6 +28,7 @@ import PatientDashboardPage from '@/pages/portal/patient/PatientDashboardPage';
 import PatientProfilePage from '@/pages/portal/patient/PatientProfilePage';
 import PatientClinicsPage from '@/pages/portal/patient/PatientClinicsPage';
 import PatientAppointmentsPage from '@/pages/portal/patient/PatientAppointmentsPage';
+import PatientAppointmentDetailsPage from '@/pages/portal/patient/PatientAppointmentDetailsPage';
 import PatientQueuePage from '@/pages/portal/patient/PatientQueuePage';
 import PatientClinicProfilePage from '@/pages/portal/patient/PatientClinicProfilePage';
 import PatientDoctorProfilePage from '@/pages/portal/patient/PatientDoctorProfilePage';
@@ -53,6 +54,7 @@ export default function AppRouter() {
           <Route path="clinics/:listingId" element={<PatientClinicProfilePage />} />
           <Route path="doctors/:listingId" element={<PatientDoctorProfilePage />} />
           <Route path="appointments" element={<PatientAppointmentsPage />} />
+          <Route path="appointments/:appointmentId" element={<PatientAppointmentDetailsPage />} />
           <Route path="queue" element={<PatientQueuePage />} />
           <Route path="profile" element={<PatientProfilePage />} />
         </Route>

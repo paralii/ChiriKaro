@@ -10,6 +10,7 @@
     "build": "tsc --noEmit --ignoreDeprecations 5.0 && esbuild src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server.js",
     "start": "node dist/server.js",
     "seed:admin": "tsx src/scripts/seed-super-admin.ts",
+    "migrate:treatment-plans": "tsx src/scripts/migrate-treatment-plans.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\" \"*.{json,md}\"",

@@ -17,6 +17,7 @@ const items = [
   { path: '/clinic/review-doctors', label: 'Doctor verification' },
   { path: '/clinic/staff', label: 'Staff invitations' },
   { path: '/clinic/queue', label: 'Today’s queue' },
+  { path: '/clinic/treatment-plans', label: 'Guest treatment plans' },
 ];
 
 export default function ClinicPortalLayout() {
@@ -25,7 +26,7 @@ export default function ClinicPortalLayout() {
   const clinic = useAppSelector((state) => state.clinic.current);
   const { pathname } = useLocation();
   const section = pathname.split('/')[2] ?? 'dashboard';
-  const title = section === 'profile' ? 'Clinic profile' : section === 'setup' ? 'Clinic setup' : section === 'doctors' ? 'Doctor invitations' : section === 'review-doctors' ? 'Doctor verification' : section === 'staff' ? 'Staff invitations' : section === 'queue' ? 'Today’s queue' : 'Overview';
+  const title = section === 'profile' ? 'Clinic profile' : section === 'setup' ? 'Clinic setup' : section === 'doctors' ? 'Doctor invitations' : section === 'review-doctors' ? 'Doctor verification' : section === 'staff' ? 'Staff invitations' : section === 'queue' ? 'Today’s queue' : section === 'treatment-plans' ? 'Guest treatment plans' : 'Overview';
   const logout = useLogout();
 
   useEffect(() => { void dispatch(loadClinic()); }, [dispatch]);

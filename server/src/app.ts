@@ -12,6 +12,7 @@ import { roleDashboardRouter } from "@container/role-dashboard.container.ts";
 import { publicDirectoryRouter } from "@container/public-directory.container.ts";
 import { patientAppointmentsRouter } from "@container/patient-appointments.container.ts";
 import { patientAppointmentPaymentsRouter } from "@container/patient-appointment-payments.container.ts";
+import { clinicClinicalRecordsRouter, doctorClinicalRecordsRouter, patientClinicalRecordsRouter } from "@container/clinical-records.container.ts";
 import { clinicQueueRouter } from "@container/clinic-queue.container.ts";
 import { patientQueueRouter } from "@container/patient-queue.container.ts";
 import { consultationRouter, patientPrescriptionRouter } from "@container/consultation.container.ts";
@@ -73,6 +74,9 @@ export class App {
     this.instance.use(API_ROUTES.SEARCH.BASE, publicDirectoryRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentsRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentPaymentsRouter);
+    this.instance.use(API_ROUTES.PATIENT.BASE, patientClinicalRecordsRouter);
+    this.instance.use(API_ROUTES.DOCTOR.BASE, doctorClinicalRecordsRouter);
+    this.instance.use(API_ROUTES.CLINIC.BASE, clinicClinicalRecordsRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientQueueRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientPrescriptionRouter);
     this.instance.use(API_ROUTES.SUPER_ADMIN.BASE, superAdminRouter);

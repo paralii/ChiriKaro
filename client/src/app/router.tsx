@@ -33,7 +33,9 @@ import PatientQueuePage from '@/pages/portal/patient/PatientQueuePage';
 import PatientClinicProfilePage from '@/pages/portal/patient/PatientClinicProfilePage';
 import PatientDoctorProfilePage from '@/pages/portal/patient/PatientDoctorProfilePage';
 import PatientPrescriptionsPage from '@/pages/portal/patient/PatientPrescriptionsPage';
+import PatientClinicalRecordsPage from '@/pages/portal/patient/PatientClinicalRecordsPage';
 import ClinicQueuePage from '@/pages/portal/clinic/ClinicQueuePage';
+import ClinicTreatmentPlansPage from '@/pages/portal/clinic/ClinicTreatmentPlansPage';
 import DoctorConsultationPage from '@/pages/portal/doctor/DoctorConsultationPage';
 
 export default function AppRouter() {
@@ -58,6 +60,7 @@ export default function AppRouter() {
           <Route path="appointments" element={<PatientAppointmentsPage />} />
           <Route path="appointments/:appointmentId" element={<PatientAppointmentDetailsPage />} />
           <Route path="prescriptions" element={<PatientPrescriptionsPage />} />
+          <Route path="care-records" element={<PatientClinicalRecordsPage />} />
           <Route path="queue" element={<PatientQueuePage />} />
           <Route path="profile" element={<PatientProfilePage />} />
         </Route>
@@ -77,6 +80,7 @@ export default function AppRouter() {
       <Route element={<RequireStaff />}>
         <Route path="/staff/dashboard" element={<TeamAccessPage />} />
         <Route path="/staff/queue" element={<ClinicQueuePage />} />
+        <Route path="/staff/treatment-plans" element={<ClinicTreatmentPlansPage />} />
       </Route>
 
       <Route element={<RequireClinicAdmin />}>
@@ -89,6 +93,7 @@ export default function AppRouter() {
           <Route path="review-doctors" element={<ClinicDoctorReviewPage />} />
           <Route path="staff" element={<ClinicInvitationsPage invitee="staff" />} />
           <Route path="queue" element={<ClinicQueuePage />} />
+          <Route path="treatment-plans" element={<ClinicTreatmentPlansPage />} />
         </Route>
       </Route>
 

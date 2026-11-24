@@ -1,0 +1,11 @@
+import { Role } from "@domain/value-objects/Role.ts";
+import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
+import { ClinicRepository } from "@infrastructure/repositories/clinic.repository.ts";
+import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts";
+import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
+import { ClinicalRecordsController } from "@presentation/controllers/clinical-records.controller.ts";
+import { ClinicClinicalRecordsRouter, DoctorClinicalRecordsRouter, PatientClinicalRecordsRouter } from "@presentation/routes/clinical-records.routes.ts";
+const clinics = new ClinicRepository(); const auth = new AuthMiddleware({ tokenService: new TokenService(), userRepository: new MongoUserRepository(), clinicRepository: clinics }); const controller = new ClinicalRecordsController();
+export const doctorClinicalRecordsRouter = DoctorClinicalRecordsRouter(controller, auth.authenticate, auth.authorize(Role.DOCTOR));
+export const patientClinicalRecordsRouter = PatientClinicalRecordsRouter(controller, auth.authenticate, auth.authorize(Role.PATIENT));
+export const clinicClinicalRecordsRouter = ClinicClinicalRecordsRouter(controller, auth.authenticate, auth.authorize(Role.CLINIC_ADMIN, Role.STAFF));

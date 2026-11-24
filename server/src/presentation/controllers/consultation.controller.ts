@@ -5,6 +5,18 @@ import { BadRequestError } from "@shared/errors/index.ts";
 
 export class ConsultationController {
   constructor(private readonly useCase: IConsultationUseCase) {}
+  private sendPrescriptionPdf(res: Response, next: NextFunction, stream: NodeJS.ReadableStream, id: string): void {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="prescription-${id}.pdf"`);
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    stream.on("error", (error) => { if (res.headersSent) res.destroy(error); else next(error); });
+    stream.pipe(res);
+  }
+  patientPrescriptionPdf = async (req: Request, res: Response, next: NextFunction) => { try { const id = req.params.consultationId; if (!req.user?.sub || typeof id !== "string") throw new BadRequestError("Prescription is required"); const stream = await this.useCase.patientPrescriptionPdf(id, req.user.sub); this.sendPrescriptionPdf(res, next, stream, id); } catch (e) { next(e); } };
+  doctorPrescriptionPdf = async (req: Request, res: Response, next: NextFunction) => { try { const id = req.params.consultationId; if (!req.user?.clinicId || typeof id !== "string") throw new BadRequestError("Prescription is required"); const stream = await this.useCase.doctorPrescriptionPdf(id, req.user.clinicId, req.user.sub); this.sendPrescriptionPdf(res, next, stream, id); } catch (e) { next(e); } };
+  patientPrescriptions = async (req: Request, res: Response, next: NextFunction) => { try { if (!req.user?.sub) throw new BadRequestError("Patient identity is required"); ApiResponse.success(res, "Patient prescriptions retrieved", await this.useCase.listPatientPrescriptions(req.user.sub)); } catch (e) { next(e); } };
   open = async (req: Request, res: Response, next: NextFunction) => { try { const queueEntryId = req.params.queueEntryId; if (!req.user?.clinicId || typeof queueEntryId !== "string") throw new BadRequestError("Queue entry is required"); ApiResponse.success(res, "Consultation opened", await this.useCase.open(queueEntryId, req.user.clinicId, req.user.sub)); } catch (e) { next(e); } };
   get = async (req: Request, res: Response, next: NextFunction) => { try { const id = req.params.consultationId; if (!req.user?.clinicId || typeof id !== "string") throw new BadRequestError("Consultation is required"); ApiResponse.success(res, "Consultation retrieved", await this.useCase.get(id, req.user.clinicId, req.user.sub)); } catch (e) { next(e); } };
   save = async (req: Request, res: Response, next: NextFunction) => { try { const id = req.params.consultationId; if (!req.user?.clinicId || typeof id !== "string") throw new BadRequestError("Consultation is required"); ApiResponse.success(res, "Consultation saved", await this.useCase.save(id, req.user.clinicId, req.user.sub, req.user.sub, req.body?.data, req.body?.medicalHistorySnapshot)); } catch (e) { next(e); } };

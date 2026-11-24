@@ -19,6 +19,16 @@ export class ConsultationRepository implements IConsultationRepository {
     const docs = await ConsultationModel.find({ patientUserId: new Types.ObjectId(patientUserId), clinicId: new Types.ObjectId(clinicId) }).sort({ createdAt: -1 }).limit(50).exec();
     return docs.map((doc) => this.toRecord(doc));
   }
+  async listCompletedForPatient(patientUserId: string) {
+    if (!Types.ObjectId.isValid(patientUserId)) return [];
+    const docs = await ConsultationModel.find({ patientUserId: new Types.ObjectId(patientUserId), status: "COMPLETED" }).sort({ completedAt: -1, createdAt: -1 }).limit(100).exec();
+    return docs.map((doc) => this.toRecord(doc));
+  }
+  async findCompletedForPatient(id: string, patientUserId: string) {
+    if (![id, patientUserId].every(Types.ObjectId.isValid)) return null;
+    const doc = await ConsultationModel.findOne({ _id: new Types.ObjectId(id), patientUserId: new Types.ObjectId(patientUserId), status: "COMPLETED" }).exec();
+    return doc ? this.toRecord(doc) : null;
+  }
   async create(record: ConsultationRecord) {
     const doc = await ConsultationModel.create({ _id: new Types.ObjectId(record.id), queueEntryId: new Types.ObjectId(record.queueEntryId), clinicId: new Types.ObjectId(record.clinicId), doctorUserId: new Types.ObjectId(record.doctorUserId), patientUserId: record.patientUserId ? new Types.ObjectId(record.patientUserId) : null, patientNameSnapshot: record.patientNameSnapshot, appointmentId: record.appointmentId ? new Types.ObjectId(record.appointmentId) : null, visitDetails: record.visitDetails, status: record.status, medicalHistorySnapshot: record.medicalHistorySnapshot, data: record.data, attachments: record.attachments, startedAt: record.startedAt, startedBy: new Types.ObjectId(record.startedBy), completedAt: record.completedAt, completedBy: record.completedBy ? new Types.ObjectId(record.completedBy) : null });
     return this.toRecord(doc);

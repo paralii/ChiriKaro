@@ -9,6 +9,7 @@ export type ConsultationData = {
   treatmentPlan: Array<{ procedure: string; affectedTeeth: string[]; estimatedCost: number | null; numberOfSessions: number | null; instructions: string }>;
   prescriptions: Array<{ medicine: string; dosage: string; frequency: string; duration: string; instructions: string }>;
 };
+export type Prescription = ConsultationData['prescriptions'][number];
 export type Consultation = { id: string; queueEntryId: string; clinicId: string; doctorUserId: string; patientUserId: string | null; patientNameSnapshot: string; appointmentId: string | null; visitDetails: { localDate: string; localStartTime: string | null; localEndTime: string | null; tokenNumber: number; clinicName: string }; status: 'IN_PROGRESS' | 'COMPLETED'; medicalHistorySnapshot: MedicalHistory; data: ConsultationData; attachments: Array<{ id: string; category: string; fileName: string; contentType: string; uploadedAt: string }>; startedAt: string; completedAt: string | null; createdAt: string; updatedAt: string };
 const emptyData: ConsultationData = { chiefComplaint: '', symptoms: [], painLevel: null, examinationFindings: '', clinicalNotes: '', dentalChart: [], diagnoses: [], treatmentPlan: [], prescriptions: [] };
 const emptyHistory: MedicalHistory = { existingConditions: [], allergies: [], medications: [], previousSurgeries: [], dentalHistory: '', remarks: '' };

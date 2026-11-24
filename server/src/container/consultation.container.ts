@@ -9,7 +9,7 @@ import { ClinicRepository } from "@infrastructure/repositories/clinic.repository
 import { QueueClinicContextService } from "@application/services/queue-clinic-context.service.ts";
 import { ConsultationUseCase } from "@application/use-cases/consultation/consultation.use-case.ts";
 import { ConsultationController } from "@presentation/controllers/consultation.controller.ts";
-import { ConsultationRouter } from "@presentation/routes/consultation.routes.ts";
+import { ConsultationRouter, PatientPrescriptionRouter } from "@presentation/routes/consultation.routes.ts";
 import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
 import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts";
 const clinics = new ClinicRepository();
@@ -17,3 +17,4 @@ const doctors = new DoctorRepository();
 const users = new MongoUserRepository();
 const auth = new AuthMiddleware({ tokenService: new TokenService(), userRepository: users, clinicRepository: clinics });
 export const consultationRouter = ConsultationRouter(new ConsultationController(new ConsultationUseCase(new ConsultationRepository(), new QueueRepository(), users, new QueueClinicContextService(clinics, doctors), new CloudinaryDocumentStorage("patient-records"), new AppointmentRepository())), auth.authenticate, auth.authorize(Role.DOCTOR));
+export const patientPrescriptionRouter = PatientPrescriptionRouter(new ConsultationController(new ConsultationUseCase(new ConsultationRepository(), new QueueRepository(), users, new QueueClinicContextService(clinics, doctors), new CloudinaryDocumentStorage("patient-records"), new AppointmentRepository())), auth.authenticate, auth.authorize(Role.PATIENT));

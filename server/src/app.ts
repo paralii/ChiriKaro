@@ -14,7 +14,7 @@ import { patientAppointmentsRouter } from "@container/patient-appointments.conta
 import { patientAppointmentPaymentsRouter } from "@container/patient-appointment-payments.container.ts";
 import { clinicQueueRouter } from "@container/clinic-queue.container.ts";
 import { patientQueueRouter } from "@container/patient-queue.container.ts";
-import { consultationRouter } from "@container/consultation.container.ts";
+import { consultationRouter, patientPrescriptionRouter } from "@container/consultation.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
@@ -74,6 +74,7 @@ export class App {
     this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentsRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientAppointmentPaymentsRouter);
     this.instance.use(API_ROUTES.PATIENT.BASE, patientQueueRouter);
+    this.instance.use(API_ROUTES.PATIENT.BASE, patientPrescriptionRouter);
     this.instance.use(API_ROUTES.SUPER_ADMIN.BASE, superAdminRouter);
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicRouter);
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicQueueRouter);

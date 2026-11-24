@@ -6,8 +6,18 @@ type ApiEnvelope<T> = { data?: T };
 
 export type PaymentOrder = { appointmentId: string; orderId: string; amountMinor: number; currency: string; keyId: string; mode: 'MOCK' | 'RAZORPAY'; status: string };
 export type AppointmentPaymentStatus = { appointmentId: string; paymentStatus: string; appointmentStatus: PatientAppointment['status']; refundReviewStatus?: 'NOT_REQUIRED' | 'PENDING_REVIEW' };
+export type PatientPrescription = { consultationId: string; doctorName: string; clinicName: string; prescribedAt: string; prescriptions: Array<{ medicine: string; dosage: string; frequency: string; duration: string; instructions: string }> };
 
 export const appointmentService = {
+  listPrescriptions: async () => {
+    const response = await http.get<ApiEnvelope<PatientPrescription[]>>(API_ROUTES.PATIENT.PRESCRIPTIONS);
+    if (!response.data.data) throw new Error('Prescriptions were not returned.');
+    return response.data.data;
+  },
+  downloadPrescriptionPdf: async (consultationId: string) => {
+    const response = await http.get<Blob>(API_ROUTES.PATIENT.PRESCRIPTION_PDF(consultationId), { responseType: 'blob' });
+    return response.data;
+  },
   create: async (input: { listingId: string; date: string; startsAt: string }, idempotencyKey: string) => {
     const response = await http.post<ApiEnvelope<PatientAppointment>>(API_ROUTES.PATIENT.APPOINTMENTS, input, {
       headers: { 'Idempotency-Key': idempotencyKey },

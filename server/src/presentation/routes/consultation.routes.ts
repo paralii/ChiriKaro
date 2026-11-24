@@ -1,0 +1,18 @@
+import express, { Router } from "express";
+import type { RequestHandler } from "express";
+import type { ConsultationController } from "@presentation/controllers/consultation.controller.ts";
+import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
+export function ConsultationRouter(controller: ConsultationController, auth: RequestHandler, doctor: RequestHandler): Router {
+  const r = Router();
+  r.post(API_ROUTES.DOCTOR.CONSULTATION_OPEN, auth, doctor, controller.open);
+  r.get(API_ROUTES.DOCTOR.CONSULTATION_BY_ID, auth, doctor, controller.get);
+  r.put(API_ROUTES.DOCTOR.CONSULTATION_BY_ID, auth, doctor, controller.save);
+  r.get(API_ROUTES.DOCTOR.CONSULTATION_PATIENT_RECORDS, auth, doctor, controller.history);
+  r.get(API_ROUTES.DOCTOR.CONSULTATION_PATIENT_HISTORY, auth, doctor, controller.getMedicalHistory);
+  r.put(API_ROUTES.DOCTOR.CONSULTATION_PATIENT_HISTORY, auth, doctor, controller.updateHistory);
+  r.post(API_ROUTES.DOCTOR.CONSULTATION_FINALIZE, auth, doctor, controller.finalize);
+  r.post(API_ROUTES.DOCTOR.CONSULTATION_ATTACHMENTS, auth, doctor, express.raw({ type: ["application/pdf", "image/jpeg", "image/png"], limit: "10mb" }), controller.upload);
+  r.get(API_ROUTES.DOCTOR.CONSULTATION_ATTACHMENT, auth, doctor, controller.readAttachment);
+  r.delete(API_ROUTES.DOCTOR.CONSULTATION_ATTACHMENT, auth, doctor, controller.deleteAttachment);
+  return r;
+}

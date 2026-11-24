@@ -10,8 +10,6 @@ import { Role } from "@domain/value-objects/Role.ts";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@shared/errors/index.ts";
 
 const DOCTOR_TRANSITIONS = new Set<QueueEntryStatus>([
-  QueueEntryStatus.IN_CONSULTATION,
-  QueueEntryStatus.COMPLETED,
   QueueEntryStatus.SKIPPED,
   QueueEntryStatus.WAITING,
   QueueEntryStatus.NO_SHOW,
@@ -31,6 +29,8 @@ export class TransitionQueueEntryUseCase implements ITransitionQueueEntryUseCase
     if (!Types.ObjectId.isValid(input.actorUserId) || !Types.ObjectId.isValid(input.queueEntryId)) throw new BadRequestError("Queue entry or authenticated user id is invalid");
     if (!Object.values(QueueEntryStatus).includes(input.nextStatus as QueueEntryStatus)) throw new BadRequestError("Queue status is invalid");
     const nextStatus = input.nextStatus as QueueEntryStatus;
+    if (nextStatus === QueueEntryStatus.COMPLETED) throw new ForbiddenError("Queue entries are completed only when a doctor finalizes the consultation");
+    if (nextStatus === QueueEntryStatus.IN_CONSULTATION) throw new ForbiddenError("Queue entries enter consultation through the consultation workflow");
     const clinic = await this.context.getOperationalClinic(input.clinicId);
     const localDate = this.context.localDate(new Date(), clinic.timeZone);
     const current = await this.queue.findByIdInClinic(input.queueEntryId, input.clinicId, localDate);

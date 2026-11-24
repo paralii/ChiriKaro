@@ -108,6 +108,13 @@ export const API_ROUTES = {
   },
 
   DOCTOR: {
+    CONSULTATION_OPEN: (queueEntryId: string) => `/doctor/consultations/queue/${encodeURIComponent(queueEntryId)}`,
+    CONSULTATION: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}`,
+    CONSULTATION_FINALIZE: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/finalize`,
+    CONSULTATION_HISTORY: (patientId: string) => `/doctor/consultations/patients/${encodeURIComponent(patientId)}/history`,
+    CONSULTATION_RECORDS: (patientId: string) => `/doctor/consultations/patients/${encodeURIComponent(patientId)}/records`,
+    CONSULTATION_ATTACHMENTS: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/attachments`,
+    CONSULTATION_ATTACHMENT: (id: string, attachmentId: string) => `/doctor/consultations/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}`,
     ONBOARDING: "/doctor/onboarding",
     ONBOARDING_STEP: (step: string) =>
       `/doctor/onboarding/${encodeURIComponent(step)}`,

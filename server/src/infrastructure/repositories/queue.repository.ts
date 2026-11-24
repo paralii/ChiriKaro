@@ -62,6 +62,12 @@ export class QueueRepository implements IQueueRepository {
     return doc ? this.toDomain(doc) : null;
   }
 
+  async findByIdForClinic(queueEntryId: string, clinicId: string): Promise<QueueEntryRecord | null> {
+    if (!Types.ObjectId.isValid(queueEntryId) || !Types.ObjectId.isValid(clinicId)) return null;
+    const doc = await QueueEntryModel.findOne({ _id: new Types.ObjectId(queueEntryId), clinicId: new Types.ObjectId(clinicId) }).exec();
+    return doc ? this.toDomain(doc) : null;
+  }
+
   async transitionStatus(input: { queueEntryId: string; clinicId: string; localDate: string; expectedStatus: QueueEntryRecord["status"]; nextStatus: QueueEntryRecord["status"]; actorUserId: string; actorRole: string; changedAt: Date }): Promise<QueueEntryRecord | null> {
     if (!Types.ObjectId.isValid(input.queueEntryId) || !Types.ObjectId.isValid(input.clinicId) || !Types.ObjectId.isValid(input.actorUserId)) return null;
     const doc = await QueueEntryModel.findOneAndUpdate({
@@ -71,6 +77,12 @@ export class QueueRepository implements IQueueRepository {
       $set: { status: input.nextStatus },
       $push: { statusHistory: { fromStatus: input.expectedStatus, toStatus: input.nextStatus, actorUserId: new Types.ObjectId(input.actorUserId), actorRole: input.actorRole, changedAt: input.changedAt } },
     }, { returnDocument: "after" }).exec();
+    return doc ? this.toDomain(doc) : null;
+  }
+
+  async transitionStatusForClinic(input: { queueEntryId: string; clinicId: string; expectedStatus: QueueEntryRecord["status"]; nextStatus: QueueEntryRecord["status"]; actorUserId: string; actorRole: string; changedAt: Date }): Promise<QueueEntryRecord | null> {
+    if (!Types.ObjectId.isValid(input.queueEntryId) || !Types.ObjectId.isValid(input.clinicId) || !Types.ObjectId.isValid(input.actorUserId)) return null;
+    const doc = await QueueEntryModel.findOneAndUpdate({ _id: new Types.ObjectId(input.queueEntryId), clinicId: new Types.ObjectId(input.clinicId), status: input.expectedStatus }, { $set: { status: input.nextStatus }, $push: { statusHistory: { fromStatus: input.expectedStatus, toStatus: input.nextStatus, actorUserId: new Types.ObjectId(input.actorUserId), actorRole: input.actorRole, changedAt: input.changedAt } } }, { returnDocument: "after" }).exec();
     return doc ? this.toDomain(doc) : null;
   }
 

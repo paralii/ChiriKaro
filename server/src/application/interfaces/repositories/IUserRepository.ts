@@ -1,5 +1,6 @@
 import { User } from "@domain/entities/user.entity.js";
 import { Role } from "@domain/value-objects/Role.js";
+import type { MedicalHistory } from "@domain/entities/consultation.entity.ts";
 
 export interface IUserRepository {
   findById(id: string): Promise<User | null>;
@@ -11,4 +12,6 @@ export interface IUserRepository {
   save(user: User): Promise<User>;
   deleteById(id: string): Promise<void>;
   update(user: User): Promise<User>;
+  getMedicalHistory(patientUserId: string): Promise<{ history: MedicalHistory; updatedBy: string | null; updatedAt: Date | null } | null>;
+  updateMedicalHistory(patientUserId: string, actorUserId: string, history: MedicalHistory): Promise<{ history: MedicalHistory; updatedBy: string; updatedAt: Date } | null>;
 }

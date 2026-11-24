@@ -33,6 +33,7 @@ import PatientQueuePage from '@/pages/portal/patient/PatientQueuePage';
 import PatientClinicProfilePage from '@/pages/portal/patient/PatientClinicProfilePage';
 import PatientDoctorProfilePage from '@/pages/portal/patient/PatientDoctorProfilePage';
 import ClinicQueuePage from '@/pages/portal/clinic/ClinicQueuePage';
+import DoctorConsultationPage from '@/pages/portal/doctor/DoctorConsultationPage';
 
 export default function AppRouter() {
   return (
@@ -67,6 +68,8 @@ export default function AppRouter() {
           <Route path="availability" element={<DoctorAvailabilityPage />} />
           <Route path="workspace" element={<TeamAccessPage />} />
           <Route path="queue" element={<ClinicQueuePage canRegister={false} />} />
+          <Route path="consultations/new" element={<DoctorConsultationPage />} />
+          <Route path="consultations/:consultationId" element={<DoctorConsultationPage />} />
         </Route>
       </Route>
       <Route element={<RequireStaff />}>

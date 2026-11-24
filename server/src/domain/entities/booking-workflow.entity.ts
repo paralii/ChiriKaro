@@ -77,3 +77,10 @@ export interface QueueEntryRecord {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface PatientMedicalHistoryRecord {
+  patientUserId: string;
+  history: import("@domain/entities/consultation.entity.ts").MedicalHistory;
+  updatedBy: string | null;
+  updatedAt: Date | null;
+}

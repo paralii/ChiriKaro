@@ -12,6 +12,8 @@ export interface IAppointmentPaymentDocument extends Document {
   providerPaymentId: string | null;
   lastWebhookEventId: string | null;
   refundReviewStatus: "NOT_REQUIRED" | "PENDING_REVIEW";
+  activeSettlementId: Types.ObjectId | null;
+  completedSettlementId: Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,10 +28,13 @@ const schema = new Schema<IAppointmentPaymentDocument>({
   providerPaymentId: { type: String, default: null },
   lastWebhookEventId: { type: String, default: null },
   refundReviewStatus: { type: String, required: true, enum: ["NOT_REQUIRED", "PENDING_REVIEW"], default: "NOT_REQUIRED" },
+  activeSettlementId: { type: Schema.Types.ObjectId, ref: "Settlement", default: null },
+  completedSettlementId: { type: Schema.Types.ObjectId, ref: "Settlement", default: null },
 }, { timestamps: true, versionKey: false });
 
 schema.index({ appointmentId:  1 }, { unique: true, name: "uniq_payment_per_appointment" });
 schema.index({ providerOrderId: 1 }, { unique: true, partialFilterExpression: { providerOrderId: { $type: "string" } }, name: "uniq_razorpay_order" });
 schema.index({ providerPaymentId: 1 }, { unique: true, partialFilterExpression: { providerPaymentId: { $type: "string" } }, name: "uniq_razorpay_payment" });
+schema.index({ activeSettlementId: 1 }, { name: "appointment_payment_active_settlement" });
 
 export const AppointmentPaymentModel = model<IAppointmentPaymentDocument>("AppointmentPayment", schema);

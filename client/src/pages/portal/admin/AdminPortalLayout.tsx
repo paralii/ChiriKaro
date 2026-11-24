@@ -12,6 +12,7 @@ const items = [
   { path: 'patients', label: 'Patients' },
   { path: 'doctors', label: 'Doctors' },
   { path: 'pending', label: 'Pending review' },
+  { path: 'billing', label: 'Billing and settlements' },
 ];
 
 const titles: Record<string, string> = {
@@ -20,6 +21,7 @@ const titles: Record<string, string> = {
   patients: 'Patients',
   doctors: 'Doctor directory',
   pending: 'Pending clinics',
+  billing: 'Billing and settlements',
 };
 
 export default function AdminPortalLayout() {

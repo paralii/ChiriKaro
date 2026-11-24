@@ -13,6 +13,7 @@ const items = [
   { path: '/doctor/availability', label: 'Availability and slots' },
   { path: '/doctor/workspace', label: 'Workspace details' },
   { path: '/doctor/queue', label: 'Clinic queue' },
+  { path: '/doctor/transactions', label: 'Transactions' },
 ];
 
 const titles: Record<string, string> = {
@@ -21,6 +22,7 @@ const titles: Record<string, string> = {
   workspace: 'Workspace details',
   queue: 'Clinic queue',
   consultations: 'Dental consultation',
+  transactions: 'Transactions',
 };
 
 export default function DoctorPortalLayout() {

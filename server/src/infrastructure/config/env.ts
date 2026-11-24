@@ -36,6 +36,9 @@ interface EnvVars {
   CLOUDINARY_API_SECRET: string;
 
   LOG_LEVEL: string;
+  AI_PROVIDER: "gemini";
+  GEMINI_API_KEY: string;
+  GEMINI_MODEL: string;
 }
 
 const envSchema = Joi.object({
@@ -75,6 +78,9 @@ const envSchema = Joi.object({
   LOG_LEVEL: Joi.string()
     .valid("error", "warn", "info", "http", "verbose", "debug", "silly")
     .default("info"),
+  AI_PROVIDER: Joi.string().valid("gemini").default("gemini"),
+  GEMINI_API_KEY: Joi.string().allow("").default(""),
+  GEMINI_MODEL: Joi.string().default("gemini-2.5-flash"),
 }).unknown(true);
 
 const { error, value } = envSchema.validate(process.env, { abortEarly: false });
@@ -116,4 +122,7 @@ export const env: EnvVars = {
   CLOUDINARY_API_SECRET: value.CLOUDINARY_API_SECRET,
 
   LOG_LEVEL: value.LOG_LEVEL,
+  AI_PROVIDER: value.AI_PROVIDER,
+  GEMINI_API_KEY: value.GEMINI_API_KEY,
+  GEMINI_MODEL: value.GEMINI_MODEL,
 };

@@ -6,4 +6,5 @@ export * from "./NotFoundError.js";
 export * from "./ConflictError.js";
 export * from "./ValidationError.js";
 export * from "./TooManyRequestsError.js";
+export * from "./RetryableAIProviderError.js";
 export * from "./InternalServerError.js";

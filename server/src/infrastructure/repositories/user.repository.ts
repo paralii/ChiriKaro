@@ -10,10 +10,11 @@ import type { MedicalHistory } from "@domain/entities/consultation.entity.ts";
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
+import type { IAIPatientHistoryRepository } from "@application/interfaces/repositories/IAIPatientHistoryRepository.ts";
 
 export class MongoUserRepository
   extends BaseRepository<IUserDocument>
-  implements IUserRepository
+  implements IUserRepository, IAIPatientHistoryRepository
 {
   constructor() {
     super(UserModel);

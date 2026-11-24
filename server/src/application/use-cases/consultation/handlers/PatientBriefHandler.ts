@@ -5,14 +5,15 @@ import type { PatientBriefDTO } from "@application/dto/consultation/ai-assistanc
 import type { AIClinicalContextService } from "@application/services/ai/AIClinicalContextService.ts";
 import { AIPrivacyFilter } from "@application/services/ai/AIPrivacyFilter.ts";
 import { AIPromptBuilder } from "@application/services/ai/AIPromptBuilder.ts";
+import { AIInputFingerprint } from "@application/services/ai/AIInputFingerprint.ts";
 import { parseResponseObject, responseText, responseTextList } from "@application/services/ai/ai-response-validation.ts";
-import { BadRequestError } from "@shared/errors/index.ts";
+import { BadRequestError, RetryableAIProviderError, ValidationError } from "@shared/errors/index.ts";
 
 const instructions = "Task: PATIENT_BRIEF. Return JSON only with overview (string), medicalHistory, previousDiagnoses, prescriptions, treatmentHistory, followUps, recordsReviewed (string arrays). Summarize recorded facts only; do not infer missing facts.";
 export class PatientBriefHandler implements IAIAssistanceFeatureHandler<PatientBriefDTO> {
-  constructor(private readonly provider: IAIProvider, private readonly context: AIClinicalContextService, private readonly privacy: AIPrivacyFilter, private readonly prompts: AIPromptBuilder) {}
+  constructor(private readonly provider: IAIProvider, private readonly context: AIClinicalContextService, private readonly privacy: AIPrivacyFilter, private readonly prompts: AIPromptBuilder, private readonly fingerprints = new AIInputFingerprint()) {}
 
-  async execute(consultation: ConsultationRecord): Promise<PatientBriefDTO> {
+  private async normalizedInput(consultation: ConsultationRecord) {
     const patientId = consultation.patientUserId;
     if (!patientId) throw new BadRequestError("AI patient brief requires a registered patient account");
     const [context, medicalHistory] = await Promise.all([
@@ -21,26 +22,37 @@ export class PatientBriefHandler implements IAIAssistanceFeatureHandler<PatientB
     ]);
     const source = {
       medicalHistory: {
-        conditions: medicalHistory.existingConditions.map((value) => this.privacy.cleanText(value)), allergies: medicalHistory.allergies.map((value) => this.privacy.cleanText(value)),
-        medications: medicalHistory.medications.map((value) => this.privacy.cleanText(value)), surgeries: medicalHistory.previousSurgeries.map((value) => this.privacy.cleanText(value)),
-        dentalHistory: this.privacy.cleanText(medicalHistory.dentalHistory), remarks: this.privacy.cleanText(medicalHistory.remarks),
+        conditions: medicalHistory.existingConditions.slice(0, 20).map((value) => this.privacy.cleanText(value, 300)), allergies: medicalHistory.allergies.slice(0, 20).map((value) => this.privacy.cleanText(value, 300)),
+        medications: medicalHistory.medications.slice(0, 20).map((value) => this.privacy.cleanText(value, 300)), surgeries: medicalHistory.previousSurgeries.slice(0, 10).map((value) => this.privacy.cleanText(value, 300)),
+        dentalHistory: this.privacy.cleanText(medicalHistory.dentalHistory),
       },
       consultations: context.consultations.map((item) => ({
-        chiefComplaint: this.privacy.cleanText(item.data.chiefComplaint), symptoms: item.data.symptoms.map((value) => this.privacy.cleanText(value)),
-        diagnoses: item.data.diagnoses.map((d) => ({ diagnosis: this.privacy.cleanText(d.diagnosis), severity: this.privacy.cleanText(d.severity), remarks: this.privacy.cleanText(d.remarks) })),
-        prescriptions: item.data.prescriptions.map((p) => `${this.privacy.cleanText(p.medicine)}; ${this.privacy.cleanText(p.dosage)}; ${this.privacy.cleanText(p.frequency)}; ${this.privacy.cleanText(p.duration)}`),
+        chiefComplaint: this.privacy.cleanText(item.data.chiefComplaint), symptoms: item.data.symptoms.slice(0, 20).map((value) => this.privacy.cleanText(value, 300)),
+        diagnoses: item.data.diagnoses.slice(0, 20).map((d) => ({ diagnosis: this.privacy.cleanText(d.diagnosis, 300), severity: this.privacy.cleanText(d.severity, 100) })),
+        prescriptions: item.data.prescriptions.slice(0, 20).map((p) => `${this.privacy.cleanText(p.medicine, 100)}; ${this.privacy.cleanText(p.dosage, 100)}; ${this.privacy.cleanText(p.frequency, 100)}; ${this.privacy.cleanText(p.duration, 100)}`),
       })),
-      plans: context.treatmentPlans.map((p) => ({ title: this.privacy.cleanText(p.title), diagnosis: this.privacy.cleanText(p.diagnosis), procedures: p.procedures.map((item) => this.privacy.cleanText(item.procedure)), status: p.status })),
-      followUps: context.followUps.map((f) => ({ reason: this.privacy.cleanText(f.reason), notes: this.privacy.cleanText(f.notes), status: f.status })),
+      plans: context.treatmentPlans.slice(0, 20).map((p) => ({ title: this.privacy.cleanText(p.title, 200), diagnosis: this.privacy.cleanText(p.diagnosis, 300), procedures: p.procedures.slice(0, 20).map((item) => this.privacy.cleanText(item.procedure, 200)), status: p.status })),
+      followUps: context.followUps.slice(0, 20).map((f) => ({ reason: this.privacy.cleanText(f.reason, 300), status: f.status })),
     };
-    const safeSource = this.privacy.redact(JSON.stringify(source), consultation.patientNameSnapshot);
+    return JSON.parse(this.privacy.redact(JSON.stringify(source), consultation.patientNameSnapshot)) as Record<string, unknown>;
+  }
+
+  async fingerprint(consultation: ConsultationRecord): Promise<string> {
+    return this.fingerprints.create("patient-brief", await this.normalizedInput(consultation));
+  }
+
+  async execute(consultation: ConsultationRecord): Promise<PatientBriefDTO> {
+    const safeSource = await this.normalizedInput(consultation);
+    const inputFingerprint = this.fingerprints.create("patient-brief", safeSource);
     const raw = await this.provider.generate(this.prompts.build(instructions, safeSource));
-    const value = parseResponseObject(raw);
-    return {
-      overview: responseText(value.overview, "overview"), medicalHistory: responseTextList(value.medicalHistory, "medicalHistory"),
-      previousDiagnoses: responseTextList(value.previousDiagnoses, "previousDiagnoses"), prescriptions: responseTextList(value.prescriptions, "prescriptions"),
-      treatmentHistory: responseTextList(value.treatmentHistory, "treatmentHistory"), followUps: responseTextList(value.followUps, "followUps"),
-      recordsReviewed: responseTextList(value.recordsReviewed, "recordsReviewed"),
-    };
+    try {
+      const value = parseResponseObject(raw);
+      return {
+        overview: responseText(value.overview, "overview"), medicalHistory: responseTextList(value.medicalHistory, "medicalHistory"),
+        previousDiagnoses: responseTextList(value.previousDiagnoses, "previousDiagnoses"), prescriptions: responseTextList(value.prescriptions, "prescriptions"),
+        treatmentHistory: responseTextList(value.treatmentHistory, "treatmentHistory"), followUps: responseTextList(value.followUps, "followUps"),
+        recordsReviewed: responseTextList(value.recordsReviewed, "recordsReviewed"), inputFingerprint,
+      };
+    } catch (error) { if (error instanceof ValidationError) throw new RetryableAIProviderError("AI provider returned an invalid response"); throw error; }
   }
 }

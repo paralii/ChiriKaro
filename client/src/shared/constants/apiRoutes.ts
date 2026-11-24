@@ -115,6 +115,7 @@ export const API_ROUTES = {
     CONSULTATION_AI_SYMPTOM_ANALYSIS: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/symptom-analysis`,
     CONSULTATION_AI_PATIENT_BRIEF: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/patient-brief`,
     CONSULTATION_AI_INSIGHTS: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/insights`,
+    CONSULTATION_AI_FRESHNESS: (id: string, feature: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/${encodeURIComponent(feature)}/freshness`,
     CONSULTATION_FINALIZE: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/finalize`,
     CONSULTATION_HISTORY: (patientId: string) => `/doctor/consultations/patients/${encodeURIComponent(patientId)}/history`,
     CONSULTATION_RECORDS: (patientId: string) => `/doctor/consultations/patients/${encodeURIComponent(patientId)}/records`,

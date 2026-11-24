@@ -14,4 +14,14 @@ export class AIAssistanceController {
   insights = async (req: Request, res: Response, next: NextFunction) => {
     try { if (!req.user?.clinicId || !req.user.sub || typeof req.params.consultationId !== "string") throw new BadRequestError("Consultation is required"); ApiResponse.success(res, "AI patient insights generated", await this.useCase.insights(req.params.consultationId, req.user.clinicId, req.user.sub)); } catch (error) { next(error); }
   };
+  freshness = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user?.clinicId || !req.user.sub || typeof req.params.consultationId !== "string") throw new BadRequestError("Consultation is required");
+      const feature = req.params.feature;
+      if (feature !== "symptoms" && feature !== "brief" && feature !== "insights") throw new BadRequestError("AI feature is invalid");
+      const input = feature === "symptoms" ? req.body?.consultationData : undefined;
+      const result = await this.useCase.freshness(feature, req.params.consultationId, req.user.clinicId, req.user.sub, req.body?.inputFingerprint, input);
+      ApiResponse.success(res, "AI result freshness checked", result);
+    } catch (error) { next(error); }
+  };
 }

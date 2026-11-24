@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { logger } from "../../infrastructure/logger/logger.js";
 import { AppError } from "../../shared/errors/index.js";
 import { InvalidClinicDataError, InvalidDoctorDataError, InvalidInvitationDataError, InvalidUserDataError } from "../../domain/error/DomainError.js";
+import { RetryableAIProviderError, TooManyRequestsError } from "../../shared/errors/index.js";
 
 interface MongoServerErrorLike extends Error {
   code?: number;
@@ -40,12 +41,14 @@ const resolveErrorDetails = (
   statusCode: number;
   message: string;
   errors?: Record<string, string[]>;
+  retryAfterSeconds?: number;
 } => {
   if (err instanceof AppError) {
     const result: {
       statusCode: number;
       message: string;
       errors?: Record<string, string[]>;
+      retryAfterSeconds?: number;
     } = {
       statusCode: err.statusCode,
       message: err.message,
@@ -54,6 +57,7 @@ const resolveErrorDetails = (
     if (err.errors) {
       result.errors = err.errors;
     }
+    if ((err instanceof TooManyRequestsError || err instanceof RetryableAIProviderError) && err.retryAfterSeconds !== undefined) result.retryAfterSeconds = err.retryAfterSeconds;
 
     return result;
   }
@@ -110,18 +114,20 @@ export const errorMiddleware = (
   _next: NextFunction,
 ): void => {
   void _next;
-  const { statusCode, message, errors } = resolveErrorDetails(err);
+  const { statusCode, message, errors, retryAfterSeconds } = resolveErrorDetails(err);
 
-  logger.error(
-    `[${req.requestId}] ${req.method} ${req.originalUrl} - ${statusCode} - ${err.message}`,
-    { stack: err.stack },
-  );
+  // AI failures are deliberately logged without exception details, which may contain provider or prompt data.
+  const isAIAssistanceRequest = req.originalUrl.includes("/ai/");
+  const safeAIFailure = isAIAssistanceRequest || err instanceof TooManyRequestsError || err instanceof RetryableAIProviderError;
+  const safePath = isAIAssistanceRequest ? "AI assistance route" : req.originalUrl;
+  logger.error(`[${req.requestId}] ${req.method} ${safePath} - ${statusCode} - ${safeAIFailure ? "AI assistance request failed" : err.message}`, safeAIFailure ? undefined : { stack: err.stack });
 
   res.status(statusCode).json({
     success: false,
     message,
     ...(errors ? { errors } : {}),
+    ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
     requestId: req.requestId,
-    ...(process.env.NODE_ENV === "production" ? {} : { stack: err.stack }),
+    ...(process.env.NODE_ENV === "production" || isAIAssistanceRequest ? {} : { stack: err.stack }),
   });
 };

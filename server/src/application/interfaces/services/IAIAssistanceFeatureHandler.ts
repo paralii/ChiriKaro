@@ -3,6 +3,7 @@ import type { PatientBriefDTO, PatientInsightsDTO, SymptomAnalysisDTO } from "@a
 
 export interface IAIAssistanceFeatureHandler<TResult> {
   execute(consultation: ConsultationRecord, input?: unknown): Promise<TResult>;
+  fingerprint(consultation: ConsultationRecord, input?: unknown): Promise<string>;
 }
 
 export interface AIAssistanceFeatureHandlers {

@@ -26,15 +26,28 @@ export class AIAssistanceUseCase {
     return this.execute(this.handlers.insights, id, clinicId, doctorUserId);
   }
 
+  async freshness(feature: "symptoms" | "brief" | "insights", id: string, clinicId: string, doctorUserId: string, previousFingerprint: unknown, input?: unknown): Promise<{ current: boolean; inputFingerprint: string }> {
+    const handlers = { symptoms: this.handlers.symptomAnalysis, brief: this.handlers.patientBrief, insights: this.handlers.insights };
+    const handler = handlers[feature];
+    const consultation = await this.authorizedConsultation(id, clinicId, doctorUserId);
+    const inputFingerprint = await handler.fingerprint(consultation, input);
+    return { current: typeof previousFingerprint === "string" && previousFingerprint === inputFingerprint, inputFingerprint };
+  }
+
   private async execute<TResult>(
     handler: IAIAssistanceFeatureHandler<TResult>, id: string, clinicId: string, doctorUserId: string, input?: unknown,
   ): Promise<TResult> {
+    const consultation = await this.authorizedConsultation(id, clinicId, doctorUserId);
+    return handler.execute(consultation, input);
+  }
+
+  private async authorizedConsultation(id: string, clinicId: string, doctorUserId: string): Promise<ConsultationRecord> {
     if (![id, clinicId, doctorUserId].every((value) => this.identifiers.isValid(value))) throw new BadRequestError("Consultation identity is invalid");
     await this.clinicContext.getOperationalClinic(clinicId);
     await this.clinicContext.getVerifiedDoctor(clinicId, doctorUserId);
     const consultation: ConsultationRecord | null = await this.consultations.findById(id, clinicId);
     if (!consultation || consultation.clinicId !== clinicId) throw new NotFoundError("Consultation");
     if (consultation.doctorUserId !== doctorUserId) throw new ForbiddenError("Doctors can only access their own consultations");
-    return handler.execute(consultation, input);
+    return consultation;
   }
 }

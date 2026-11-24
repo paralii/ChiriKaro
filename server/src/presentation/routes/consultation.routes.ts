@@ -19,6 +19,7 @@ export function ConsultationRouter(controller: ConsultationController, auth: Req
   r.post(API_ROUTES.DOCTOR.CONSULTATION_AI_SYMPTOM_ANALYSIS, auth, doctor, ai.symptomAnalysis);
   r.post(API_ROUTES.DOCTOR.CONSULTATION_AI_PATIENT_BRIEF, auth, doctor, ai.patientBrief);
   r.post(API_ROUTES.DOCTOR.CONSULTATION_AI_INSIGHTS, auth, doctor, ai.insights);
+  r.post(API_ROUTES.DOCTOR.CONSULTATION_AI_FRESHNESS, auth, doctor, ai.freshness);
   return r;
 }
 

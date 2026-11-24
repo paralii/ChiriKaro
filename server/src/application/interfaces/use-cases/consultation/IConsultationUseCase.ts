@@ -1,6 +1,9 @@
 import type { ConsultationDTO } from "@application/dto/consultation/consultation.dto.ts";
 import type { MedicalHistory } from "@domain/entities/consultation.entity.ts";
 export interface IConsultationUseCase {
+  listPatientPrescriptions(patientUserId: string): Promise<Array<{ consultationId: string; doctorName: string; clinicName: string; prescribedAt: Date; prescriptions: ConsultationDTO["data"]["prescriptions"] }>>;
+  patientPrescriptionPdf(consultationId: string, patientUserId: string): Promise<import("node:stream").Readable>;
+  doctorPrescriptionPdf(consultationId: string, clinicId: string, doctorUserId: string): Promise<import("node:stream").Readable>;
   open(queueEntryId: string, clinicId: string, doctorUserId: string): Promise<ConsultationDTO>;
   get(id: string, clinicId: string, doctorUserId: string): Promise<ConsultationDTO>;
   listPatient(patientUserId: string, clinicId: string, doctorUserId: string): Promise<ConsultationDTO[]>;

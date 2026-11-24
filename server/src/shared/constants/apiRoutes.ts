@@ -62,6 +62,7 @@ export const API_ROUTES = {
     CONSULTATION_PATIENT_HISTORY: "/consultations/patients/:patientUserId/history",
     CONSULTATION_PATIENT_RECORDS: "/consultations/patients/:patientUserId/records",
     CONSULTATION_FINALIZE: "/consultations/:consultationId/finalize",
+    CONSULTATION_PRESCRIPTION_PDF: "/consultations/:consultationId/prescription.pdf",
     CONSULTATION_ATTACHMENTS: "/consultations/:consultationId/attachments",
     CONSULTATION_ATTACHMENT: "/consultations/:consultationId/attachments/:attachmentId",
 
@@ -79,6 +80,8 @@ export const API_ROUTES = {
     APPOINTMENTS: "/appointments",
     APPOINTMENT_BY_ID: "/appointments/:appointmentId",
     QUEUE: "/queue",
+    PRESCRIPTIONS: "/prescriptions",
+    PRESCRIPTION_PDF: "/prescriptions/:consultationId.pdf",
     APPOINTMENT_CANCEL: "/appointments/:appointmentId/cancel",
     APPOINTMENT_RESCHEDULE: "/appointments/:appointmentId/reschedule",
     APPOINTMENT_PAYMENT_ORDER: "/appointments/:appointmentId/payment/order",

@@ -53,6 +53,13 @@ export default function DoctorConsultationPage() {
 
   const save = async () => {
     if (!record) return;
+    const prescriptionErrors = data.prescriptions.flatMap((prescription, index) => ([
+      !prescription.medicine.trim() ? `Medicine is required for prescription ${index + 1}.` : '',
+      !prescription.dosage.trim() ? `Dosage is required for ${prescription.medicine || `prescription ${index + 1}`}.` : '',
+      !prescription.frequency.trim() ? `Frequency is required for ${prescription.medicine || `prescription ${index + 1}`}.` : '',
+      !prescription.duration.trim() ? `Duration is required for ${prescription.medicine || `prescription ${index + 1}`}.` : '',
+    ].filter(Boolean)));
+    if (prescriptionErrors.length) { setError(prescriptionErrors.join(' ')); setNotice(''); setTab(6); return; }
     setBusy(true); setError(''); setNotice('');
     try {
       if (record.patientUserId) {
@@ -60,7 +67,7 @@ export default function DoctorConsultationPage() {
         setHistoryMeta({ updatedBy: result.updatedBy, updatedAt: result.updatedAt });
       }
       const updated = await consultationService.save(record.id, { data, medicalHistorySnapshot: history });
-      accept(updated); setNotice('Consultation draft saved. Queue remains in consultation.');
+      accept(updated); setNotice('Consultation draft and prescriptions saved. Queue remains in consultation.');
     } catch (reason) { setError(getErrorMessage(reason, 'Could not save the consultation.')); }
     finally { setBusy(false); }
   };
@@ -107,7 +114,7 @@ export default function DoctorConsultationPage() {
         {tab === 3 ? <><h2 className="m-0 text-base font-semibold">Dental Chart</h2><p className="m-0 text-sm text-text-muted">Record tooth numbers and surfaces using your clinic’s preferred notation.</p>{renderRows('dentalChart', [{ key: 'toothNumber', label: 'Tooth number' }, { key: 'condition', label: 'Condition' }, { key: 'affectedSurface', label: 'Affected surface' }, { key: 'observations', label: 'Observations', multiline: true }])}</> : null}
         {tab === 4 ? <><h2 className="m-0 text-base font-semibold">Diagnosis</h2>{renderRows('diagnoses', [{ key: 'diagnosis', label: 'Diagnosis' }, { key: 'affectedTeeth', label: 'Affected teeth (comma separated)' }, { key: 'severity', label: 'Severity' }, { key: 'remarks', label: 'Remarks', multiline: true }])}</> : null}
         {tab === 5 ? <><h2 className="m-0 text-base font-semibold">Treatment Plan</h2>{renderRows('treatmentPlan', [{ key: 'procedure', label: 'Procedure' }, { key: 'affectedTeeth', label: 'Affected teeth (comma separated)' }, { key: 'estimatedCost', label: 'Estimated cost', type: 'number' }, { key: 'numberOfSessions', label: 'Number of sessions', type: 'number' }, { key: 'instructions', label: 'Instructions', multiline: true }])}</> : null}
-        {tab === 6 ? <><h2 className="m-0 text-base font-semibold">Prescription</h2>{renderRows('prescriptions', [{ key: 'medicine', label: 'Medicine' }, { key: 'dosage', label: 'Dosage' }, { key: 'frequency', label: 'Frequency' }, { key: 'duration', label: 'Duration' }, { key: 'instructions', label: 'Instructions', multiline: true }])}</> : null}
+        {tab === 6 ? <><h2 className="m-0 text-base font-semibold">Prescription</h2><p className="m-0 text-sm text-text-muted">Add one or more medicines. Medicine, dosage, frequency and duration are required. Prescriptions become historical when the consultation is finalized.</p>{renderRows('prescriptions', [{ key: 'medicine', label: 'Medicine *' }, { key: 'dosage', label: 'Dosage *' }, { key: 'frequency', label: 'Frequency *' }, { key: 'duration', label: 'Duration *' }, { key: 'instructions', label: 'Instructions', multiline: true }])}</> : null}
         {tab === 7 ? <><h2 className="m-0 text-base font-semibold">Attachments</h2><p className="m-0 text-sm text-text-muted">Private files are available only through authorized clinician access. PDF, JPEG and PNG, up to 10 MB.</p>{record.attachments.map((a) => <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm"><span>{a.fileName} · {a.category.replaceAll('_', ' ')} · {new Date(a.uploadedAt).toLocaleDateString()}</span><div className="flex gap-2"><Button size="xs" variant="secondary" onClick={() => void attachmentAction(a.id, false)}>Open</Button>{record.status === 'IN_PROGRESS' ? <Button size="xs" variant="secondary" disabled={busy} onClick={() => void attachmentAction(a.id, true)}>Remove</Button> : null}</div></div>)}{record.status === 'IN_PROGRESS' ? <div className="grid gap-2 sm:grid-cols-[1fr_2fr]"><label className={label}>Category<select id="attachment-category" className={area}><option value="X_RAY">X-rays</option><option value="CLINICAL_PHOTOGRAPH">Clinical photographs</option><option value="REPORT">Reports</option><option value="SUPPORTING_DOCUMENT">Supporting documents</option></select></label><label className={label}>Choose attachment<input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(e) => void upload(e)} disabled={busy} /></label></div> : null}</> : null}
       </Card>
       <div className="flex flex-wrap justify-between gap-2"><Button variant="secondary" onClick={() => navigate('/doctor/queue')}>Back to queue</Button><div className="flex flex-wrap gap-2">{record.status === 'IN_PROGRESS' ? <><Button variant="secondary" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save draft'}</Button><Button disabled={busy} onClick={() => void finalize()}>{busy ? 'Working…' : 'Finalize consultation'}</Button></> : <p className="m-0 self-center text-sm font-medium text-success">Completed historical record · read only</p>}</div></div>

@@ -148,6 +148,8 @@ export const API_ROUTES = {
     PROFILE: "/patient/profile",
     APPOINTMENTS: "/patient/appointments",
     QUEUE: "/patient/queue",
+    PRESCRIPTIONS: "/patient/prescriptions",
+    PRESCRIPTION_PDF: (consultationId: string) => `/patient/prescriptions/${consultationId}.pdf`,
     APPOINTMENT_BY_ID: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}`,
     APPOINTMENT_CANCEL: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/cancel`,
     APPOINTMENT_RESCHEDULE: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/reschedule`,

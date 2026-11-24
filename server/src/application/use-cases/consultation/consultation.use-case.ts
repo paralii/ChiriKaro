@@ -11,6 +11,8 @@ import { QueueEntryStatus } from "@domain/enum/queue-entry-status.enum.ts";
 import { Role } from "@domain/value-objects/Role.ts";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
 import type { ConsultationDTO } from "@application/dto/consultation/consultation.dto.ts";
+import type { Readable } from "node:stream";
+import { PrescriptionPdfService } from "@application/services/prescription-pdf.service.ts";
 
 const EMPTY_HISTORY: MedicalHistory = { existingConditions: [], allergies: [], medications: [], previousSurgeries: [], dentalHistory: "", remarks: "" };
 const EMPTY_DATA: ConsultationData = { chiefComplaint: "", symptoms: [], painLevel: null, examinationFindings: "", clinicalNotes: "", dentalChart: [], diagnoses: [], treatmentPlan: [], prescriptions: [] };
@@ -35,12 +37,16 @@ function consultationData(v: unknown): ConsultationData {
     dentalChart: rows(r.dentalChart, "dentalChart", (x) => ({ toothNumber: text(x.toothNumber, "toothNumber", 8), condition: text(x.condition, "condition", 300), affectedSurface: text(x.affectedSurface, "affectedSurface", 100), observations: text(x.observations, "observations") })),
     diagnoses: rows(r.diagnoses, "diagnoses", (x) => ({ diagnosis: text(x.diagnosis, "diagnosis", 500), affectedTeeth: strings(x.affectedTeeth, "affectedTeeth"), severity: text(x.severity, "severity", 100), remarks: text(x.remarks, "diagnosis remarks") })),
     treatmentPlan: rows(r.treatmentPlan, "treatmentPlan", (x) => ({ procedure: text(x.procedure, "procedure", 500), affectedTeeth: strings(x.affectedTeeth, "affectedTeeth"), estimatedCost: number(x.estimatedCost, "estimatedCost", 0, 100000000), numberOfSessions: number(x.numberOfSessions, "numberOfSessions", 1, 1000), instructions: text(x.instructions, "treatment instructions") })),
-    prescriptions: rows(r.prescriptions, "prescriptions", (x) => ({ medicine: text(x.medicine, "medicine", 500), dosage: text(x.dosage, "dosage", 300), frequency: text(x.frequency, "frequency", 300), duration: text(x.duration, "duration", 300), instructions: text(x.instructions, "prescription instructions") })) };
+    prescriptions: rows(r.prescriptions, "prescriptions", (x) => {
+      const medicine = text(x.medicine, "medicine", 500); const dosage = text(x.dosage, "dosage", 300); const frequency = text(x.frequency, "frequency", 300); const duration = text(x.duration, "duration", 300);
+      if (!medicine || !dosage || !frequency || !duration) throw new ValidationError("Each prescription requires medicine, dosage, frequency and duration");
+      return { medicine, dosage, frequency, duration, instructions: text(x.instructions, "prescription instructions") };
+    }) };
 }
 function dto(record: ConsultationRecord): ConsultationDTO { return { ...record, attachments: record.attachments.map(({ documentKey: _key, ...attachment }) => { void _key; return attachment; }) }; }
 
 export class ConsultationUseCase implements IConsultationUseCase {
-  constructor(private readonly records: IConsultationRepository, private readonly queue: IQueueRepository, private readonly users: IUserRepository, private readonly context: IQueueClinicContext, private readonly storage: IDocumentStorage, private readonly appointments: IAppointmentRepository) {}
+  constructor(private readonly records: IConsultationRepository, private readonly queue: IQueueRepository, private readonly users: IUserRepository, private readonly context: IQueueClinicContext, private readonly storage: IDocumentStorage, private readonly appointments: IAppointmentRepository, private readonly prescriptionPdf = new PrescriptionPdfService()) {}
   private async authorize(clinicId: string, doctorUserId: string) { if (!Types.ObjectId.isValid(doctorUserId)) throw new BadRequestError("Doctor identity is invalid"); await this.context.getOperationalClinic(clinicId); await this.context.getVerifiedDoctor(clinicId, doctorUserId); }
   private async owned(id: string, clinicId: string, doctorUserId: string) { const item = await this.records.findById(id, clinicId); if (!item) throw new NotFoundError("Consultation"); if (item.doctorUserId !== doctorUserId) throw new ForbiddenError("Doctors can only access their own consultations"); return item; }
   private async currentHistory(patientUserId: string | null): Promise<MedicalHistory> { if (!patientUserId) return { ...EMPTY_HISTORY }; const current = await this.users.getMedicalHistory(patientUserId); return current?.history ?? { ...EMPTY_HISTORY }; }
@@ -63,6 +69,37 @@ export class ConsultationUseCase implements IConsultationUseCase {
   }
   async get(id: string, clinicId: string, doctorUserId: string) { await this.authorize(clinicId, doctorUserId); return dto(await this.owned(id, clinicId, doctorUserId)); }
   async listPatient(patientUserId: string, clinicId: string, doctorUserId: string) { await this.authorize(clinicId, doctorUserId); if (!Types.ObjectId.isValid(patientUserId)) throw new BadRequestError("Patient identity is invalid"); return (await this.records.listForPatient(patientUserId, clinicId)).map(dto); }
+  async listPatientPrescriptions(patientUserId: string) {
+    if (!Types.ObjectId.isValid(patientUserId)) throw new BadRequestError("Patient identity is invalid");
+    const records = await this.records.listCompletedForPatient(patientUserId);
+    return Promise.all(records.filter((record) => record.data.prescriptions.length > 0).map(async (record) => {
+      const [doctor, clinic] = await Promise.all([this.context.getVerifiedDoctor(record.clinicId, record.doctorUserId), this.context.getOperationalClinic(record.clinicId)]);
+      return { consultationId: record.id, doctorName: `${doctor.firstName} ${doctor.lastName}`, clinicName: clinic.name, prescribedAt: record.completedAt ?? record.startedAt, prescriptions: record.data.prescriptions };
+    }));
+  }
+  private async prescriptionPdfFor(record: ConsultationRecord): Promise<Readable> {
+    if (record.status !== "COMPLETED") throw new NotFoundError("Finalized prescription");
+    if (!record.data.prescriptions.length) throw new NotFoundError("Prescription");
+    const [clinic, doctor, patient] = await Promise.all([
+      this.context.getOperationalClinic(record.clinicId),
+      this.context.getVerifiedDoctor(record.clinicId, record.doctorUserId),
+      record.patientUserId ? this.users.findById(record.patientUserId) : Promise.resolve(null),
+    ]);
+    return this.prescriptionPdf.generate({ record, clinic, doctor, patientName: patient?.name ?? record.patientNameSnapshot, patientEmail: patient?.email ?? null });
+  }
+  async patientPrescriptionPdf(consultationId: string, patientUserId: string) {
+    if (!Types.ObjectId.isValid(consultationId) || !Types.ObjectId.isValid(patientUserId)) throw new BadRequestError("Prescription identity is invalid");
+    const record = await this.records.findCompletedForPatient(consultationId, patientUserId);
+    if (!record) throw new NotFoundError("Finalized prescription");
+    return this.prescriptionPdfFor(record);
+  }
+  async doctorPrescriptionPdf(consultationId: string, clinicId: string, doctorUserId: string) {
+    await this.authorize(clinicId, doctorUserId);
+    const record = await this.records.findById(consultationId, clinicId);
+    if (!record) throw new NotFoundError("Finalized prescription");
+    if (record.doctorUserId !== doctorUserId) throw new ForbiddenError("Doctors can only access their own prescriptions");
+    return this.prescriptionPdfFor(record);
+  }
   async save(id: string, clinicId: string, doctorUserId: string, _actorUserId: string, data: unknown, snapshot?: unknown) { await this.authorize(clinicId, doctorUserId); const current = await this.owned(id, clinicId, doctorUserId); if (current.status !== "IN_PROGRESS") throw new ConflictError("Completed consultations are historical and cannot be changed"); const updated = await this.records.saveDraft(id, clinicId, doctorUserId, consultationData(data), history(snapshot === undefined ? current.medicalHistorySnapshot : snapshot)); if (!updated) throw new ConflictError("Consultation changed or was finalized. Refresh before saving."); return dto(updated); }
   async updateMedicalHistory(patientUserId: string, clinicId: string, doctorUserId: string, actorUserId: string, value: MedicalHistory) { await this.authorize(clinicId, doctorUserId); if (!Types.ObjectId.isValid(patientUserId)) throw new BadRequestError("Patient identity is invalid"); const updated = await this.users.updateMedicalHistory(patientUserId, actorUserId, history(value)); if (!updated) throw new NotFoundError("Patient account"); return updated; }
   async getMedicalHistory(patientUserId: string, clinicId: string, doctorUserId: string) { await this.authorize(clinicId, doctorUserId); if (!Types.ObjectId.isValid(patientUserId)) throw new BadRequestError("Patient identity is invalid"); const result = await this.users.getMedicalHistory(patientUserId); if (!result) throw new NotFoundError("Patient account"); return result; }

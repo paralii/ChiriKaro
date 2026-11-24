@@ -9,7 +9,7 @@ export const navItems: Record<Role, NavEntry[]> = {
     { path: 'review-doctors', label: 'Doctor review' }, { path: 'staff', label: 'Staff invitations' },
   ],
   DOCTOR: [{ path: 'dashboard', label: 'Onboarding' }],
-  PATIENT: [{ path: 'dashboard', label: 'Overview' }, { path: 'clinics', label: 'Find a clinic' }, { path: 'profile', label: 'My profile' }],
+  PATIENT: [{ path: 'dashboard', label: 'Overview' }, { path: 'clinics', label: 'Find a clinic' }, { path: 'prescriptions', label: 'Prescriptions' }, { path: 'profile', label: 'My profile' }],
   STAFF: [{ path: 'dashboard', label: 'Overview' }, { path: 'profile', label: 'My profile' }],
 };
 

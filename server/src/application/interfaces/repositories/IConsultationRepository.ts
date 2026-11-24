@@ -3,6 +3,8 @@ export interface IConsultationRepository {
   findByQueueEntry(queueEntryId: string): Promise<ConsultationRecord | null>;
   findById(id: string, clinicId: string): Promise<ConsultationRecord | null>;
   listForPatient(patientUserId: string, clinicId: string): Promise<ConsultationRecord[]>;
+  listCompletedForPatient(patientUserId: string): Promise<ConsultationRecord[]>;
+  findCompletedForPatient(id: string, patientUserId: string): Promise<ConsultationRecord | null>;
   create(record: ConsultationRecord): Promise<ConsultationRecord>;
   saveDraft(id: string, clinicId: string, doctorUserId: string, data: ConsultationRecord["data"], history: ConsultationRecord["medicalHistorySnapshot"]): Promise<ConsultationRecord | null>;
   addAttachment(id: string, clinicId: string, doctorUserId: string, attachment: ConsultationRecord["attachments"][number]): Promise<ConsultationRecord | null>;

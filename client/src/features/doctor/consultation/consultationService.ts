@@ -10,6 +10,9 @@ export type ConsultationData = {
   prescriptions: Array<{ medicine: string; dosage: string; frequency: string; duration: string; instructions: string }>;
 };
 export type Prescription = ConsultationData['prescriptions'][number];
+export type SymptomAnalysis = { summary: string; considerations: Array<{ consideration: string; rationale: string }>; questions: string[]; warningSigns: string[] };
+export type PatientBrief = { overview: string; medicalHistory: string[]; previousDiagnoses: string[]; prescriptions: string[]; treatmentHistory: string[]; followUps: string[]; recordsReviewed: string[] };
+export type PatientInsights = { recordedFacts: string[]; interpretations: string[]; insufficientInformation: boolean };
 export type Consultation = { id: string; queueEntryId: string; clinicId: string; doctorUserId: string; patientUserId: string | null; patientNameSnapshot: string; appointmentId: string | null; visitDetails: { localDate: string; localStartTime: string | null; localEndTime: string | null; tokenNumber: number; clinicName: string }; status: 'IN_PROGRESS' | 'COMPLETED'; medicalHistorySnapshot: MedicalHistory; data: ConsultationData; attachments: Array<{ id: string; category: string; fileName: string; contentType: string; uploadedAt: string }>; startedAt: string; completedAt: string | null; createdAt: string; updatedAt: string };
 const emptyData: ConsultationData = { chiefComplaint: '', symptoms: [], painLevel: null, examinationFindings: '', clinicalNotes: '', dentalChart: [], diagnoses: [], treatmentPlan: [], prescriptions: [] };
 const emptyHistory: MedicalHistory = { existingConditions: [], allergies: [], medications: [], previousSurgeries: [], dentalHistory: '', remarks: '' };
@@ -18,6 +21,9 @@ export const consultationService = {
   emptyData, emptyHistory,
   open: async (queueEntryId: string) => data(await api.post<ApiResponse<Consultation>>(API_ROUTES.DOCTOR.CONSULTATION_OPEN(queueEntryId)), 'Consultation was not returned.'),
   get: async (id: string) => data(await api.get<ApiResponse<Consultation>>(API_ROUTES.DOCTOR.CONSULTATION(id)), 'Consultation was not returned.'),
+  analyzeSymptoms: async (id: string, consultationData: Pick<ConsultationData, 'chiefComplaint' | 'symptoms' | 'painLevel' | 'examinationFindings' | 'clinicalNotes'>, medicalHistory: MedicalHistory) => data(await api.post<ApiResponse<SymptomAnalysis>>(API_ROUTES.DOCTOR.CONSULTATION_AI_SYMPTOM_ANALYSIS(id), { consultationData: { ...consultationData, medicalHistory } }), 'AI symptom analysis was not returned.'),
+  patientBrief: async (id: string) => data(await api.post<ApiResponse<PatientBrief>>(API_ROUTES.DOCTOR.CONSULTATION_AI_PATIENT_BRIEF(id)), 'AI patient brief was not returned.'),
+  insights: async (id: string) => data(await api.post<ApiResponse<PatientInsights>>(API_ROUTES.DOCTOR.CONSULTATION_AI_INSIGHTS(id)), 'AI insights were not returned.'),
   save: async (id: string, body: { data: ConsultationData; medicalHistorySnapshot: MedicalHistory }) => data(await api.put<ApiResponse<Consultation>>(API_ROUTES.DOCTOR.CONSULTATION(id), body), 'Saved consultation was not returned.'),
   finalize: async (id: string) => data(await api.post<ApiResponse<Consultation>>(API_ROUTES.DOCTOR.CONSULTATION_FINALIZE(id)), 'Finalized consultation was not returned.'),
   history: async (patientId: string) => data(await api.get<ApiResponse<Consultation[]>>(API_ROUTES.DOCTOR.CONSULTATION_RECORDS(patientId)), 'Previous consultations were not returned.'),

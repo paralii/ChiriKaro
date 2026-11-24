@@ -112,6 +112,9 @@ export const API_ROUTES = {
   DOCTOR: {
     CONSULTATION_OPEN: (queueEntryId: string) => `/doctor/consultations/queue/${encodeURIComponent(queueEntryId)}`,
     CONSULTATION: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}`,
+    CONSULTATION_AI_SYMPTOM_ANALYSIS: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/symptom-analysis`,
+    CONSULTATION_AI_PATIENT_BRIEF: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/patient-brief`,
+    CONSULTATION_AI_INSIGHTS: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/ai/insights`,
     CONSULTATION_FINALIZE: (id: string) => `/doctor/consultations/${encodeURIComponent(id)}/finalize`,
     CONSULTATION_HISTORY: (patientId: string) => `/doctor/consultations/patients/${encodeURIComponent(patientId)}/history`,
     CONSULTATION_RECORDS: (patientId: string) => `/doctor/consultations/patients/${encodeURIComponent(patientId)}/records`,

@@ -1,9 +1,10 @@
 import { Types } from "mongoose";
 import type { ConsultationRecord } from "@domain/entities/consultation.entity.ts";
 import type { IConsultationRepository } from "@application/interfaces/repositories/IConsultationRepository.ts";
+import type { IAIConsultationLookupRepository } from "@application/interfaces/repositories/IAIConsultationLookupRepository.ts";
 import { ConsultationModel, type IConsultationDocument } from "@infrastructure/database/mongodb/models/ConsultationModel.ts";
 
-export class ConsultationRepository implements IConsultationRepository {
+export class ConsultationRepository implements IConsultationRepository, IAIConsultationLookupRepository {
   async findByQueueEntry(queueEntryId: string) {
     if (!Types.ObjectId.isValid(queueEntryId)) return null;
     const doc = await ConsultationModel.findOne({ queueEntryId: new Types.ObjectId(queueEntryId) }).exec();

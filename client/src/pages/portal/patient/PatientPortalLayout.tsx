@@ -12,6 +12,7 @@ const items = [
   { path: '/patient/clinics', label: 'Find care' },
   { path: '/patient/appointments', label: 'Appointments' },
   { path: '/patient/prescriptions', label: 'Prescriptions' },
+  { path: '/patient/care-records', label: 'Follow-ups & plans' },
   { path: '/patient/queue', label: 'My queue' },
   { path: '/patient/profile', label: 'Profile & settings' },
 ];
@@ -20,7 +21,7 @@ export default function PatientPortalLayout() {
   const user = useAppSelector((state) => state.auth.user)!;
   const { pathname } = useLocation();
   const page = pathname.split('/')[2];
-  const title = page === 'profile' ? 'My profile' : page === 'clinics' ? 'Find care' : page === 'appointments' ? 'My appointments' : page === 'prescriptions' ? 'My prescriptions' : page === 'queue' ? 'My queue' : 'Overview';
+  const title = page === 'profile' ? 'My profile' : page === 'clinics' ? 'Find care' : page === 'appointments' ? 'My appointments' : page === 'prescriptions' ? 'My prescriptions' : page === 'care-records' ? 'Follow-ups and treatment plans' : page === 'queue' ? 'My queue' : 'Overview';
   const logout = useLogout();
 
   return (

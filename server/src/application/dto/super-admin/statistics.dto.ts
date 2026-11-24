@@ -3,6 +3,7 @@ export interface SuperAdminStatisticsDTO {
     total: number;
     approved: number;
     pending: number;
+    rejected?: number;
     blocked: number;
   };
   doctors: {

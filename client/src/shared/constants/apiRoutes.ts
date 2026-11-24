@@ -1,4 +1,5 @@
 export const API_ROUTES = {
+  ANALYTICS: { SUPER_ADMIN: "/super-admin/analytics", CLINIC: "/clinic/analytics", DOCTOR: "/doctor/analytics" },
   SEARCH: {
     DIRECTORY: "/search/directory",
     DIRECTORY_AVAILABILITY: (listingId: string) => `/search/directory/${encodeURIComponent(listingId)}/availability`,

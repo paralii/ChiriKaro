@@ -167,6 +167,8 @@ export const API_ROUTES = {
     TREATMENT_PLANS: '/patient/treatment-plans',
     TREATMENT_PLAN: (id: string) => `/patient/treatment-plans/${encodeURIComponent(id)}`,
     TREATMENT_PLAN_DECISION: (id: string) => `/patient/treatment-plans/${encodeURIComponent(id)}/decision`,
+    HEALTH_RECORDS: "/patient/health-records",
+    HEALTH_RECORD: (id: string) => `/patient/health-records/${encodeURIComponent(id)}`,
     APPOINTMENT_BY_ID: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}`,
     APPOINTMENT_CANCEL: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/cancel`,
     APPOINTMENT_RESCHEDULE: (appointmentId: string) => `/patient/appointments/${encodeURIComponent(appointmentId)}/reschedule`,

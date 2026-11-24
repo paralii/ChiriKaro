@@ -7,6 +7,7 @@ import { ClinicModel } from "@infrastructure/database/mongodb/models/ClinicModel
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { BadRequestError, ForbiddenError, NotFoundError, ValidationError } from "@shared/errors/index.ts";
 import { Role } from "@domain/value-objects/Role.ts";
+import type { PatientHealthRecordUseCase } from "@application/use-cases/patient/patient-health-record.use-case.ts";
 
 const FALLBACK_TIME_ZONE = "Asia/Kolkata";
 function validatePlanInput(input: unknown): { title?: string; diagnosis?: string; procedures?: Array<{ procedure: string; affectedTeeth: string[]; estimatedCost: number | null; requiredSessions: number | null; instructions: string }> } {
@@ -38,6 +39,10 @@ function localDateTime(date: string, time: string, zone: string): Date {
   return result;
 }
 export class ClinicalRecordsController {
+  constructor(private readonly healthRecords?: PatientHealthRecordUseCase) {}
+  listHealthRecords = async (req: Request, res: Response, next: NextFunction) => { try { if (!this.healthRecords || !req.user?.sub) throw new BadRequestError("Patient identity is required"); ApiResponse.success(res, "Health records retrieved", await this.healthRecords.list(req.user.sub)); } catch (e) { next(e); } };
+  uploadHealthRecord = async (req: Request, res: Response, next: NextFunction) => { try { if (!this.healthRecords || !req.user?.sub || !Buffer.isBuffer(req.body)) throw new BadRequestError("Health record upload is invalid"); ApiResponse.created(res, "Health record uploaded", await this.healthRecords.upload(req.user.sub, req.get("X-File-Name") ?? "", req.get("Content-Type") ?? "", req.body, req.get("X-Health-Record-Category"))); } catch (e) { next(e); } };
+  readHealthRecord = async (req: Request, res: Response, next: NextFunction) => { try { if (!this.healthRecords || !req.user?.sub || typeof req.params.recordId !== "string") throw new BadRequestError("Health record is invalid"); const file = await this.healthRecords.read(req.user.sub, req.params.recordId); res.setHeader("Content-Type", file.contentType); res.setHeader("Content-Disposition", `${req.query.download === "true" ? "attachment" : "inline"}; filename="${file.fileName.replace(/["\\\r\n]/g, "_")}"`); res.setHeader("X-Content-Type-Options", "nosniff"); res.setHeader("Cache-Control", "private, no-store"); res.send(file.content); } catch (e) { next(e); } };
   private async consultation(id: string, clinicId: string, doctorId?: string) {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestError("Consultation identity is invalid");
     const query = ConsultationModel.findOne({ _id: id, clinicId });

@@ -10,11 +10,14 @@ import { useAppSelector } from '@/store/hooks';
 import { useAdminClinics } from '@/features/admin/hooks/useAdminClinics';
 import { useAppDispatch } from '@/store/hooks';
 import { loadAdminClinics } from '@/features/admin/store/adminClinicsSlice';
+import { useAnalytics } from '@/features/dashboard/services/useAnalytics';
+import { AnalyticsPanel } from '@/components/molecules/AnalyticsPanel';
 
 export default function AdminDashboardPage() {
   const dispatch = useAppDispatch();
   const { summary, error, message } = useAdminClinics();
   const pendingCount = useAppSelector((s) => s.adminClinics.summary.pending);
+  const analytics = useAnalytics('SUPER_ADMIN');
   useEffect(() => { void dispatch(loadAdminClinics({ page: 1 })); }, [dispatch]);
   return (
     <>
@@ -26,6 +29,8 @@ export default function AdminDashboardPage() {
         <MetricCard label="Approved" value={summary.approved} note="Active clinic accounts" />
       </MetricGrid>
       <Card className="overflow-hidden"><SectionHeading title="Review clinics" description="Open the review queue to inspect submitted clinic information and make an approval decision." action={<Link to="/app/pending" className="inline-flex min-h-9 items-center rounded-sm text-sm font-semibold text-primary-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Pending clinics →</Link>} /></Card>
+      {analytics.error ? <Notices error={analytics.error} /> : null}
+      <AnalyticsPanel {...analytics} mode="platform" />
     </>
   );
 }

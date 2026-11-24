@@ -15,6 +15,7 @@ import { patientAppointmentPaymentsRouter } from "@container/patient-appointment
 import { clinicClinicalRecordsRouter, doctorClinicalRecordsRouter, patientClinicalRecordsRouter } from "@container/clinical-records.container.ts";
 import { clinicQueueRouter } from "@container/clinic-queue.container.ts";
 import { patientQueueRouter } from "@container/patient-queue.container.ts";
+import { analyticsRouter } from "@container/analytics.container.ts";
 import { consultationRouter, patientPrescriptionRouter } from "@container/consultation.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
@@ -89,6 +90,7 @@ export class App {
     // Public token validation and acceptance use /api/invitation/*.
     this.instance.use(API_ROUTES.INVITATION.BASE, invitationRouter);
     this.instance.use("/api", roleDashboardRouter);
+    this.instance.use("/api", analyticsRouter);
   }
 
   public registerErrorHandlers(): void {

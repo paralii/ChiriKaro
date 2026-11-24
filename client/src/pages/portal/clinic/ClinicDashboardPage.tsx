@@ -8,11 +8,14 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { WelcomeBand } from '@/components/molecules/WelcomeBand';
 import { Notice } from '@/components/atoms/Notice';
 import { useAppSelector } from '@/store/hooks';
+import { useAnalytics } from '@/features/dashboard/services/useAnalytics';
+import { AnalyticsPanel } from '@/components/molecules/AnalyticsPanel';
 
 export default function ClinicDashboardPage() {
   const user = useAppSelector((s) => s.auth.user)!;
   const { current: clinic, dashboard, busy, error } = useAppSelector((s) => s.clinic);
   const pending = clinic?.status !== 'APPROVED';
+  const analytics = useAnalytics('CLINIC_ADMIN');
   return (
     <>
       <Notices error={error} />
@@ -32,6 +35,8 @@ export default function ClinicDashboardPage() {
         <SectionHeading title="Clinic details" description="Information associated with your account" />
         <DetailList items={[['Clinic', clinic?.name ?? (busy ? 'Loading...' : 'Not available')], ['Owner', clinic?.ownerName ?? user.name], ['Contact', clinic?.contactEmail ?? user.email], ['Address', clinic?.address ?? 'Not provided']]} />
       </Card>
+      {clinic?.status === 'APPROVED' && analytics.error ? <Notices error={analytics.error} /> : null}
+      {clinic?.status === 'APPROVED' ? <AnalyticsPanel {...analytics} mode="clinic" /> : null}
     </>
   );
 }

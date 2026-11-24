@@ -4,6 +4,8 @@ import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 import { Notice } from '@/components/atoms/Notice';
 import { Notices } from '@/components/molecules/Notices';
+import { AnalyticsPanel } from '@/components/molecules/AnalyticsPanel';
+import { useAnalytics } from '@/features/dashboard/services/useAnalytics';
 import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { DetailList } from '@/components/molecules/DetailList';
 import { DocumentList } from '@/components/molecules/DocumentList';
@@ -40,6 +42,7 @@ function clinicScheduleAsDisplayHours(clinicHours: WorkingHour[]): WorkingHour[]
 }
 
 export default function DoctorOnboardingPage() {
+  const analytics = useAnalytics('DOCTOR');
   const user = useAppSelector((state) => state.auth.user)!;
   const [profile, setProfile] = useState<DoctorOnboardingProfile | null>(null);
   const [clinicSpecializations, setClinicSpecializations] = useState<string[]>([]);
@@ -211,6 +214,8 @@ export default function DoctorOnboardingPage() {
 
   return (
     <div className="grid gap-5 [&>section]:mt-0">
+      {analytics.error ? <Notices error={analytics.error} /> : null}
+      <AnalyticsPanel {...analytics} mode="doctor" />
       <Notices error={error} message={message} />
       {!profile && busy ? <Card className="overflow-hidden p-4 text-sm text-text-muted sm:p-5">Loading your onboarding profile...</Card> : null}
       {profile ? (

@@ -1,5 +1,11 @@
 export const API_ROUTES = {
   ANALYTICS: { SUPER_ADMIN: "/super-admin/analytics", CLINIC: "/clinic/analytics", DOCTOR: "/doctor/analytics" },
+  BILLING: {
+    SUPER_ADMIN_TRANSACTIONS: "/super-admin/billing/transactions", CLINIC_TRANSACTIONS: "/clinic/billing/transactions", DOCTOR_TRANSACTIONS: "/doctor/billing/transactions",
+    SUPER_ADMIN_SUMMARY: "/super-admin/billing/summary", CLINIC_SUMMARY: "/clinic/billing/summary",
+    SUPER_ADMIN_SETTLEMENTS: "/super-admin/settlements", CLINIC_SETTLEMENTS: "/clinic/settlements",
+    SETTLEMENT: (base: string, id: string) => `${base}/${encodeURIComponent(id)}`,
+  },
   SEARCH: {
     DIRECTORY: "/search/directory",
     DIRECTORY_AVAILABILITY: (listingId: string) => `/search/directory/${encodeURIComponent(listingId)}/availability`,

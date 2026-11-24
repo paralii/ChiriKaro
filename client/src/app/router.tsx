@@ -37,6 +37,7 @@ import PatientClinicalRecordsPage from '@/pages/portal/patient/PatientClinicalRe
 import ClinicQueuePage from '@/pages/portal/clinic/ClinicQueuePage';
 import ClinicTreatmentPlansPage from '@/pages/portal/clinic/ClinicTreatmentPlansPage';
 import DoctorConsultationPage from '@/pages/portal/doctor/DoctorConsultationPage';
+import BillingPage from '@/pages/portal/billing/BillingPage';
 
 export default function AppRouter() {
   return (
@@ -75,6 +76,7 @@ export default function AppRouter() {
           <Route path="queue" element={<ClinicQueuePage canRegister={false} />} />
           <Route path="consultations/new" element={<DoctorConsultationPage />} />
           <Route path="consultations/:consultationId" element={<DoctorConsultationPage />} />
+          <Route path="transactions" element={<BillingPage role="DOCTOR" />} />
         </Route>
       </Route>
       <Route element={<RequireStaff />}>
@@ -94,6 +96,7 @@ export default function AppRouter() {
           <Route path="staff" element={<ClinicInvitationsPage invitee="staff" />} />
           <Route path="queue" element={<ClinicQueuePage />} />
           <Route path="treatment-plans" element={<ClinicTreatmentPlansPage />} />
+          <Route path="billing" element={<BillingPage role="CLINIC_ADMIN" />} />
         </Route>
       </Route>
 
@@ -105,6 +108,7 @@ export default function AppRouter() {
           <Route path="patients" element={<AdminPatientsPage />} />
           <Route path="doctors" element={<AdminDoctorsPage />} />
           <Route path="pending" element={<AdminClinicsPage pendingOnly />} />
+          <Route path="billing" element={<BillingPage role="SUPER_ADMIN" />} />
         </Route>
       </Route>
 

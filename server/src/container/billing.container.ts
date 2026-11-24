@@ -1,0 +1,10 @@
+import { BillingRepository } from "@infrastructure/repositories/billing.repository.ts";
+import { BillingUseCase } from "@application/use-cases/billing/billing.use-case.ts";
+import { BillingController } from "@presentation/controllers/billing.controller.ts";
+import { BillingRouter } from "@presentation/routes/billing.routes.ts";
+import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
+import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts";
+import { MongoUserRepository } from "@infrastructure/repositories/user.repository.ts";
+import { ClinicRepository } from "@infrastructure/repositories/clinic.repository.ts";
+const auth = new AuthMiddleware({ tokenService: new TokenService(), userRepository: new MongoUserRepository(), clinicRepository: new ClinicRepository() });
+export const billingRouter = BillingRouter(new BillingController(new BillingUseCase(new BillingRepository())), { authenticate: auth.authenticate, authorize: auth.authorize });

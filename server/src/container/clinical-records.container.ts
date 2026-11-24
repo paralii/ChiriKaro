@@ -4,8 +4,10 @@ import { ClinicRepository } from "@infrastructure/repositories/clinic.repository
 import { TokenService } from "@infrastructure/services/jwt/jwt.token.service.ts";
 import { AuthMiddleware } from "@presentation/middleware/auth.middleware.ts";
 import { ClinicalRecordsController } from "@presentation/controllers/clinical-records.controller.ts";
+import { PatientHealthRecordUseCase } from "@application/use-cases/patient/patient-health-record.use-case.ts";
+import { CloudinaryDocumentStorage } from "@infrastructure/services/storage/cloudinary-document.storage.ts";
 import { ClinicClinicalRecordsRouter, DoctorClinicalRecordsRouter, PatientClinicalRecordsRouter } from "@presentation/routes/clinical-records.routes.ts";
-const clinics = new ClinicRepository(); const auth = new AuthMiddleware({ tokenService: new TokenService(), userRepository: new MongoUserRepository(), clinicRepository: clinics }); const controller = new ClinicalRecordsController();
+const clinics = new ClinicRepository(); const auth = new AuthMiddleware({ tokenService: new TokenService(), userRepository: new MongoUserRepository(), clinicRepository: clinics }); const controller = new ClinicalRecordsController(new PatientHealthRecordUseCase(new CloudinaryDocumentStorage("patient-health-records")));
 export const doctorClinicalRecordsRouter = DoctorClinicalRecordsRouter(controller, auth.authenticate, auth.authorize(Role.DOCTOR));
 export const patientClinicalRecordsRouter = PatientClinicalRecordsRouter(controller, auth.authenticate, auth.authorize(Role.PATIENT));
 export const clinicClinicalRecordsRouter = ClinicClinicalRecordsRouter(controller, auth.authenticate, auth.authorize(Role.CLINIC_ADMIN, Role.STAFF));

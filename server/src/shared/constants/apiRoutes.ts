@@ -96,6 +96,8 @@ export const API_ROUTES = {
     TREATMENT_PLANS: "/treatment-plans",
     TREATMENT_PLAN_BY_ID: "/treatment-plans/:planId",
     TREATMENT_PLAN_DECISION: "/treatment-plans/:planId/decision",
+    HEALTH_RECORDS: "/health-records",
+    HEALTH_RECORD: "/health-records/:recordId",
     APPOINTMENT_CANCEL: "/appointments/:appointmentId/cancel",
     APPOINTMENT_RESCHEDULE: "/appointments/:appointmentId/reschedule",
     APPOINTMENT_PAYMENT_ORDER: "/appointments/:appointmentId/payment/order",

@@ -7,7 +7,7 @@ import { Role } from "@domain/value-objects/Role.ts";
 import { ForbiddenError } from "@shared/errors/index.ts";
 
 function toDTO(entry: QueueEntryRecord): QueueEntryDTO {
-  return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, doctorName: entry.doctorNameSnapshot, clinicName: entry.clinicNameSnapshot, timeZone: entry.timeZone, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };
+  return { queueEntryId: entry.id, tokenNumber: entry.tokenNumber, kind: entry.kind, patientName: entry.patientNameSnapshot, patientUserId: entry.patientUserId, appointmentId: entry.appointmentId, doctorName: entry.doctorNameSnapshot, clinicName: entry.clinicNameSnapshot, timeZone: entry.timeZone, localDate: entry.localDate, status: entry.status, createdAt: entry.createdAt };
 }
 
 export class ListClinicQueueUseCase implements IListClinicQueueUseCase {

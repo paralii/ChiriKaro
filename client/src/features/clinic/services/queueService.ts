@@ -6,6 +6,8 @@ export type QueueEntry = {
   tokenNumber: number;
   kind: 'WALK_IN' | 'APPOINTMENT';
   patientName: string;
+  patientUserId?: string | null;
+  appointmentId?: string | null;
   doctorName: string;
   clinicName: string;
   timeZone: string;

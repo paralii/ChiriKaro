@@ -6,25 +6,25 @@ import { SectionHeading } from '@/components/molecules/SectionHeading';
 import { queueService, type QueueDay, type QueueDoctor, type QueueEntry, type CheckInAppointment } from '@/features/clinic/services/queueService';
 import { getErrorMessage } from '@/shared/lib/http';
 import { useAppSelector } from '@/store/hooks';
+import { useNavigate } from 'react-router-dom';
 
 type QueueTransition = QueueEntry['status'];
 function availableActions(status: QueueEntry['status'], role: string): Array<{ target: QueueTransition; label: string }> {
   const admin: Partial<Record<QueueEntry['status'], Array<{ target: QueueTransition; label: string }>>> = {
     WAITING: [{ target: 'IN_CONSULTATION', label: 'Start consultation' }, { target: 'SKIPPED', label: 'Skip' }, { target: 'CANCELLED', label: 'Cancel' }, { target: 'NO_SHOW', label: 'Mark no-show' }],
-    IN_CONSULTATION: [{ target: 'COMPLETED', label: 'Complete' }],
     SKIPPED: [{ target: 'WAITING', label: 'Recall' }, { target: 'CANCELLED', label: 'Cancel' }, { target: 'NO_SHOW', label: 'Mark no-show' }],
   };
   if (role === 'CLINIC_ADMIN') return admin[status] ?? [];
   if (role === 'STAFF') return status === 'WAITING' || status === 'SKIPPED' ? [{ target: 'CANCELLED', label: 'Cancel' }, { target: 'NO_SHOW', label: 'Mark no-show' }] : [];
   if (role === 'DOCTOR') {
     if (status === 'WAITING') return [{ target: 'IN_CONSULTATION', label: 'Start consultation' }, { target: 'SKIPPED', label: 'Skip' }, { target: 'NO_SHOW', label: 'Mark no-show' }];
-    if (status === 'IN_CONSULTATION') return [{ target: 'COMPLETED', label: 'Complete' }];
     if (status === 'SKIPPED') return [{ target: 'WAITING', label: 'Recall' }, { target: 'NO_SHOW', label: 'Mark no-show' }];
   }
   return [];
 }
 
 export default function ClinicQueuePage({ canRegister = true }: { canRegister?: boolean }) {
+  const navigate = useNavigate();
   const actorRole = useAppSelector((state) => state.auth.user?.role ?? '');
   const [queue, setQueue] = useState<QueueDay | null>(null);
   const [doctors, setDoctors] = useState<QueueDoctor[]>([]);
@@ -94,10 +94,11 @@ export default function ClinicQueuePage({ canRegister = true }: { canRegister?: 
   };
 
   const changeStatus = async (entry: QueueEntry, status: QueueTransition) => {
+    if (actorRole === 'DOCTOR' && status === 'IN_CONSULTATION') { navigate(`/doctor/consultations/new?queueEntryId=${encodeURIComponent(entry.queueEntryId)}`); return; }
     setTransitioningId(entry.queueEntryId); setError('');
     try {
       const updated = await queueService.transition(entry.queueEntryId, status);
-      setQueue((current) => current ? { ...current, entries: current.entries.map((item) => item.queueEntryId === updated.queueEntryId ? updated : item) } : current);
+      setQueue((current) => current ? { ...current, entries: current.entries.map((item) => item.queueEntryId === updated.queueEntryId ? { ...item, ...updated } : item) } : current);
       setNotice(`Token ${updated.tokenNumber} is now ${updated.status.replaceAll('_', ' ').toLowerCase()}.`);
     } catch (reason) {
       setError(getErrorMessage(reason, 'Queue status changed. Refresh the queue and try again.'));

@@ -1,4 +1,5 @@
 import { Document, model, Schema, Types } from "mongoose";
+import type { MedicalHistory } from "@domain/entities/consultation.entity.ts";
 
 export interface IUserDocument extends Document {
   _id: Types.ObjectId;
@@ -10,6 +11,9 @@ export interface IUserDocument extends Document {
   clinicId?: Types.ObjectId | null;
   googleId?: string;
   avatar?: string | null;
+  medicalHistory?: MedicalHistory;
+  medicalHistoryUpdatedBy?: Types.ObjectId | null;
+  medicalHistoryUpdatedAt?: Date | null;
   isEmailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +60,15 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       default: null,
     },
+    medicalHistory: {
+      type: new Schema({
+        existingConditions: { type: [String], default: [] }, allergies: { type: [String], default: [] }, medications: { type: [String], default: [] },
+        previousSurgeries: { type: [String], default: [] }, dentalHistory: { type: String, default: "" }, remarks: { type: String, default: "" },
+      }, { _id: false }),
+      default: () => ({}),
+    },
+    medicalHistoryUpdatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    medicalHistoryUpdatedAt: { type: Date, default: null },
     isEmailVerified: {
       type: Boolean,
       default: false,

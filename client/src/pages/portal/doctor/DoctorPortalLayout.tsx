@@ -20,6 +20,7 @@ const titles: Record<string, string> = {
   availability: 'Availability and slots',
   workspace: 'Workspace details',
   queue: 'Clinic queue',
+  consultations: 'Dental consultation',
 };
 
 export default function DoctorPortalLayout() {

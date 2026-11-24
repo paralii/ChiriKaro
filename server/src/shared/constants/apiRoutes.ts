@@ -56,6 +56,14 @@ export const API_ROUTES = {
 
     CONSULTATION_FEE: "/consultation-fee",
     CONSULTATION_FEE_REQUESTS: "/consultation-fee/requests",
+    CONSULTATIONS: "/consultations",
+    CONSULTATION_OPEN: "/consultations/queue/:queueEntryId",
+    CONSULTATION_BY_ID: "/consultations/:consultationId",
+    CONSULTATION_PATIENT_HISTORY: "/consultations/patients/:patientUserId/history",
+    CONSULTATION_PATIENT_RECORDS: "/consultations/patients/:patientUserId/records",
+    CONSULTATION_FINALIZE: "/consultations/:consultationId/finalize",
+    CONSULTATION_ATTACHMENTS: "/consultations/:consultationId/attachments",
+    CONSULTATION_ATTACHMENT: "/consultations/:consultationId/attachments/:attachmentId",
 
     AVAILABILITY: "/availability",
     AVAILABILITY_SLOTS: "/availability/slots",

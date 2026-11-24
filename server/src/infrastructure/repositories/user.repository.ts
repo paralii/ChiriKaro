@@ -6,6 +6,7 @@ import { UserStatus } from "@domain/enum/user-statues.enum.ts";
 
 import type { IUserDocument } from "@infrastructure/database/mongodb/models/UserModel.ts";
 import { UserModel } from "@infrastructure/database/mongodb/models/UserModel.ts";
+import type { MedicalHistory } from "@domain/entities/consultation.entity.ts";
 import { BaseRepository } from "@infrastructure/database/mongodb/mongodb.base.repository.ts";
 
 import type { IUserRepository } from "@application/interfaces/repositories/IUserRepository.ts";
@@ -82,6 +83,22 @@ export class MongoUserRepository
     }
 
     return this.toDomain(document);
+  }
+
+  async getMedicalHistory(patientUserId: string) {
+    if (!Types.ObjectId.isValid(patientUserId)) return null;
+    const doc = await UserModel.findOne({ _id: new Types.ObjectId(patientUserId), role: Role.PATIENT }).select("medicalHistory medicalHistoryUpdatedBy medicalHistoryUpdatedAt").lean().exec();
+    if (!doc) return null;
+    const history = (doc.medicalHistory ?? {}) as Partial<MedicalHistory>;
+    return { history: { existingConditions: history.existingConditions ?? [], allergies: history.allergies ?? [], medications: history.medications ?? [], previousSurgeries: history.previousSurgeries ?? [], dentalHistory: history.dentalHistory ?? "", remarks: history.remarks ?? "" }, updatedBy: doc.medicalHistoryUpdatedBy?.toString() ?? null, updatedAt: doc.medicalHistoryUpdatedAt ?? null };
+  }
+
+  async updateMedicalHistory(patientUserId: string, actorUserId: string, history: MedicalHistory) {
+    if (!Types.ObjectId.isValid(patientUserId) || !Types.ObjectId.isValid(actorUserId)) return null;
+    const updatedAt = new Date();
+    const doc = await UserModel.findOneAndUpdate({ _id: new Types.ObjectId(patientUserId), role: Role.PATIENT }, { $set: { medicalHistory: history, medicalHistoryUpdatedBy: new Types.ObjectId(actorUserId), medicalHistoryUpdatedAt: updatedAt } }, { returnDocument: "after", runValidators: true }).select("medicalHistory medicalHistoryUpdatedBy medicalHistoryUpdatedAt").lean().exec();
+    if (!doc) return null;
+    return { history: doc.medicalHistory ?? history, updatedBy: doc.medicalHistoryUpdatedBy!.toString(), updatedAt: doc.medicalHistoryUpdatedAt! };
   }
 
   private toDomain(document: IUserDocument): User {

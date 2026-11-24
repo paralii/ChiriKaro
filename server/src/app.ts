@@ -14,6 +14,7 @@ import { patientAppointmentsRouter } from "@container/patient-appointments.conta
 import { patientAppointmentPaymentsRouter } from "@container/patient-appointment-payments.container.ts";
 import { clinicQueueRouter } from "@container/clinic-queue.container.ts";
 import { patientQueueRouter } from "@container/patient-queue.container.ts";
+import { consultationRouter } from "@container/consultation.container.ts";
 import { ApiResponse } from "@shared/utils/ApiResponse.ts";
 import { API_ROUTES } from "@shared/constants/apiRoutes.ts";
 import { errorMiddleware } from "@presentation/middleware/error.middleware.ts";
@@ -77,6 +78,7 @@ export class App {
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicRouter);
     this.instance.use(API_ROUTES.CLINIC.BASE, clinicQueueRouter);
     this.instance.use(API_ROUTES.DOCTOR.BASE, doctorRouter);
+    this.instance.use(API_ROUTES.DOCTOR.BASE, consultationRouter);
     // The router also serves authenticated clinic invitation endpoints.
     this.instance.use(API_ROUTES.CLINIC.BASE, invitationRouter);
     // Public token validation and acceptance use /api/invitation/*.

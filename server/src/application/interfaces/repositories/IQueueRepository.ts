@@ -8,5 +8,7 @@ export interface IQueueRepository {
   listForClinic(clinicId: string, localDate: string, doctorUserId?: string): Promise<QueueEntryRecord[]>;
   findForPatient(patientUserId: string): Promise<QueueEntryRecord[]>;
   findByIdInClinic(queueEntryId: string, clinicId: string, localDate: string): Promise<QueueEntryRecord | null>;
+  findByIdForClinic(queueEntryId: string, clinicId: string): Promise<QueueEntryRecord | null>;
   transitionStatus(input: { queueEntryId: string; clinicId: string; localDate: string; expectedStatus: QueueEntryStatus; nextStatus: QueueEntryStatus; actorUserId: string; actorRole: string; changedAt: Date }): Promise<QueueEntryRecord | null>;
+  transitionStatusForClinic(input: { queueEntryId: string; clinicId: string; expectedStatus: QueueEntryStatus; nextStatus: QueueEntryStatus; actorUserId: string; actorRole: string; changedAt: Date }): Promise<QueueEntryRecord | null>;
 }

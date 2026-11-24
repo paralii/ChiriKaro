@@ -5,5 +5,6 @@ export interface IDoctorRepository {
   findByIdAndClinic(doctorId: string, clinicId: string): Promise<Doctor | null>;
   findByClinicAndStatus(clinicId: string, status: DoctorVerificationStatus): Promise<Doctor[]>;
   findByClinic(clinicId: string): Promise<Doctor[]>;
+  findByUserIdAndClinic(userId: string, clinicId: string): Promise<Doctor | null>;
   save(doctor: Doctor): Promise<Doctor>;
 }

@@ -59,6 +59,8 @@ export const API_ROUTES = {
 
     AVAILABILITY: "/availability",
     AVAILABILITY_SLOTS: "/availability/slots",
+    LEAVES: "/leaves",
+    LEAVE_BY_START_DATE: "/leaves/:startDate",
   },
 
   PATIENT: {

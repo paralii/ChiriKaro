@@ -8,6 +8,7 @@ import type {
   DoctorOnboardingDTO,
   DoctorOnboardingStep,
   DoctorProfile,
+  DoctorLeave,
 } from "@/shared/types";
 
 type ApiEnvelope<T> = { data?: T };
@@ -105,6 +106,14 @@ export const doctorService = {
       ),
       "Availability slots were not returned.",
     ),
+
+  listLeaves: () => responseData(api.get<ApiEnvelope<DoctorLeave[]>>(API_ROUTES.DOCTOR.LEAVES), "Doctor leave was not returned."),
+  createLeave: (body: { startDate: string; endDate: string; reason?: string }) => responseData(
+    api.post<ApiEnvelope<DoctorLeave[]>>(API_ROUTES.DOCTOR.LEAVES, body), "Saved doctor leave was not returned.",
+  ),
+  deleteLeave: (startDate: string) => responseData(
+    api.delete<ApiEnvelope<DoctorLeave[]>>(API_ROUTES.DOCTOR.LEAVE_BY_START_DATE(startDate)), "Updated doctor leave was not returned.",
+  ),
 
   getProfile: () => api.get<DoctorProfile>(API_ROUTES.DOCTOR.PROFILE),
   patchProfile: (body: unknown) =>

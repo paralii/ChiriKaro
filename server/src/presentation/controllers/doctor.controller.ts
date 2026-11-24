@@ -16,6 +16,9 @@ import type { IConfigureDoctorAvailabilityUseCase } from "@application/interface
 import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
 import type { IManageDoctorFeeChangeRequestsUseCase } from "@application/interfaces/use-cases/doctor/IManageDoctorFeeChangeRequestsUseCase.ts";
 import type { DoctorOnboardingStep } from "@application/dto/doctor/doctor-onboarding.dto.ts";
+import type { IListDoctorLeavesUseCase } from "@application/interfaces/use-cases/doctor/IListDoctorLeavesUseCase.ts";
+import type { ICreateDoctorLeaveUseCase } from "@application/interfaces/use-cases/doctor/ICreateDoctorLeaveUseCase.ts";
+import type { IDeleteDoctorLeaveUseCase } from "@application/interfaces/use-cases/doctor/IDeleteDoctorLeaveUseCase.ts";
 
 export class DoctorController {
   constructor(
@@ -30,6 +33,9 @@ export class DoctorController {
     private readonly _configureAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase,
     private readonly _generateAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase,
     private readonly _feeChangeRequestsUseCase: IManageDoctorFeeChangeRequestsUseCase,
+    private readonly _listDoctorLeavesUseCase: IListDoctorLeavesUseCase,
+    private readonly _createDoctorLeaveUseCase: ICreateDoctorLeaveUseCase,
+    private readonly _deleteDoctorLeaveUseCase: IDeleteDoctorLeaveUseCase,
   ) {}
 
   getOnboarding = async (
@@ -256,6 +262,29 @@ export class DoctorController {
     } catch (error) {
       next(error);
     }
+  };
+
+  listLeaves = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const leaves = await this._listDoctorLeavesUseCase.execute(req.user!.sub, req.user!.clinicId!);
+      ApiResponse.success(res, "Doctor leave retrieved", leaves);
+    } catch (error) { next(error); }
+  };
+
+  createLeave = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const leaves = await this._createDoctorLeaveUseCase.execute(req.user!.sub, req.user!.clinicId!, req.body);
+      ApiResponse.created(res, "Doctor leave saved", leaves);
+    } catch (error) { next(error); }
+  };
+
+  deleteLeave = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const startDate = req.params.startDate;
+      if (typeof startDate !== "string") throw new ValidationError("startDate is required");
+      const leaves = await this._deleteDoctorLeaveUseCase.execute(req.user!.sub, req.user!.clinicId!, startDate);
+      ApiResponse.success(res, "Doctor leave removed", leaves);
+    } catch (error) { next(error); }
   };
 }
 

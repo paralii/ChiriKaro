@@ -29,6 +29,13 @@ export interface DoctorBreak {
   endTime: string;
 }
 
+export interface DoctorLeave {
+  startDate: string;
+  endDate: string;
+  reason: string | null;
+  createdAt: Date;
+}
+
 export interface DoctorAvailabilitySlot {
   day: DoctorDayOfWeek;
   startTime: string;
@@ -74,6 +81,7 @@ export interface DoctorProps {
   procedures: string[];
   workingHours: DoctorWorkingHour[];
   breaks: DoctorBreak[];
+  leaves: DoctorLeave[];
   slotDurationMinutes: number;
   bufferTimeMinutes: number;
   verificationStatus: DoctorVerificationStatus;
@@ -151,6 +159,7 @@ export class Doctor {
       procedures: props.procedures ?? [],
       workingHours: props.workingHours ?? [],
       breaks: props.breaks ?? [],
+      leaves: (props.leaves ?? []).map((leave) => ({ ...leave, createdAt: new Date(leave.createdAt) })),
       slotDurationMinutes: props.slotDurationMinutes ?? 30,
       bufferTimeMinutes: props.bufferTimeMinutes ?? 0,
       verificationStatus: props.verificationStatus ?? "NOT_STARTED",
@@ -271,6 +280,35 @@ export class Doctor {
     this.props.bufferTimeMinutes = updates.bufferTimeMinutes;
     if (this.props.verificationStatus === "REJECTED") this.markInProgress();
     else this.props.updatedAt = new Date();
+  }
+
+  addLeave(leave: Omit<DoctorLeave, "createdAt">): DoctorLeave {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(leave.startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(leave.endDate)) {
+      throw new InvalidDoctorDataError("Leave dates must use YYYY-MM-DD format");
+    }
+    const start = new Date(`${leave.startDate}T00:00:00.000Z`);
+    const end = new Date(`${leave.endDate}T00:00:00.000Z`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start.toISOString().slice(0, 10) !== leave.startDate || end.toISOString().slice(0, 10) !== leave.endDate) {
+      throw new InvalidDoctorDataError("Leave dates must be valid calendar dates");
+    }
+    if (leave.startDate > leave.endDate) throw new InvalidDoctorDataError("Leave end date must be on or after the start date");
+    if (leave.startDate < new Date().toISOString().slice(0, 10)) throw new InvalidDoctorDataError("Leave cannot start in the past");
+    const reason = leave.reason?.trim() || null;
+    if (reason && reason.length > 500) throw new InvalidDoctorDataError("Leave reason cannot exceed 500 characters");
+    if (this.props.leaves.some((existing) => existing.startDate <= leave.endDate && existing.endDate >= leave.startDate)) {
+      throw new InvalidDoctorDataError("Leave dates cannot overlap existing leave");
+    }
+    const created = { startDate: leave.startDate, endDate: leave.endDate, reason, createdAt: new Date() };
+    this.props.leaves = [...this.props.leaves, created].sort((a, b) => a.startDate.localeCompare(b.startDate));
+    this.props.updatedAt = new Date();
+    return { ...created };
+  }
+
+  removeLeave(startDate: string): void {
+    const remaining = this.props.leaves.filter((leave) => leave.startDate !== startDate);
+    if (remaining.length === this.props.leaves.length) throw new InvalidDoctorDataError("Doctor leave was not found");
+    this.props.leaves = remaining;
+    this.props.updatedAt = new Date();
   }
 
   generateAvailabilitySlots(): DoctorAvailabilitySlot[] {
@@ -467,6 +505,7 @@ export class Doctor {
   get procedures() { return [...this.props.procedures]; }
   get workingHours() { return this.props.workingHours.map((hours) => ({ ...hours })); }
   get breaks() { return this.props.breaks.map((item) => ({ ...item })); }
+  get leaves() { return this.props.leaves.map((leave) => ({ ...leave, createdAt: new Date(leave.createdAt) })); }
   get slotDurationMinutes() { return this.props.slotDurationMinutes; }
   get bufferTimeMinutes() { return this.props.bufferTimeMinutes; }
   get verificationStatus() { return this.props.verificationStatus; }

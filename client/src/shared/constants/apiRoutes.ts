@@ -121,6 +121,8 @@ export const API_ROUTES = {
 
     AVAILABILITY: "/doctor/availability",
     AVAILABILITY_SLOTS: "/doctor/availability/slots",
+    LEAVES: "/doctor/leaves",
+    LEAVE_BY_START_DATE: (startDate: string) => `/doctor/leaves/${encodeURIComponent(startDate)}`,
 
     PROFILE: "/doctor/profile",
 

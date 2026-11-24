@@ -1,9 +1,12 @@
-import type { DoctorAvailabilitySlot, DoctorBreak, DoctorVerificationStatus, DoctorWorkingHour } from "@domain/entities/doctor.entity.ts";
+import type { DoctorAvailabilitySlot, DoctorBreak, DoctorLeave, DoctorVerificationStatus, DoctorWorkingHour } from "@domain/entities/doctor.entity.ts";
+
+export type DoctorLeaveDTO = DoctorLeave;
 
 export interface DoctorAvailabilityDTO {
   doctorId: string;
   workingHours: DoctorWorkingHour[];
   breaks: DoctorBreak[];
+  leaves: DoctorLeave[];
   slotDurationMinutes: number;
   bufferTimeMinutes: number;
   updatedAt: Date;

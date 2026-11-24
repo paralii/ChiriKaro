@@ -33,6 +33,13 @@ export interface IDentistBreak {
   endTime: string;
 }
 
+export interface IDentistLeave {
+  startDate: string;
+  endDate: string;
+  reason: string | null;
+  createdAt: Date;
+}
+
 export interface IDentistDocumentMeta {
   documentType: string;
   documentUrl: string;
@@ -77,6 +84,7 @@ export interface IDentistProfile extends Document {
 
   workingHours: IDentistWorkingHour[];
   breaks: IDentistBreak[];
+  leaves: IDentistLeave[];
   slotDurationMinutes: number;
   bufferTimeMinutes: number;
 
@@ -165,6 +173,13 @@ const dentistBreakSchema = new Schema<IDentistBreak>(
   },
   { _id: false },
 );
+
+const dentistLeaveSchema = new Schema<IDentistLeave>({
+  startDate: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
+  endDate: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
+  reason: { type: String, default: null, trim: true, maxlength: 500 },
+  createdAt: { type: Date, required: true, default: Date.now },
+}, { _id: false });
 
 const doctorFeeChangeRequestSchema = new Schema<IDoctorFeeChangeRequest>({
   requestId: { type: String, required: true, trim: true },
@@ -273,6 +288,7 @@ const dentistProfileSchema = new Schema<IDentistProfile>(
       },
     },
     breaks: { type: [dentistBreakSchema], default: [] },
+    leaves: { type: [dentistLeaveSchema], default: [] },
     slotDurationMinutes: { type: Number, default: 30, min: 5, max: 240, validate: Number.isInteger },
     bufferTimeMinutes: { type: Number, default: 0, min: 0, max: 120, validate: Number.isInteger },
 

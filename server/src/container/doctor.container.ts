@@ -30,6 +30,9 @@ import type { IConfigureDoctorAvailabilityUseCase } from "@application/interface
 import { GenerateDoctorAvailabilitySlotsUseCase } from "@application/use-cases/doctor/generate-doctor-availability-slots.use-case.ts";
 import type { IGenerateDoctorAvailabilitySlotsUseCase } from "@application/interfaces/use-cases/doctor/IGenerateDoctorAvailabilitySlotsUseCase.ts";
 import { ManageDoctorFeeChangeRequestsUseCase } from "@application/use-cases/doctor/manage-doctor-fee-change-requests.use-case.ts";
+import { ListDoctorLeavesUseCase } from "@application/use-cases/doctor/list-doctor-leaves.use-case.ts";
+import { CreateDoctorLeaveUseCase } from "@application/use-cases/doctor/create-doctor-leave.use-case.ts";
+import { DeleteDoctorLeaveUseCase } from "@application/use-cases/doctor/delete-doctor-leave.use-case.ts";
 import { IdGenerator } from "@infrastructure/services/UuidGenerator.ts";
 
 const doctorRepository = new DoctorRepository();
@@ -59,6 +62,9 @@ const configureDoctorAvailabilityUseCase: IConfigureDoctorAvailabilityUseCase =
 const generateDoctorAvailabilitySlotsUseCase: IGenerateDoctorAvailabilitySlotsUseCase =
   new GenerateDoctorAvailabilitySlotsUseCase(doctorRepository);
 const feeChangeRequestsUseCase = new ManageDoctorFeeChangeRequestsUseCase(doctorRepository, new IdGenerator());
+const listDoctorLeavesUseCase = new ListDoctorLeavesUseCase(doctorRepository);
+const createDoctorLeaveUseCase = new CreateDoctorLeaveUseCase(doctorRepository);
+const deleteDoctorLeaveUseCase = new DeleteDoctorLeaveUseCase(doctorRepository);
 
 const controller = new DoctorController(
   getDoctorOnboardingUseCase,
@@ -72,6 +78,9 @@ const controller = new DoctorController(
   configureDoctorAvailabilityUseCase,
   generateDoctorAvailabilitySlotsUseCase,
   feeChangeRequestsUseCase,
+  listDoctorLeavesUseCase,
+  createDoctorLeaveUseCase,
+  deleteDoctorLeaveUseCase,
 );
 
 const authMiddleware = new AuthMiddleware({

@@ -6,6 +6,7 @@ export function toDoctorAvailabilityDTO(doctor: Doctor): DoctorAvailabilityDTO {
     doctorId: doctor.id!,
     workingHours: doctor.workingHours,
     breaks: doctor.breaks,
+    leaves: doctor.leaves,
     slotDurationMinutes: doctor.slotDurationMinutes,
     bufferTimeMinutes: doctor.bufferTimeMinutes,
     updatedAt: doctor.updatedAt,

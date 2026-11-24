@@ -11,6 +11,9 @@ import { defaultHours } from '@/shared/constants/schedule';
 import { useAction } from '@/shared/hooks/useAction';
 import { findClinicHoursConflict, findInvalidHours, getDoctorBreakError, sortAvailabilitySlots, toDisplayWorkingHours, toDoctorWorkingHours } from '@/shared/utils/doctor';
 import type { DoctorAvailability, DoctorAvailabilitySlot, DoctorBreak, WorkingHour } from '@/shared/types';
+import type { DoctorLeave } from '@/shared/types';
+import { Button } from '@/components/atoms/Button';
+import { Input } from '@/components/atoms/Input';
 
 type AvailabilityUpdates = Pick<DoctorAvailability, 'workingHours' | 'breaks' | 'slotDurationMinutes' | 'bufferTimeMinutes'>;
 
@@ -18,12 +21,17 @@ export default function DoctorAvailabilityPage() {
   const [availability, setAvailability] = useState<DoctorAvailability | null>(null);
   const [clinicHours, setClinicHours] = useState<WorkingHour[]>([]);
   const [slots, setSlots] = useState<DoctorAvailabilitySlot[]>([]);
+  const [leaves, setLeaves] = useState<DoctorLeave[]>([]);
+  const [leaveStart, setLeaveStart] = useState('');
+  const [leaveEnd, setLeaveEnd] = useState('');
+  const [leaveReason, setLeaveReason] = useState('');
   const { busy, error, message, setError, run } = useAction();
 
   useEffect(() => {
     void run(async () => {
-      const [saved, onboarding] = await Promise.all([doctorService.getAvailability(), doctorService.getOnboarding()]);
+      const [saved, onboarding, savedLeaves] = await Promise.all([doctorService.getAvailability(), doctorService.getOnboarding(), doctorService.listLeaves()]);
       setAvailability(saved);
+      setLeaves(savedLeaves);
       setClinicHours(onboarding.clinicWorkingHours ?? []);
       return saved;
     }, { fallback: 'Could not load doctor availability.' });
@@ -78,6 +86,16 @@ export default function DoctorAvailabilityPage() {
     return generated;
   }, { success: (generated) => `${generated.length} availability slots generated.`, fallback: 'Could not generate availability slots.' });
 
+  const addLeave = () => void run(async () => {
+    const updated = await doctorService.createLeave({ startDate: leaveStart, endDate: leaveEnd, ...(leaveReason.trim() ? { reason: leaveReason.trim() } : {}) });
+    setLeaves(updated); setLeaveStart(''); setLeaveEnd(''); setLeaveReason(''); setSlots([]);
+    return updated;
+  }, { success: 'Leave saved. Bookings are unavailable for those dates.', fallback: 'Could not save leave.' });
+
+  const removeLeave = (startDate: string) => void run(async () => {
+    const updated = await doctorService.deleteLeave(startDate); setLeaves(updated); setSlots([]); return updated;
+  }, { success: 'Leave removed.', fallback: 'Could not remove leave.' });
+
   const hours = availability?.workingHours.length
     ? toDisplayWorkingHours(availability.workingHours)
     : clinicHours.length ? clinicHours : defaultHours;
@@ -96,6 +114,23 @@ export default function DoctorAvailabilityPage() {
           <Card className="overflow-hidden pb-5">
             <SectionHeading title="Working hours" description="Doctor hours must be within the clinic’s configured working hours. Adjust saved breaks before narrowing a shift." />
             <WorkingHoursForm initial={hours} busy={busy} onSave={saveHours} submitLabel="Save working hours" />
+          </Card>
+          <Card className="overflow-hidden p-4 sm:p-5">
+            <SectionHeading title="Doctor leave" description="Set full-day leave dates. Patients will not see appointment slots during this period; existing appointments are unchanged." />
+            <form className="grid gap-3 sm:grid-cols-2" onSubmit={(event) => { event.preventDefault(); addLeave(); }}>
+              <label className="grid gap-1 text-sm font-medium text-text-primary">From<Input type="date" value={leaveStart} onChange={(event) => setLeaveStart(event.target.value)} required /></label>
+              <label className="grid gap-1 text-sm font-medium text-text-primary">Through<Input type="date" min={leaveStart || undefined} value={leaveEnd} onChange={(event) => setLeaveEnd(event.target.value)} required /></label>
+              <label className="grid gap-1 text-sm font-medium text-text-primary sm:col-span-2">Reason (optional)<Input maxLength={500} value={leaveReason} onChange={(event) => setLeaveReason(event.target.value)} /></label>
+              <div><Button type="submit" disabled={busy || !leaveStart || !leaveEnd}>Add leave</Button></div>
+            </form>
+            <div className="mt-4 grid gap-2">
+              {leaves.length === 0 ? <p className="text-sm text-text-muted">No leave dates scheduled.</p> : leaves.map((leave) => (
+                <div key={leave.startDate} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border p-3 text-sm">
+                  <span className="text-text-primary">{leave.startDate}{leave.endDate !== leave.startDate ? ` to ${leave.endDate}` : ''}{leave.reason ? ` · ${leave.reason}` : ''}</span>
+                  <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => removeLeave(leave.startDate)}>Remove</Button>
+                </div>
+              ))}
+            </div>
           </Card>
           <Card className="overflow-hidden pb-5">
             <SectionHeading title="Breaks" description="Add breaks inside an open working day. Breaks on the same day cannot overlap." />

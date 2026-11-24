@@ -12,6 +12,11 @@ export class DoctorRepository implements IDoctorRepository {
     return document ? this.toDomain(document) : null;
   }
 
+  async findByUserIdAndClinic(userId: string, clinicId: string): Promise<Doctor | null> {
+    const document = await DentistModel.findOne({ userId: new Types.ObjectId(userId), clinicId: new Types.ObjectId(clinicId) }).exec();
+    return document ? this.toDomain(document) : null;
+  }
+
   async findByIdAndClinic(doctorId: string, clinicId: string): Promise<Doctor | null> {
     const document = await DentistModel.findOne({
       _id: new Types.ObjectId(doctorId),
@@ -70,6 +75,12 @@ export class DoctorRepository implements IDoctorRepository {
         startTime: pause.startTime,
         endTime: pause.endTime,
       })),
+      leaves: (document.leaves ?? []).map((leave) => ({
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        reason: leave.reason ?? null,
+        createdAt: leave.createdAt,
+      })),
       slotDurationMinutes: document.slotDurationMinutes ?? 30,
       bufferTimeMinutes: document.bufferTimeMinutes ?? 0,
       verificationStatus: document.verificationStatus,
@@ -115,6 +126,7 @@ export class DoctorRepository implements IDoctorRepository {
       procedures: doctor.procedures,
       workingHours: doctor.workingHours,
       breaks: doctor.breaks,
+      leaves: doctor.leaves,
       slotDurationMinutes: doctor.slotDurationMinutes,
       bufferTimeMinutes: doctor.bufferTimeMinutes,
       verificationStatus: doctor.verificationStatus,

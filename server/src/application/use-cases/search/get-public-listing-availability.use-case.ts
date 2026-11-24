@@ -39,6 +39,10 @@ export class GetPublicListingAvailabilityUseCase implements IGetPublicListingAva
     const daysAhead = Math.floor((requested.getTime() - todayUtc.getTime()) / 86_400_000);
     if (daysAhead < 0 || daysAhead > MAX_BOOKING_HORIZON_DAYS) throw new BadRequestError(`Choose a date from today through the next ${MAX_BOOKING_HORIZON_DAYS} days`);
 
+    if (doctor.leaves.some((leave) => leave.startDate <= date && leave.endDate >= date)) {
+      return { clinicTimeZone: clinic.timeZone, localDate: date, slots: [] };
+    }
+
     const generatedSlots = generateDatedSlots({
       date,
       timeZone: clinic.timeZone,

@@ -151,11 +151,13 @@ export type DoctorOnboardingProfile = {
 };
 export type DoctorOnboardingDTO = { onboardingStatus: DoctorOnboardingStatus; profile: DoctorOnboardingProfile | null; clinicSpecializations?: string[]; clinicWorkingHours?: WorkingHour[] };
 export type DoctorAvailabilitySlot = { day: DoctorDayOfWeek; startTime: string; endTime: string };
+export type DoctorLeave = { startDate: string; endDate: string; reason: string | null; createdAt: string };
 export type DoctorBreak = { day: DoctorDayOfWeek; startTime: string; endTime: string };
 export type DoctorAvailability = {
   doctorId: string;
   workingHours: Array<{ day: DoctorDayOfWeek; isOpen: boolean; startTime: string; endTime: string }>;
   breaks: DoctorBreak[];
+  leaves: DoctorLeave[];
   slotDurationMinutes: number;
   bufferTimeMinutes: number;
   updatedAt: string;

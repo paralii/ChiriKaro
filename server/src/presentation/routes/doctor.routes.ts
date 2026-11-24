@@ -89,5 +89,8 @@ export function DoctorRouter(
     authorizeDoctor,
     doctorController.generateAvailabilitySlots,
   );
+  router.get(API_ROUTES.DOCTOR.LEAVES, authenticate, authorizeDoctor, doctorController.listLeaves);
+  router.post(API_ROUTES.DOCTOR.LEAVES, authenticate, authorizeDoctor, doctorController.createLeave);
+  router.delete(API_ROUTES.DOCTOR.LEAVE_BY_START_DATE, authenticate, authorizeDoctor, doctorController.deleteLeave);
   return router;
 }
